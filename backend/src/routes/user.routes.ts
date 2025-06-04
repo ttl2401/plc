@@ -1,17 +1,18 @@
 import express from 'express';
-import { testUser } from '@/controllers/test.controller';
+import { auth } from '@/middleware/auth.middleware';
 import {
   createUser,
   getUsers,
   getUser,
   updateUser,
   deleteUser,
+  getProfile,
 } from '@/controllers/user.controller';
 
 const router = express.Router();
 
-// Test endpoint
-router.get('/users/test', testUser);
+// Protected profile route
+router.get('/profile', auth, getProfile);
 
 // User CRUD routes
 router.route('/users')

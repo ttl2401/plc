@@ -1,5 +1,6 @@
 import { User, IUser } from '@/models/user.model';
 import { AppError } from '@/middleware/error.middleware';
+import { PaginateResult } from '@/controllers/base.controller';
 
 interface MongoError extends Error {
   code?: number;
@@ -22,8 +23,16 @@ export class UserService {
   }
 
   // Get all users
-  async getUsers(): Promise<IUser[]> {
-    return User.find().select('-password');
+  async getUsers(query: any): Promise<PaginateResult<IUser>> {
+    const { page = 1, limit = 10, ...rest } = query;
+    
+    const options = {
+      page,
+      limit,
+      sort: { createdAt: -1 },
+      select: '-password'
+    };
+    return await User.paginate({}, options) as PaginateResult<IUser>;
   }
 
   // Get a single user by ID

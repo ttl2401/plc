@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from '@/services/user.service';
+import { returnMessage, returnError, returnPaginationMessage } from '@/controllers/base.controller';
+
 
 const userService = new UserService();
 
@@ -13,18 +15,12 @@ export const createUser = async (
     const { name, email, password, role } = req.body;
     
     if (!password || password.length < 6) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Password must be at least 6 characters long',
-      });
+      return res.status(400).json(returnError('Password must be at least 6 characters long'));
     }
 
     const user = await userService.createUser({ name, email, password, role });
 
-    res.status(201).json({
-      status: 'success',
-      data: user,
-    });
+    return res.status(201).json(returnMessage(user, 'User created successfully'));
   } catch (error) {
     next(error);
   }
@@ -37,13 +33,11 @@ export const getUsers = async (
   next: NextFunction
 ) => {
   try {
-    const users = await userService.getUsers();
+    const query = req.query;
+    const result = await userService.getUsers(query);
 
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      data: users,
-    });
+    return res.status(200).json(returnPaginationMessage(result as any, 'Users retrieved successfully'));
+    
   } catch (error) {
     next(error);
   }
@@ -58,10 +52,7 @@ export const getUser = async (
   try {
     const user = await userService.getUserById(req.params.id);
 
-    res.status(200).json({
-      status: 'success',
-      data: user,
-    });
+    return res.status(200).json(returnMessage(user, 'User retrieved successfully'));
   } catch (error) {
     next(error);
   }
@@ -78,10 +69,7 @@ export const updateUser = async (
     
     // If password is provided, validate it
     if (password && password.length < 6) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Password must be at least 6 characters long',
-      });
+      return res.status(400).json(returnError('Password must be at least 6 characters long'));
     }
 
     const user = await userService.updateUser(req.params.id, {
@@ -91,10 +79,7 @@ export const updateUser = async (
       role,
     });
 
-    res.status(200).json({
-      status: 'success',
-      data: user,
-    });
+    return res.status(200).json(returnMessage(user, 'User updated successfully'));
   } catch (error) {
     next(error);
   }
@@ -109,10 +94,22 @@ export const deleteUser = async (
   try {
     await userService.deleteUser(req.params.id);
 
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
+    return res.status(204).json(returnMessage(null, 'User deleted successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get current user profile
+export const getProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // User is already attached to req by auth middleware
+    const user = req.user;
+    return res.status(200).json(returnMessage(user, 'Profile retrieved successfully'));
   } catch (error) {
     next(error);
   }

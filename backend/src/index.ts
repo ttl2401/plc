@@ -2,10 +2,9 @@ import dotenv from 'dotenv';
 import app from './app';
 import { connectMongoDB, disconnectMongoDB } from '@/config/mongodb';
 import { closeInfluxDB } from '@/config/influxdb';
+import { PORT } from '@/config';
 
 dotenv.config();
-
-const port = process.env.PORT || 3001;
 
 // Connect to databases
 connectMongoDB();
@@ -17,6 +16,6 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 }); 

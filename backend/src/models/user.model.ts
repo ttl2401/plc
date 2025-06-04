@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 export interface IUser extends Document {
   name: string;
@@ -62,4 +63,7 @@ userSchema.methods.comparePassword = async function (
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-export const User = mongoose.model<IUser>('User', userSchema); 
+// Add pagination plugin
+userSchema.plugin(mongoosePaginate);
+
+export const User = mongoose.model<IUser, mongoose.PaginateModel<IUser>>('User', userSchema); 
