@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import mongoosePaginate from 'mongoose-paginate-v2';
 
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId;
   name: string;
   email: string;
   password: string;

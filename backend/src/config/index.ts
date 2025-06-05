@@ -29,6 +29,14 @@ export const JWT = {
   EXPIRES_IN: process.env.JWT_EXPIRES_IN as string | number || '1d',
 };
 
+// User roles configuration
+export const ROLES = {
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  USER: 'user',
+  ALL: ['admin', 'manager', 'user'] as const,
+};
+
 // Helper function to get MongoDB URI
 export const getMongoURI = () => {
   const { USER, PASSWORD, HOST, PORT, DATABASE } = MONGODB;
