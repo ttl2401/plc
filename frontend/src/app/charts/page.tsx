@@ -3,7 +3,6 @@
 import React from 'react';
 import { Card, Row, Col } from 'antd';
 import { Line, Column, Pie } from '@ant-design/plots';
-import DashboardLayout from '@/components/layout/DashboardLayout';
 
 const ChartsPage = () => {
   // Sample data for line chart
@@ -62,30 +61,28 @@ const ChartsPage = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <Card title="Performance Trend">
-              <Line {...lineConfig} />
-            </Card>
-          </Col>
-        </Row>
+    <div className="space-y-6">
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Card title="Performance Trend">
+            <Line {...lineConfig} />
+          </Card>
+        </Col>
+      </Row>
 
-        <Row gutter={[16, 16]}>
-          <Col span={12}>
-            <Card title="Monthly Statistics">
-              <Column {...columnConfig} />
-            </Card>
-          </Col>
-          <Col span={12}>
-            <Card title="Category Distribution">
-              <Pie {...pieConfig} />
-            </Card>
-          </Col>
-        </Row>
-      </div>
-    </DashboardLayout>
+      <Row gutter={[16, 16]}>
+        <Col span={12}>
+          <Card title="Monthly Statistics">
+            <Column {...columnConfig} />
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card title="Category Distribution">
+            <Pie {...pieConfig} />
+          </Card>
+        </Col>
+      </Row>
+    </div>
   );
 };
 

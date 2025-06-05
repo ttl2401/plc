@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+// Import service functions
+import { fetchUserProfile, loginUser } from '@/services/authService';
 
 interface User {
   id: string;
@@ -25,39 +27,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper function to fetch user profile
-  const fetchUserProfile = async (token: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/profile`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      // If fetching profile fails (e.g., invalid token), clear the token
-      Cookies.remove('auth_token');
-      throw new Error(data.message || 'Failed to fetch user profile');
-    }
-
-    return data.data as User; // Assuming user data is in data.data
-  };
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const token = Cookies.get('auth_token');
         if (token) {
-          // Fetch user profile using the token
-          const fetchedUser = await fetchUserProfile(token);
-          setUser(fetchedUser);
+          // Use the service function to fetch user profile
+          const profileResponse = await fetchUserProfile(token);
+          if (profileResponse.success) {
+            setUser(profileResponse.data);
+          } else {
+             // If fetching profile fails, clear the token and user
+            Cookies.remove('auth_token');
+            setUser(null);
+            console.error('Auth check failed:', profileResponse.message);
+          }
+        } else {
+             setUser(null); // Ensure user is null if no token exists
         }
       } catch (error) {
         console.error('Auth check failed:', error);
         // Ensure user is null if auth check fails
+        Cookies.remove('auth_token'); // Clear token on unexpected error
         setUser(null);
       } finally {
         setLoading(false);
@@ -70,30 +61,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      // Use the service function to login
+      const loginResponse = await loginUser(email, password);
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Login failed');
+      if (!loginResponse.success) {
+        throw new Error(loginResponse.message || 'Login failed');
       }
 
       // Assuming the backend returns { success: true, data: { token, user } }
-      const { token, user: userData } = data.data;
+      const { token, user: userData } = loginResponse.data;
 
       // Set auth token in cookies (you might want to set expiration)
       Cookies.set('auth_token', token, { expires: 7 }); // Example: expires in 7 days
 
       // Set user data in state
       setUser(userData);
-      
-      // Return something if needed, or just resolve the promise
+
     } catch (error) {
       console.error('Login failed:', error);
       setUser(null); // Ensure user is null on login failure
@@ -106,6 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     Cookies.remove('auth_token');
     setUser(null);
+    // TODO: Optionally call backend logout API if needed
   };
 
   const value = {
