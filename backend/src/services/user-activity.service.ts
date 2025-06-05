@@ -1,7 +1,11 @@
-import { UserActivity, ActivityAction, ActivityResource, IUserActivity } from '@/models/user-activity.model';
+import { UserActivity as BaseUserActivity, ActivityAction, ActivityResource, IUserActivity } from '@/models/user-activity.model';
 import { Request } from 'express';
 import mongoose from 'mongoose';
 import { PaginateResult } from '@/controllers/base.controller';
+import { PaginateModel } from 'mongoose';
+
+// Explicitly type the UserActivity model with pagination capabilities
+const UserActivity = BaseUserActivity as PaginateModel<IUserActivity>;
 
 export class UserActivityService {
   /**
@@ -43,7 +47,7 @@ export class UserActivityService {
       resource?: ActivityResource;
       action?: ActivityAction;
     } = {}
-  ) {
+  ): Promise<PaginateResult<IUserActivity>> {
     const { page = 1, limit = 10, resource, action } = options;
 
     const query: any = { user: userId };
@@ -51,10 +55,11 @@ export class UserActivityService {
     if (action) query.action = action;
 
     return await UserActivity.paginate(query, {
-      page,
-      limit,
+      page: Number(page),
+      limit: Number(limit),
       sort: { createdAt: -1 },
       populate: 'user',
+      lean: true, // Return plain JavaScript objects
     }) as PaginateResult<IUserActivity>;
   }
 
@@ -69,17 +74,18 @@ export class UserActivityService {
       limit?: number;
       action?: ActivityAction;
     } = {}
-  ) {
+  ): Promise<PaginateResult<IUserActivity>> {
     const { page = 1, limit = 10, action } = options;
 
     const query: any = { resource, resourceId };
     if (action) query.action = action;
 
     return await UserActivity.paginate(query, {
-      page,
-      limit,
+      page: Number(page),
+      limit: Number(limit),
       sort: { createdAt: -1 },
       populate: 'user',
+      lean: true, // Return plain JavaScript objects
     }) as PaginateResult<IUserActivity>;
   }
 
@@ -92,7 +98,7 @@ export class UserActivityService {
     resource?: ActivityResource;
     action?: ActivityAction;
     userId?: mongoose.Types.ObjectId;
-  } = {}) {
+  } = {}): Promise<PaginateResult<IUserActivity>> {
     const { page = 1, limit = 10, resource, action, userId } = options;
 
     const query: any = {};
@@ -101,10 +107,11 @@ export class UserActivityService {
     if (userId) query.user = userId;
 
     return await UserActivity.paginate(query, {
-      page,
-      limit,
+      page: Number(page),
+      limit: Number(limit),
       sort: { createdAt: -1 },
       populate: 'user',
+      lean: true, // Return plain JavaScript objects
     }) as PaginateResult<IUserActivity>;
   }
 } 

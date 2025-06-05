@@ -38,8 +38,8 @@ export interface PaginateResult<T> {
   pagingCounter: number;
   hasPrevPage: boolean;
   hasNextPage: boolean;
-  prevPage: number | null;
-  nextPage: number | null;
+  prevPage?: number | null;
+  nextPage?: number | null;
 }
 
 /**
@@ -103,8 +103,8 @@ export const returnPaginationMessage = <T>(
       pagingCounter: result.pagingCounter,
       hasPrevPage: result.hasPrevPage,
       hasNextPage: result.hasNextPage,
-      prevPage: result.prevPage,
-      nextPage: result.nextPage,
+      prevPage: result.prevPage || null,
+      nextPage: result.nextPage || null,
     },
   };
 };

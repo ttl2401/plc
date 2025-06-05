@@ -6,6 +6,9 @@ dotenv.config();
 // Server configuration
 export const PORT = process.env.PORT || 3001;
 
+// Api Url
+export const API_URL = process.env.API_URL || 'http://localhost';
+
 // MongoDB configuration
 export const MONGODB = {
   HOST: process.env.MONGODB_HOST || 'localhost',
