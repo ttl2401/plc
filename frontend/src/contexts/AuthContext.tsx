@@ -5,14 +5,16 @@ import Cookies from 'js-cookie';
 
 interface User {
   id: string;
-  username: string;
+  name: string;
   email: string;
+  role: string;
+  // Add other user properties as needed based on your backend response
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -23,46 +25,81 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to fetch user profile
+  const fetchUserProfile = async (token: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/profile`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      // If fetching profile fails (e.g., invalid token), clear the token
+      Cookies.remove('auth_token');
+      throw new Error(data.message || 'Failed to fetch user profile');
+    }
+
+    return data.data as User; // Assuming user data is in data.data
+  };
+
   useEffect(() => {
-    // Check for existing session
     const checkAuth = async () => {
       try {
         const token = Cookies.get('auth_token');
         if (token) {
-          // TODO: Validate token with your backend
-          // For now, we'll just set a mock user
-          setUser({
-            id: '1',
-            username: 'user',
-            email: 'user@example.com'
-          });
+          // Fetch user profile using the token
+          const fetchedUser = await fetchUserProfile(token);
+          setUser(fetchedUser);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        // Ensure user is null if auth check fails
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
-  const login = async (username: string, password: string) => {
+  const login = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      // TODO: Implement actual login logic with your backend
-      // For now, we'll just set a mock user
-      const mockUser = {
-        id: '1',
-        username,
-        email: `${username}@example.com`
-      };
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Assuming the backend returns { success: true, data: { token, user } }
+      const { token, user: userData } = data.data;
+
+      // Set auth token in cookies (you might want to set expiration)
+      Cookies.set('auth_token', token, { expires: 7 }); // Example: expires in 7 days
+
+      // Set user data in state
+      setUser(userData);
       
-      // Set auth token in cookies
-      Cookies.set('auth_token', 'mock_token', { expires: 100 });
-      setUser(mockUser);
+      // Return something if needed, or just resolve the promise
     } catch (error) {
       console.error('Login failed:', error);
-      throw error;
+      setUser(null); // Ensure user is null on login failure
+      throw error; // Re-throw the error for the component to handle
+    } finally {
+      setLoading(false);
     }
   };
 
