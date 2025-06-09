@@ -1,0 +1,54 @@
+:root {
+  --primary-dark-blue: #001532;
+  --active-menu-color: limegreen; /* Define a variable for the active menu color */
+}
+
+body { /* Added rule to remove default body margin */
+  margin: 0;
+}
+
+/* Apply background color to header */
+.ant-layout-header {
+  background-color: var(--primary-dark-blue) !important;
+}
+
+/* Apply background color to horizontal menu items */
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item,
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-submenu {
+  background-color: var(--primary-dark-blue) !important;
+}
+
+/* Style for active menu item background and text color */
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item-selected {
+  background-color: var(--primary-dark-blue) !important; /* Ensure background is the dark blue */
+}
+
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item-selected .ant-menu-title-content,
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item-selected a {
+  color: var(--active-menu-color) !important; /* Target text and link color specifically */
+}
+
+
+/* Maintain styles for buttons on hover/focus */
+.ant-btn:hover,
+.ant-btn:focus {
+  background-color: var(--primary-dark-blue) !important; /* Keep the same background on hover/focus */
+  border-color: var(--primary-dark-blue) !important;
+  color: white !important; /* Keep text white on hover/focus */
+  opacity: 0.8; /* Add a slight opacity change for visual feedback */
+}
+
+/* Ensure specific button types like primary also use the dark blue and white text */
+.ant-btn-primary {
+  background-color: var(--primary-dark-blue) !important;
+  border-color: var(--primary-dark-blue) !important;
+  color: white !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: var(--primary-dark-blue) !important;
+  border-color: var(--primary-dark-blue) !important;
+  color: white !important;
+  opacity: 0.9;
+} 

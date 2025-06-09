@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import mongoosePaginate from 'mongoose-paginate-v2';
-
+import { ENUM_ROLES } from '@/config';
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -35,7 +35,7 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['admin', 'user'],
+      enum: ENUM_ROLES,
       default: 'user',
     },
   },

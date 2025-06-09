@@ -4,7 +4,7 @@ import { UserActivityService } from '@/services/user-activity.service';
 import { returnMessage, returnError, returnPaginationMessage } from '@/controllers/base.controller';
 import { ActivityAction, ActivityResource } from '@/models/user-activity.model';
 import mongoose from 'mongoose';
-
+import { getList, getDetail } from '@/transforms/product.transform'
 const productService = new ProductService();
 const userActivityService = new UserActivityService();
 
@@ -16,10 +16,9 @@ export const createProduct = async (
 ) => {
   try {
     // Transform code to uppercase
-    const { code, name, sizeDm2, image, qrCode } = req.body;
-    const payload = { code : code?.toUpperCase(), name, sizeDm2, image, qrCode }
+    const { code, name, sizeDm2, image } = req.body;
+    const payload = { code : code?.toUpperCase(), name, sizeDm2, image }
     const product = await productService.createProduct(payload);
-
     // Log activity
     if (req.user) {
       await userActivityService.logActivity(
@@ -46,8 +45,8 @@ export const getProducts = async (
 ) => {
   try {
     const query = req.query;
-    const result = await productService.getProducts(query);
-
+    const data = await productService.getProducts(query);
+    const result = getList(data);
     return res.status(200).json(returnPaginationMessage(result, 'Products retrieved successfully'));
   } catch (error) {
     next(error);
@@ -63,7 +62,7 @@ export const getProduct = async (
   try {
     const product = await productService.getProductById(req.params.id);
 
-    return res.status(200).json(returnMessage(product, 'Product retrieved successfully'));
+    return res.status(200).json(returnMessage(getDetail(product), 'Product retrieved successfully'));
   } catch (error) {
     next(error);
   }
@@ -77,8 +76,9 @@ export const updateProduct = async (
 ) => {
   try {
     const id = req.params.id;
-    const { code, name, sizeDm2, image, qrCode } = req.body;
-    const payload = { code : code?.toUpperCase(), name, sizeDm2, image, qrCode };
+    const { code, name, sizeDm2, image } = req.body;
+    console.log(req.body)
+    const payload = { code : code?.toUpperCase(), name, sizeDm2, image };
     const beforeProduct = await productService.getProductById(id);
     const product = await productService.updateProduct(id, payload);
 

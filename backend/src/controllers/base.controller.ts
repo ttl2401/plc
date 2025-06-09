@@ -25,7 +25,10 @@ interface ErrorResponse {
   };
 }
 
-interface PaginatedResponse<T> extends SuccessResponse<T> {
+interface PaginatedResponse<T> {
+  success: true;
+  message: string;
+  data: T[];
   pagination: PaginationData;
 }
 
@@ -34,7 +37,7 @@ export interface PaginateResult<T> {
   totalDocs: number;
   limit: number;
   totalPages: number;
-  page: number | undefined;
+  page?: number | undefined;
   pagingCounter: number;
   hasPrevPage: boolean;
   hasNextPage: boolean;
@@ -90,7 +93,7 @@ export const returnError = (
 export const returnPaginationMessage = <T>(
   result: PaginateResult<T>,
   message: string = 'success'
-): PaginatedResponse<T[]> => {
+): PaginatedResponse<T> => {
   return {
     success: true,
     message,

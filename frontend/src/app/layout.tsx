@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "../styles/globals.css";
 import { ConfigProvider, App as AntdApp } from "antd";
 import { ThemeProvider } from "next-themes";
 import NextTopLoader from "nextjs-toploader";
@@ -23,7 +23,12 @@ export default function RootLayout({
           <ConfigProvider
             theme={{
               token: {
-                colorPrimary: "#1677ff",
+                colorPrimary: "#001532",
+              },
+              components: {
+                Menu: {
+                  itemSelectedColor: "limegreen"
+                },
               },
             }}
           >

@@ -24,15 +24,26 @@ export class UserService {
 
   // Get all users
   async getUsers(query: any): Promise<PaginateResult<IUser>> {
-    const { page = 1, limit = 10, ...rest } = query;
+    const { page = 1, limit = 10, search } = query;
+    const queryFilter: any = {};
     
+    if (search) {
+      // Create a case-insensitive regex for the search term
+      const searchRegex = new RegExp(search, 'i');
+      // Use $or to search in both name and email fields
+      queryFilter.$or = [
+        { name: searchRegex },
+        { email: searchRegex }
+      ];
+    }
+
     const options = {
       page,
       limit,
       sort: { createdAt: -1 },
       select: '-password'
     };
-    return await User.paginate({}, options) as PaginateResult<IUser>;
+    return await User.paginate(queryFilter, options) as PaginateResult<IUser>;
   }
 
   // Get a single user by ID

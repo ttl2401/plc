@@ -6,7 +6,19 @@ export interface IProduct extends Document {
   name: string;
   sizeDm2: number; // Assuming size is a number in dm2
   image?: string; // URL or path to the image
-  qrCode?: string; // Data for the QR code
+  imageUrl?: string; // Derived from image path, optional
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// New interface for transformed product data (plain object)
+export interface ITransformedProduct {
+  _id: string;
+  code: string;
+  name: string;
+  sizeDm2: number;
+  image?: string;
+  imageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,10 +42,7 @@ const productSchema = new Schema<IProduct>(
     },
     image: {
       type: String,
-    },
-    qrCode: {
-      type: String,
-    },
+    }
   },
   {
     timestamps: true,

@@ -39,6 +39,9 @@ export const ROLES = {
   USER: 'user',
   ALL: ['admin', 'manager', 'user'] as const,
 };
+export const ENUM_ROLES = [
+  ROLES.ADMIN, ROLES.MANAGER, ROLES.USER
+];
 
 // Helper function to get MongoDB URI
 export const getMongoURI = () => {

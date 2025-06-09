@@ -3,6 +3,7 @@ import { AppError } from '@/middleware/error.middleware';
 import { PaginateResult } from '@/controllers/base.controller';
 import mongoose from 'mongoose';
 
+
 interface QueryOptions {
   page?: number;
   limit?: number;
@@ -31,54 +32,29 @@ export class ProductService {
    * Get all products with pagination and filtering
    */
   async getProducts(query: QueryOptions): Promise<PaginateResult<IProduct>> {
-    const { page = 1, limit = 10, sort = { createdAt: -1 }, select = '', ...filters } = query;
+    const { page = 1, limit = 10, sort = { createdAt: -1 }, select = '', search } = query;
 
     const options = {
       page: Number(page),
       limit: Number(limit),
       sort,
       select,
-      lean: true, // Return plain JavaScript objects
+      // lean: true, // Return as Javascript Json Object, so that dont need to call toObject for element
     };
 
     const queryFilters: Record<string, any> = {};
-    Object.entries(filters).forEach(([key, value]) => {
-       if (mongoose.Types.ObjectId.isValid(String(value))) {
-        queryFilters[key] = new mongoose.Types.ObjectId(String(value));
-      } else if (!isNaN(Number(value))) {
-        queryFilters[key] = Number(value);
-      } else if (typeof value === 'string' && value.length > 0) {
-        // Basic text search on name or code
-        if (key === 'name' || key === 'code') {
-           queryFilters[key] = { $regex: value, $options: 'i' }; // Case-insensitive search
-        } else {
-           queryFilters[key] = value;
-        }
-      } else {
-         queryFilters[key] = value;
-      }
-    });
+    
+    // Handle search query for name or code
+    if (search) {
+      queryFilters.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { code: { $regex: search, $options: 'i' } },
+      ];
+    }
 
-    // Handle potential full-text search query if needed in the future
-    // if (query.search) {
-    //   queryFilters.$text = { $search: query.search };
-    // }
+    // The result from paginate still contains Mongoose Document types for docs
+    return await Product.paginate(queryFilters, options);
 
-    const result = await Product.paginate(queryFilters, options);
-
-     // Ensure all required pagination fields are present in the result
-    return {
-      docs: result.docs,
-      totalDocs: result.totalDocs,
-      limit: result.limit,
-      totalPages: result.totalPages,
-      page: result.page,
-      pagingCounter: result.pagingCounter,
-      hasPrevPage: result.hasPrevPage,
-      hasNextPage: result.hasNextPage,
-      prevPage: result.prevPage,
-      nextPage: result.nextPage,
-    };
   }
 
   /**

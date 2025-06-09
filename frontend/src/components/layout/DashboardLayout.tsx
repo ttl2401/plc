@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import { Layout, Menu, theme } from 'antd';
+import React, { useState } from 'react';
+import { Layout, Menu, theme, Dropdown, Space, Avatar, Typography } from 'antd';
 import {
   DashboardOutlined,
   UserOutlined,
@@ -10,13 +10,17 @@ import {
   LogoutOutlined,
   TeamOutlined,
   ShoppingCartOutlined,
+  DownOutlined,
+  UpOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
+
 import { useAuth } from '@/contexts/AuthContext';
 
-const { Header, Sider, Content } = Layout;
+const { Header, Content } = Layout;
+const { Text } = Typography;
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -25,13 +29,14 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const allMenuItems = [
+  const mainMenuItems = [
     {
       key: '/dashboard',
       icon: <DashboardOutlined />,
@@ -40,7 +45,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     {
       key: '/products',
       icon: <ShoppingCartOutlined />,
-      label: <Link href="/products">Products</Link>,
+      label: <Link href="/products">Sản Phẩm</Link>,
       meta: { roles: ['admin', 'manager'] },
     },
     {
@@ -55,67 +60,109 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       label: <Link href="/charts">Charts</Link>,
     },
     {
-      key: '/profile',
+      key: '/charts',
+      icon: <BarChartOutlined />,
+      label: <Link href="/charts">Charts</Link>,
+    },
+    {
+      key: '/charts',
+      icon: <BarChartOutlined />,
+      label: <Link href="/charts">Charts</Link>,
+    },
+    {
+      key: '/lich-su',
+      icon: <HistoryOutlined />,
+      label: 'Lịch Sử',
+      children: [
+        {
+          key: '/lich-su-van-hanh',
+          label: <Link href="/lich-su-van-hanh">Lịch Sử Vận Hành</Link>,
+        },
+        {
+          key: '/lich-su-bo-sung-hoa-chat',
+          label: <Link href="/lich-su-bo-sung-hoa-chat">Lịch Sử Bổ Sung Hóa Chất</Link>,
+        },
+      ],
+    },
+  ];
+
+  const userDropdownItems = [
+    {
+      key: 'profile',
       icon: <UserOutlined />,
       label: <Link href="/profile">Profile</Link>,
     },
     {
-      key: '/settings',
+      key: 'settings',
       icon: <SettingOutlined />,
       label: <Link href="/settings">Settings</Link>,
     },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Logout',
+      onClick: () => {
+        logout();
+        router.push('/login');
+      },
+    },
   ];
 
-  const menuItems = allMenuItems.filter(item => {
+  const filteredMainMenuItems = mainMenuItems.filter(item => {
     if (!item.meta || !item.meta.roles) {
       return true;
     }
     return user && item.meta.roles.includes(user.role);
   });
 
-  const handleLogout = () => {
-    Cookies.remove('auth_token');
-    router.push('/login');
-  };
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
+      <Header
         style={{
-          background: '#001529',
           display: 'flex',
-          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          color: 'white',
+          fontSize: '16px',
         }}
-        theme="dark"
       >
-        <div className="p-4 text-xl font-bold" style={{ color: 'white' }}>PLC Demo</div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[pathname]}
-          items={menuItems}
-          style={{ flex: 1, background: '#001529' }}
-        />
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectable={false}
-          items={[
-            {
-              key: 'logout',
-              icon: <LogoutOutlined />,
-              label: 'Logout',
-              onClick: handleLogout,
-            },
-          ]}
-          style={{ background: '#001529' }}
-        />
-      </Sider>
+        <div className="text-xl font-bold">PLC Demo</div>
+        
+        <div style={{ width: "70%", paddingLeft:"10%", overflowX: 'visible' }}>
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            selectedKeys={[pathname]}
+            items={filteredMainMenuItems}
+            style={{
+              borderBottom: 'none',
+              fontSize: '14px',
+              
+            }}
+          />
+        </div>
+
+        {user && (
+          <Dropdown
+            menu={{ items: userDropdownItems }}
+            trigger={['click']}
+            onOpenChange={setDropdownOpen}
+            open={dropdownOpen}
+          >
+            <a onClick={(e) => e.preventDefault()}>
+              <Space style={{ color: 'white', marginLeft: 20, cursor: 'pointer' }}>
+                <Avatar icon={<UserOutlined />} />
+                <Text style={{ color: 'white' }}>{user.name}</Text>
+                {dropdownOpen ? <UpOutlined /> : <DownOutlined />}
+              </Space>
+            </a>
+          </Dropdown>
+        )}
+      </Header>
+
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
-        <Content style={{ margin: '24px 16px 0' }}>
+        <Content style={{ margin: 0 }}>
           <div
             style={{
               padding: 24,
