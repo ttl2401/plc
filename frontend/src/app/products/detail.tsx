@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Form, Input, InputNumber, Button, message, Modal, Spin, Space, Tabs, Row, Col } from 'antd';
+import { Form, Input, InputNumber, Button, message, Modal, Spin, Space, Tabs, Row, Col, Table } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchProductById, createProduct, updateProduct } from '@/services/productService';
+import { fetchProductById, createProduct, updateProduct, fetchProductChanges, ProductChange } from '@/services/productService';
 import ImageUpload from '@/components/ImageUpload';
 import { QRCodeSVG } from 'qrcode.react';
+import moment from 'moment';
 
 interface ProductDetailFormProps {
   visible: boolean;
@@ -27,7 +29,9 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
   const [qrCodeValue, setQrCodeValue] = useState<string>('');
   const [formEditable, setFormEditable] = useState(false);
   const [currentProductImage, setCurrentProductImage] = useState<string | undefined>(undefined);
-
+  const [productChanges, setProductChanges] = useState<ProductChange[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [activeTabKey, setActiveTabKey] = useState('1');
 
   const fetchProductData = async (productId:string) => {
     try {
@@ -56,6 +60,7 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
         setLoading(true);
         setFormEditable(false);
         fetchProductData(productId);
+        fetchProductChangesData(productId);
       } else {
         form.resetFields();
         setQrCodeValue('');
@@ -124,6 +129,46 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
       onCancel();
     }
   };
+
+  const fetchProductChangesData = async (productId: string) => {
+    setHistoryLoading(true);
+    try {
+      const data = await fetchProductChanges(productId);
+      if (data.success) {
+        setProductChanges(data.data);
+      } else {
+        message.error(data.message || 'Failed to fetch product changes');
+        setProductChanges([]);
+      }
+    } catch (error) {
+      console.error('Error fetching product changes:', error);
+      message.error('Failed to fetch product changes.');
+      setProductChanges([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const columns: ColumnsType<ProductChange> = [
+    {
+      title: '#',
+      dataIndex: 'id',
+      key: 'id',
+      width: '5%',
+      render: (_, record, index: number) => index + 1,
+    },
+    {
+      title: 'Thời gian',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (value) => moment(value).format('DD/MM/YYYY [lúc] HH:mm'),
+    },
+    {
+      title: 'Người thực hiện',
+      dataIndex: ['user', 'name'],
+      key: 'userName',
+    },
+  ];
 
   const renderFormContent = () => (
     <Spin spinning={loading}>
@@ -209,7 +254,7 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
     {
       key: '2',
       label: 'Lịch sử thay đổi',
-      children: <div>Content for History Tab</div>,
+      children: <Table columns={columns} dataSource={productChanges.map((change, index) => ({...change, key: change._id || index }))} pagination={false} loading={historyLoading} />,
     },
   ];
 
@@ -222,37 +267,39 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
       width={800}
       maskClosable={false}
     >
-      <Tabs defaultActiveKey="1" items={items} />
+      <Tabs defaultActiveKey="1" items={items} onChange={setActiveTabKey} />
 
-      <div style={{ textAlign: 'right', marginTop: '20px' }}>
-        {productId && !formEditable ? (
-          <>
-            <Button onClick={handleEditClick} style={{ marginRight: 8 }}>
-              Sửa
-            </Button>
-            <Button type="primary">In thông tin</Button>
-          </>)
-          : (productId && formEditable ? (
+      {activeTabKey === '1' && (
+        <div style={{ textAlign: 'right', marginTop: '20px' }}>
+          {productId && !formEditable ? (
             <>
-              <Button onClick={handleCancelEdit} style={{ marginRight: 8 }}>
-                Hủy bỏ
+              <Button onClick={handleEditClick} style={{ marginRight: 8 }}>
+                Sửa
               </Button>
-              <Button type="primary" onClick={() => form.submit()} loading={submitting}>
-                Áp dụng
-              </Button>
+              <Button type="primary">In thông tin</Button>
             </>)
-            : (
+            : (productId && formEditable ? (
               <>
-                <Button onClick={onCancel} style={{ marginRight: 8 }}>
+                <Button onClick={handleCancelEdit} style={{ marginRight: 8 }}>
                   Hủy bỏ
                 </Button>
                 <Button type="primary" onClick={() => form.submit()} loading={submitting}>
                   Áp dụng
                 </Button>
-              </>
-            )
-          )}
-      </div>
+              </>)
+              : (
+                <>
+                  <Button onClick={onCancel} style={{ marginRight: 8 }}>
+                    Hủy bỏ
+                  </Button>
+                  <Button type="primary" onClick={() => form.submit()} loading={submitting}>
+                    Áp dụng
+                  </Button>
+                </>
+              )
+            )}
+        </div>
+      )}
     </Modal>
   );
 };

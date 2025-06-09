@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import { authenticatedFetch } from '../utils/api';
 
 interface UserDataType {
   _id: string;
@@ -59,162 +60,139 @@ export const fetchUsers = async (
   limit: number = 10,
   search: string = ''
 ): Promise<FetchUsersResponse> => {
-  const token = Cookies.get('auth_token'); // Get token from cookies
-  
-  if (!token) {
-      // Handle case where token is missing, perhaps throw an error or return a specific structure
-      // For now, returning a structure similar to an unsuccessful response
-      return {
-          success: false,
-          message: 'Authentication token missing',
-          data: [],
-          pagination: {
-              totalDocs: 0,
-              limit: limit,
-              totalPages: 0,
-              page: page,
-              pagingCounter: 0,
-              hasPrevPage: false,
-              hasNextPage: false,
-              prevPage: null,
-              nextPage: null,
-          }
-      };
+  try {
+    const response = await authenticatedFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users?limit=${limit}&page=${page}${search ? `&search=${encodeURIComponent(search)}` : ''}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const data = await response.json();
+    return data as FetchUsersResponse;
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message || 'Failed to fetch users',
+      data: [],
+      pagination: {
+        totalDocs: 0,
+        limit: limit,
+        totalPages: 0,
+        page: page,
+        pagingCounter: 0,
+        hasPrevPage: false,
+        hasNextPage: false,
+        prevPage: null,
+        nextPage: null,
+      }
+    };
   }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users?limit=${limit}&page=${page}${search ? `&search=${encodeURIComponent(search)}` : ''}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    }
-  );
-
-  const data = await response.json();
-  
-  // Assuming the backend response structure matches FetchUsersResponse
-  return data as FetchUsersResponse;
 };
 
 // Fetch a single user by ID
 export const fetchUserById = async (id: string): Promise<FetchUserResponse> => {
-  const token = Cookies.get('auth_token');
+  try {
+    const response = await authenticatedFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-  if (!token) {
+    const data = await response.json();
+    return data as FetchUserResponse;
+  } catch (error: any) {
     return {
       success: false,
-      message: 'Authentication token missing',
-      data: {} as UserDataType, // Return empty data or null as appropriate for the interface
+      message: error.message || 'Failed to fetch user',
+      data: {} as UserDataType,
     };
   }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    }
-  );
-
-  const data = await response.json();
-  return data as FetchUserResponse;
 };
 
 // Create a new user
 export const createUser = async (userData: UserPayload): Promise<CreateUserResponse> => {
-  const token = Cookies.get('auth_token');
+  try {
+    const response = await authenticatedFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      }
+    );
 
-  if (!token) {
+    const data = await response.json();
+    return data as CreateUserResponse;
+  } catch (error: any) {
     return {
       success: false,
-      message: 'Authentication token missing',
+      message: error.message || 'Failed to create user',
       data: {} as UserDataType,
     };
   }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(userData),
-    }
-  );
-
-  const data = await response.json();
-  return data as CreateUserResponse;
 };
 
 // Update an existing user
 export const updateUser = async (id: string, userData: Partial<UserPayload>): Promise<UpdateUserResponse> => {
-  const token = Cookies.get('auth_token');
+  try {
+    const response = await authenticatedFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      }
+    );
 
-  if (!token) {
+    const data = await response.json();
+    return data as UpdateUserResponse;
+  } catch (error: any) {
     return {
       success: false,
-      message: 'Authentication token missing',
+      message: error.message || 'Failed to update user',
       data: {} as UserDataType,
     };
   }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(userData),
-    }
-  );
-
-  const data = await response.json();
-  return data as UpdateUserResponse;
 };
 
 // Delete a user by ID
 export const deleteUser = async (id: string): Promise<{ success: boolean; message?: string }> => {
-  const token = Cookies.get('auth_token');
+  try {
+    const response = await authenticatedFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`,
+      {
+        method: 'DELETE',
+      }
+    );
 
-  if (!token) {
+    if (response.ok) {
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+      return {
+        success: true,
+        message: data.message || 'User deleted successfully',
+      };
+    } else {
+      const data = await response.json();
+      return {
+        success: false,
+        message: data.message || 'Failed to delete user',
+      };
+    }
+  } catch (error: any) {
     return {
       success: false,
-      message: 'Authentication token missing',
+      message: error.message || 'Failed to delete user',
     };
-  }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`,
-    {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    }
-  );
-
-  // No body expected for a successful DELETE, but backend might send success/message
-  if (response.ok) {
-     // Check for a body before trying to parse JSON
-    const text = await response.text();
-    const data = text ? JSON.parse(text) : {};
-    return {
-      success: true,
-      message: data.message || 'User deleted successfully',
-    };
-  } else {
-     const data = await response.json();
-     return {
-       success: false,
-       message: data.message || 'Failed to delete user',
-     };
   }
 }; 

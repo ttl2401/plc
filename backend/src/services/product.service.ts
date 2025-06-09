@@ -113,4 +113,12 @@ export class ProductService {
       throw new AppError('No product found with that ID', 404);
     }
   }
+
+  /**
+   * Get all products without pagination, sorted by createdAt ascending
+   */
+  async getAllProductsSorted(): Promise<IProduct[]> {
+    const products = await Product.find().sort({ createdAt: 1 }).lean();
+    return products;
+  }
 } 

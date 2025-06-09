@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import { authenticatedFetch, handleUnauthorized } from '../utils/api';
 
 export interface ProductDataType {
   _id: string;
@@ -67,30 +68,14 @@ interface UploadResponse {
 }
 
 export const uploadImage = async (file: File): Promise<UploadResponse> => {
-  const token = Cookies.get('auth_token');
-
-  if (!token) {
-    return {
-      success: false,
-      message: 'Authentication tofileUrl: ',
-      data: {
-        filePath: '',
-        fileUrl: '',
-      },
-    };
-  }
-
   const formData = new FormData();
   formData.append('target', 'product');
   formData.append('image', file);
 
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/upload`,
     {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
       body: formData,
     }
   );
@@ -105,35 +90,14 @@ export const fetchProducts = async (
   search: string = '',
   sort?: string
 ): Promise<FetchProductsResponse> => {
-  const token = Cookies.get('auth_token');
   
-  if (!token) {
-    return {
-      success: false,
-      message: 'Authentication token missing',
-      data: [],
-      pagination: {
-        totalDocs: 0,
-        limit: limit,
-        totalPages: 0,
-        page: page,
-        pagingCounter: 0,
-        hasPrevPage: false,
-        hasNextPage: false,
-        prevPage: null,
-        nextPage: null,
-      }
-    };
-  }
-
   const sortParam = sort ? `&sort=${encodeURIComponent(sort)}` : '';
 
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products?limit=${limit}&page=${page}${search ? `&search=${encodeURIComponent(search)}` : ''}${sortParam}`,
     {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
     }
   );
@@ -143,22 +107,12 @@ export const fetchProducts = async (
 };
 
 export const fetchProductById = async (id: string): Promise<FetchProductResponse> => {
-  const token = Cookies.get('auth_token');
-
-  if (!token) {
-    return {
-      success: false,
-      message: 'Authentication token missing',
-      data: {} as ProductDataType,
-    };
-  }
-
-  const response = await fetch(
+  
+  const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${id}`,
     {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
     }
   );
@@ -168,23 +122,13 @@ export const fetchProductById = async (id: string): Promise<FetchProductResponse
 };
 
 export const createProduct = async (productData: ProductPayload): Promise<CreateProductResponse> => {
-  const token = Cookies.get('auth_token');
 
-  if (!token) {
-    return {
-      success: false,
-      message: 'Authentication token missing',
-      data: {} as ProductDataType,
-    };
-  }
-
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(productData),
     }
@@ -195,23 +139,12 @@ export const createProduct = async (productData: ProductPayload): Promise<Create
 };
 
 export const updateProduct = async (id: string, productData: Partial<ProductPayload>): Promise<UpdateProductResponse> => {
-  const token = Cookies.get('auth_token');
-
-  if (!token) {
-    return {
-      success: false,
-      message: 'Authentication token missing',
-      data: {} as ProductDataType,
-    };
-  }
-
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${id}`,
     {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(productData),
     }
@@ -222,22 +155,10 @@ export const updateProduct = async (id: string, productData: Partial<ProductPayl
 };
 
 export const deleteProduct = async (id: string): Promise<{ success: boolean; message?: string }> => {
-  const token = Cookies.get('auth_token');
-
-  if (!token) {
-    return {
-      success: false,
-      message: 'Authentication token missing',
-    };
-  }
-
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${id}`,
     {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
     }
   );
 
@@ -260,33 +181,74 @@ export const deleteProduct = async (id: string): Promise<{ success: boolean; mes
 interface DownloadResponse {
   success: boolean;
   message: string;
-  data: {
-    downloadUrl: string;
-  };
 }
 
 export const downloadProductsExcel = async (): Promise<DownloadResponse> => {
-  const token = Cookies.get('auth_token');
+  try {
+    const response = await authenticatedFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/download`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-  if (!token) {
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to download Excel file');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'products.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    return {
+      success: true,
+      message: 'Excel file downloaded successfully!',
+    };
+  } catch (error: any) {
     return {
       success: false,
-      message: 'Authentication token missing',
-      data: { downloadUrl: '' },
+      message: error.message || 'Failed to download Excel file.',
     };
   }
+};
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/download`,
+export interface ProductChange {
+  _id: string;
+  field: string;
+  oldValue: string;
+  newValue: string;
+  createdAt: string;
+  user: {
+    name: string;
+  };
+}
+
+interface FetchProductChangesResponse {
+  success: boolean;
+  message: string;
+  data: ProductChange[];
+}
+
+export const fetchProductChanges = async (productId: string): Promise<FetchProductChangesResponse> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${productId}/changes`,
     {
-      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
     }
   );
 
   const data = await response.json();
-  return data as DownloadResponse;
+  return data as FetchProductChangesResponse;
 }; 

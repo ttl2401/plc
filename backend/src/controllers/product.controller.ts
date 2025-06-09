@@ -5,6 +5,8 @@ import { returnMessage, returnError, returnPaginationMessage } from '@/controlle
 import { ActivityAction, ActivityResource } from '@/models/user-activity.model';
 import mongoose from 'mongoose';
 import { getList, getDetail } from '@/transforms/product.transform'
+import exceljs from 'exceljs';
+
 const productService = new ProductService();
 const userActivityService = new UserActivityService();
 
@@ -127,6 +129,78 @@ export const deleteProduct = async (
     }
 
     return res.status(204).json(returnMessage(null, 'Product deleted successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get product changes (activity history)
+export const getProductChanges = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const productId = req.params.id;
+
+    const activities = await userActivityService.getResourceActivities(
+      ActivityResource.PRODUCT,
+      new mongoose.Types.ObjectId(productId),
+      { limit: 0 } // Set limit to 0 to disable pagination and load all
+    );
+    
+    return res.status(200).json(returnMessage(activities.docs, 'Product changes retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Download products as an Excel file
+export const downloadProducts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const products = await productService.getAllProductsSorted();
+
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet('Products');
+
+    // Define columns
+    worksheet.columns = [
+      { header: '#', key: 'id', width: 5 },
+      { header: 'Mã sản phẩm', key: 'code', width: 20 },
+      { header: 'Tên sản phẩm', key: 'name', width: 30 },
+      { header: 'Kích thước (dm²)', key: 'sizeDm2', width: 20 },
+      { header: 'Ngày tạo', key: 'createdAt', width: 20 },
+      { header: 'Ngày cập nhật', key: 'updatedAt', width: 20 },
+    ];
+
+    // Add rows
+    products.forEach((product, index) => {
+      worksheet.addRow({
+        id: index + 1,
+        code: product.code,
+        name: product.name,
+        sizeDm2: product.sizeDm2,
+        createdAt: product.createdAt ? new Date(product.createdAt).toLocaleString() : '',
+        updatedAt: product.updatedAt ? new Date(product.updatedAt).toLocaleString() : '',
+      });
+    });
+
+    // Set response headers for download
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=' + 'products.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (error) {
     next(error);
   }

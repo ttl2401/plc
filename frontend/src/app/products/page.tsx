@@ -223,8 +223,7 @@ const ProductsPage: React.FC = () => {
   const handleExportExcel = async () => {
     try {
       const response = await downloadProductsExcel();
-      if (response.success && response.data.downloadUrl) {
-        window.open(response.data.downloadUrl, '_blank');
+      if (response.success) {
         message.success(response.message || 'Tải xuống Excel thành công!');
       } else {
         message.error(response.message || 'Không thể tải xuống Excel.');

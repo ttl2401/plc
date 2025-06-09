@@ -86,6 +86,7 @@ export class UserActivityService {
       sort: { createdAt: -1 },
       populate: 'user',
       lean: true, // Return plain JavaScript objects
+      pagination: options.limit === 0 ? false : true, // Set pagination to false if limit is 0, to fetch all documents
     }) as PaginateResult<IUserActivity>;
   }
 

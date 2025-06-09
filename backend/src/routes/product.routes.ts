@@ -8,6 +8,8 @@ import {
   getProduct,
   updateProduct,
   deleteProduct,
+  getProductChanges,
+  downloadProducts
 } from '@/controllers/product.controller';
 
 const router = express.Router();
@@ -19,6 +21,12 @@ router.use(auth);
 router.route('/products')
   .get(restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProducts) // Get all products
   .post(restrictTo(ROLES.ADMIN, ROLES.MANAGER), createProduct); // Create a new product
+
+// Route for downloading products as Excel (accessible by Admin and Manager)
+router.get('/products/download', restrictTo(ROLES.ADMIN, ROLES.MANAGER), downloadProducts);
+
+// Routes accessible by Admin and Manager
+router.get('/products/:id/changes',restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProductChanges); // Get info changelog of prduct
 
 // Routes accessible by Admin and Manager
 router.route('/products/:id')
