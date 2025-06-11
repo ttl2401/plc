@@ -24,7 +24,8 @@ body { /* Added rule to remove default body margin */
 }
 
 .ant-menu-dark.ant-menu-horizontal > .ant-menu-item-selected .ant-menu-title-content,
-.ant-menu-dark.ant-menu-horizontal > .ant-menu-item-selected a {
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-submenu-selected span,
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item-selected span {
   color: var(--active-menu-color) !important; /* Target text and link color specifically */
 }
 

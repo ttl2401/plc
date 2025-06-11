@@ -36,6 +36,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const getSelectedKeys = () => {
+    const keys = [pathname];
+    if (pathname.startsWith('/parameters-setting/')) {
+      keys.push('/parameters-setting');
+    }
+    return keys;
+  };
+
   const mainMenuItems = [
     {
       key: '/dashboard',
@@ -55,14 +63,31 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       meta: { roles: ['admin'] },
     },
     {
-      key: '/charts',
+      key: '/parameters-setting',
       icon: <BarChartOutlined />,
-      label: <Link href="/charts">Charts</Link>,
-    },
-    {
-      key: '/charts',
-      icon: <BarChartOutlined />,
-      label: <Link href="/charts">Charts</Link>,
+      label: 'Cài đặt thông số',
+      children: [
+        {
+          key: '/parameters-setting/electroplating',
+          label: <Link href="/parameters-setting/electroplating">Xi mạ</Link>,
+        },
+        {
+          key: '/parameters-setting/temperature',
+          label: <Link href="/parameters-setting/temperature">Nhiệt độ</Link>,
+        },
+        {
+          key: '/parameters-setting/timer',
+          label: <Link href="/parameters-setting/timer">Timer</Link>,
+        },
+        {
+          key: '/parameters-setting/robot',
+          label: <Link href="/parameters-setting/robot">Robot</Link>,
+        },
+        {
+          key: '/parameters-setting/chemical',
+          label: <Link href="/parameters-setting/chemical">Hóa chất lỏng</Link>,
+        },
+      ],
     },
     {
       key: '/charts',
@@ -79,8 +104,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           label: <Link href="/lich-su-van-hanh">Lịch Sử Vận Hành</Link>,
         },
         {
-          key: '/lich-su-bo-sung-hoa-chat',
-          label: <Link href="/lich-su-bo-sung-hoa-chat">Lịch Sử Bổ Sung Hóa Chất</Link>,
+          key: '/bo-sung-hoa-chat',
+          label: <Link href="/lich-su/bo-sung-hoa-chat">Lịch Sử Bổ Sung Hóa Chất</Link>,
         },
       ],
     },
@@ -133,12 +158,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Menu
             theme="dark"
             mode="horizontal"
-            selectedKeys={[pathname]}
+            selectedKeys={getSelectedKeys()}
             items={filteredMainMenuItems}
             style={{
               borderBottom: 'none',
               fontSize: '14px',
-              
             }}
           />
         </div>
