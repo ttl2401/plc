@@ -12,8 +12,8 @@ async function migrate(): Promise<void> {
     const migratedFileArray = migratedFile.map(e => e.file);
     
     const pattern = path.resolve(__dirname, '../migrations/*.migration.ts');
-    const files = await glob(pattern);
-    
+    const files = (await glob(pattern)).sort();
+   
     if (files.length) {
       for (let i = 0; i < files.length; i++) {
         const fileName = files[i].split('/').at(-1);

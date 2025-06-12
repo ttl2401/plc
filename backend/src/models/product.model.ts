@@ -9,6 +9,7 @@ export interface IProduct extends Document {
   imageUrl?: string; // Derived from image path, optional
   createdAt: Date;
   updatedAt: Date;
+  settings?: IProductSetting;
 }
 
 // New interface for transformed product data (plain object)
@@ -21,6 +22,40 @@ export interface ITransformedProduct {
   imageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IProductSetting {
+  rackPlating: {
+    jigCarrier: number;
+    pcsJig: number;
+    timer: number;
+    tanks: [
+      {
+        tankId: string;
+        tankInfo: {
+          [key: string]: any;
+        };
+        currentJig: number;
+        T1: number;
+        T2: number;
+      }
+    ]
+  };
+  barrelPlating: {
+    kgBarel: number;
+    timger: number;
+    tanks : [
+      {
+        tankId: string;
+        tankInfo: {
+          [key: string]: any;
+        };
+        currentJig: number;
+        T1: number;
+        T2: number;
+      }
+    ]
+  }
 }
 
 const productSchema = new Schema<IProduct>(
@@ -42,10 +77,39 @@ const productSchema = new Schema<IProduct>(
     },
     image: {
       type: String,
+    },
+    settings: {
+      type: {
+        rackPlating: {
+          jigCarrier: Number,
+          pcsJig: Number,
+          timer: Number,
+          tanks: [{
+            tankId: String,
+            tankInfo: Schema.Types.Mixed,
+            currentJig: Number,
+            T1: Number,
+            T2: Number
+          }]
+        },
+        barrelPlating: {
+          kgBarel: Number,
+          timger: Number,
+          tanks: [{
+            tankId: String,
+            tankInfo: Schema.Types.Mixed,
+            currentJig: Number,
+            T1: Number,
+            T2: Number
+          }]
+        }
+      },
+      default: undefined
     }
   },
   {
     timestamps: true,
+    collection: 'Products'
   }
 );
 

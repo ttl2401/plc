@@ -63,6 +63,7 @@ const userActivitySchema = new Schema<IUserActivity>(
   },
   {
     timestamps: true,
+    collection: 'UserActivities'
   }
 );
 

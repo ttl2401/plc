@@ -16,6 +16,7 @@ const migrationSchema = new Schema<IMigration>(
     },
     {
         timestamps: true,
+        collection: 'Migrations'
     }
 );
 

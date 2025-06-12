@@ -14,10 +14,15 @@ const migrate = async (): Promise<void> => {
     role: 'admin',
     password: '123456'
   };
-
-  await User.create(
-    payload
-  );
+  try {
+    await User.create(
+      payload
+    );
+  }
+  catch (e){
+    console.error(e);
+  }
+  
 };
 
 export { migrate }; 
