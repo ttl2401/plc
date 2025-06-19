@@ -37,7 +37,7 @@ export const ROLES = {
   ADMIN: 'admin',
   MANAGER: 'manager',
   USER: 'user',
-  ALL: ['admin', 'manager', 'user'] as const,
+//  ALL: ['admin', 'manager', 'user'] as const,
 };
 export const ENUM_ROLES = [
   ROLES.ADMIN, ROLES.MANAGER, ROLES.USER

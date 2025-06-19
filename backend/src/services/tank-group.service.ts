@@ -113,4 +113,11 @@ export class TankGroupService {
   async getActiveTankGroups(): Promise<ITankGroup[]> {
     return await TankGroup.find({ active: true }).sort({ name: 1 });
   }
+
+  /**
+   * Get all tank groups where setting.timer exists (can be null or any value)
+   */
+  async getTankGroupsWithTimerSetting(): Promise<ITankGroup[]> {
+    return await TankGroup.find({ 'settings.timer': { $exists: true }, active: true });
+  }
 } 

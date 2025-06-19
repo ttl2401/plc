@@ -4,8 +4,8 @@ import mongoosePaginate from 'mongoose-paginate-v2';
 export interface ITankGroup extends Document {
   name: string;
   key: string;
-  setting?: {
-    timer: string;
+  settings?: {
+    temp: number | null;
   } | null;
   active: boolean;
   createdAt: Date;
@@ -24,11 +24,15 @@ const tankGroupSchema = new Schema<ITankGroup>(
       required: true,
       unique: true,
     },
-    setting: {
-      type: {
-        timer: String
+    settings: {
+      type: Object,
+      default: null,
+      properties: {
+        temp: {
+          type: Number,
+          default: null
+        },
       },
-      default: null
     },
     active: {
       type: Boolean,

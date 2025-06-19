@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie';
 import { authenticatedFetch } from '../utils/api';
 
 interface UserDataType {
