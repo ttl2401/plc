@@ -79,7 +79,7 @@ export const updateProduct = async (
   try {
     const id = req.params.id;
     const { code, name, sizeDm2, image } = req.body;
-    console.log(req.body)
+    
     const payload = { code : code?.toUpperCase(), name, sizeDm2, image };
     const beforeProduct = await productService.getProductById(id);
     const product = await productService.updateProduct(id, payload);

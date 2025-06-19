@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import indexRoutes from '@/routes';
-import { errorHandler, notFoundHandler } from '@/middleware/error.middleware';
+import { errorHandler, notFoundHandler } from '@/middlewares/error.middleware';
 import path from 'path'; // Import path module
 
 const app = express();

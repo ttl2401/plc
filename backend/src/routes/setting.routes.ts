@@ -1,15 +1,27 @@
 import express from 'express';
-import { auth } from '@/middleware/auth.middleware';
-import { restrictTo } from '@/middleware/role.middleware';
+import { auth } from '@/middlewares/auth.middleware';
+import { restrictTo } from '@/middlewares/role.middleware';
 import { ROLES } from '@/config';
 import {
-    getSettingTimer
+    getSettingTimer,
+    updateSettingTimer
 } from '@/controllers/setting.controller';
+
+import validate from '@/middlewares/validate.middleware';
+import { updateSettingTimerRules } from '@/validators/settings';
 
 const router = express.Router();
 
 // Get all settings timer
-router.get('/settings/timer', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER), getSettingTimer);
+router.route('/settings/timer')
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER), getSettingTimer)
+.patch(
+    validate(updateSettingTimerRules),
+    auth,
+    restrictTo(ROLES.ADMIN, ROLES.MANAGER),
+  
+  updateSettingTimer
+);
 
 
 

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '@/models/user.model';
-import { AppError } from '@/middleware/error.middleware';
+import { AppError } from '@/middlewares/error.middleware';
 import { JWT } from '@/config';
 import ms from 'ms';
 import { returnMessage } from './base.controller';

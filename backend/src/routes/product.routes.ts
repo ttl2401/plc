@@ -1,6 +1,6 @@
 import express from 'express';
-import { auth } from '@/middleware/auth.middleware';
-import { restrictTo } from '@/middleware/role.middleware';
+import { auth } from '@/middlewares/auth.middleware';
+import { restrictTo } from '@/middlewares/role.middleware';
 import { ROLES } from '@/config';
 import {
   createProduct,

@@ -1,5 +1,5 @@
 import { Product, IProduct } from '@/models/product.model';
-import { AppError } from '@/middleware/error.middleware';
+import { AppError } from '@/middlewares/error.middleware';
 import { PaginateResult } from '@/controllers/base.controller';
 import mongoose from 'mongoose';
 

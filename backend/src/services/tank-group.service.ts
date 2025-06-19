@@ -1,5 +1,5 @@
 import { TankGroup, ITankGroup } from '@/models/tank-group.model';
-import { AppError } from '@/middleware/error.middleware';
+import { AppError } from '@/middlewares/error.middleware';
 import { PaginateResult } from '@/controllers/base.controller';
 import mongoose from 'mongoose';
 
@@ -119,5 +119,22 @@ export class TankGroupService {
    */
   async getTankGroupsWithTimerSetting(): Promise<ITankGroup[]> {
     return await TankGroup.find({ 'settings.timer': { $exists: true }, active: true });
+  }
+
+  /**
+   * Batch update settings.timer for multiple tank groups
+   */
+  async batchUpdateTimerSettings(list: { tankGroupId: string; timer: number }[]): Promise<ITankGroup[]> {
+    const bulkOps = list.map(item => ({
+      updateOne: {
+        filter: { _id: item.tankGroupId },
+        update: { $set: { 'settings.timer': item.timer } }
+      }
+    }));
+    if (bulkOps.length === 0) return [];
+    await TankGroup.bulkWrite(bulkOps);
+    // Return updated tank groups
+    const ids = list.map(item => item.tankGroupId);
+    return await TankGroup.find({ _id: { $in: ids } });
   }
 } 

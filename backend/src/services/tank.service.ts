@@ -1,5 +1,5 @@
 import { Tank, ITank } from '@/models/tank.model';
-import { AppError } from '@/middleware/error.middleware';
+import { AppError } from '@/middlewares/error.middleware';
 import { PaginateResult } from '@/controllers/base.controller';
 import mongoose from 'mongoose';
 

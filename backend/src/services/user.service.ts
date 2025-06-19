@@ -1,5 +1,5 @@
 import { User, IUser } from '@/models/user.model';
-import { AppError } from '@/middleware/error.middleware';
+import { AppError } from '@/middlewares/error.middleware';
 import { PaginateResult } from '@/controllers/base.controller';
 
 interface MongoError extends Error {

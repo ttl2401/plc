@@ -1,11 +1,9 @@
 import { authenticatedFetch } from '../utils/api';
 
 export interface TankGroup {
-  _id: string;
+  tankGroupId: string;
   name: string;
-  settings?: {
-    timer: string;
-  } | null;
+  timer: number | null;
 }
 
 export interface FetchTimerSettingsResponse {
@@ -33,7 +31,7 @@ export const fetchTimerSettings = async (): Promise<FetchTimerSettingsResponse> 
   return data as FetchTimerSettingsResponse;
 };
 
-export const updateTimerSettings = async (payload: { [id: string]: string }): Promise<UpdateTimerSettingsResponse> => {
+export const updateTimerSettings = async (payload: { list: TankGroup[] }): Promise<UpdateTimerSettingsResponse> => {
   const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/timer`,
     {

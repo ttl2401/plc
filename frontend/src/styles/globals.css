@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --primary-dark-blue: #001532;
   --active-menu-color: limegreen; /* Define a variable for the active menu color */
