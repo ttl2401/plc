@@ -14,11 +14,15 @@ export const authenticatedFetch = async (url: string, options?: RequestInit) => 
     throw new Error('Authentication token missing');
   }
 
-  const headers = {
-    'Content-Type': 'application/json',
+  let headers: any = {
     'Authorization': `Bearer ${token}`,
     ...(options?.headers || {}),
   };
+
+  // Only set Content-Type if not uploading FormData
+  if (!(options?.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const response = await fetch(url, { ...options, headers });
 
@@ -28,4 +32,4 @@ export const authenticatedFetch = async (url: string, options?: RequestInit) => 
   }
 
   return response;
-}; 
+};

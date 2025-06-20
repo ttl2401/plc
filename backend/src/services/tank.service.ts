@@ -161,4 +161,32 @@ export class TankService {
       .populate('group')
       .sort({ name: 1 });
   }
+
+
+  /**
+   * Get all tanks where setting.temp exists (can be null or any value)
+   */
+  async getTanksWithTempSetting(): Promise<ITank[]> {
+    return await Tank.find({ 'settings.temp': { $exists: true }, active: true });
+  }
+
+  /**
+   * Batch update settings.temp for multiple tanks
+   */
+  async batchUpdateTempSettings(list: { _id: string; temp: number }[]): Promise<ITank[]> {
+    const bulkOps = list.map(item => ({
+      updateOne: {
+        filter: { _id: item._id },
+        update: { $set: { 'settings.temp': item.temp } }
+      }
+    }));
+    if (bulkOps.length === 0) return [];
+    await Tank.bulkWrite(bulkOps);
+    // Return updated tank
+    const ids = list.map(item => item._id);
+    return await Tank.find({ _id: { $in: ids } });
+  }
 } 
+
+
+

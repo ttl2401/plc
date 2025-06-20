@@ -124,17 +124,17 @@ export class TankGroupService {
   /**
    * Batch update settings.timer for multiple tank groups
    */
-  async batchUpdateTimerSettings(list: { tankGroupId: string; timer: number }[]): Promise<ITankGroup[]> {
+  async batchUpdateTimerSettings(list: { _id: string; timer: number }[]): Promise<ITankGroup[]> {
     const bulkOps = list.map(item => ({
       updateOne: {
-        filter: { _id: item.tankGroupId },
+        filter: { _id: item._id },
         update: { $set: { 'settings.timer': item.timer } }
       }
     }));
     if (bulkOps.length === 0) return [];
     await TankGroup.bulkWrite(bulkOps);
     // Return updated tank groups
-    const ids = list.map(item => item.tankGroupId);
+    const ids = list.map(item => item._id);
     return await TankGroup.find({ _id: { $in: ids } });
   }
 } 

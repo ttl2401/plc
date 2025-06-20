@@ -1,31 +1,31 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from 'react';
-import { fetchTimerSettings, updateTimerSettings, TimerSetting, FetchTimerSettingsResponse } from '@/services/settingService';
+import { fetchTemperatureSettings, updateTemperatureSettings, TempSetting, FetchTempSettingsResponse } from '@/services/settingService';
 import { Form, InputNumber, Button, Typography, Row, Col, message, Spin, Card } from 'antd';
 
 const { Title } = Typography;
 
-const TimerSettingsPage: React.FC = () => {
-  const [settings, setSettings] = useState<TimerSetting[]>([]);
-  const [timers, setTimers] = useState<{ [_id: string]: number | null }>({});
+const TemperatureSettingsPage: React.FC = () => {
+  const [settings, setSettings] = useState<TempSetting[]>([]);
+  const [temperatures, setTemperatures] = useState<{ [_id: string]: number | null }>({});
   const [loading, setLoading] = useState(true);
   const [form] = Form.useForm();
 
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const response: FetchTimerSettingsResponse = await fetchTimerSettings();
+      const response: FetchTempSettingsResponse = await fetchTemperatureSettings();
       setSettings(response.data);
-      // Initialize timers state
-      const initialTimers: { [_id: string]: number | null } = {};
-      response.data.forEach((setting: TimerSetting) => {
-        initialTimers[setting._id] = setting.timer ?? null;
+      // Initialize temperatures state
+      const initialTemps: { [id: string]: number | null } = {};
+      response.data.forEach((setting: TempSetting) => {
+        initialTemps[setting._id] = setting.temp ?? null;
       });
-      setTimers(initialTimers);
-      form.setFieldsValue(initialTimers);
+      setTemperatures(initialTemps);
+      form.setFieldsValue(initialTemps);
     } catch (err) {
-      message.error('Không thể tải dữ liệu timer');
+      message.error('Không thể tải dữ liệu nhiệt độ');
     } finally {
       setLoading(false);
     }
@@ -36,15 +36,14 @@ const TimerSettingsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleFinish = async (values: { [id: string]: number | null }) => {
-    // Build the list array for the payload
+  const handleFinish = async (values: { [_id: string]: number | null }) => {
     const list = settings.map((setting) => ({
       _id: setting._id,
       name: setting.name,
-      timer: values[setting._id] ?? null,
+      temp: values[setting._id] ?? null,
     }));
     try {
-      const response = await updateTimerSettings({ list });
+      const response = await updateTemperatureSettings({ list });
       if (response.success) {
         message.success('Áp dụng thành công!');
         fetchSettings();
@@ -60,13 +59,13 @@ const TimerSettingsPage: React.FC = () => {
 
   return (
     <div className="p-8">
-      <Title level={2} className="mb-6">CÀI ĐẶT THÔNG SỐ TIMER</Title>
+      <Title level={2} className="mb-6">CÀI ĐẶT THÔNG SỐ NHIỆT ĐỘ</Title>
       <Card className="bg-white p-8 rounded-lg shadow-md">
         <Form
           form={form}
           layout="vertical"
           onFinish={handleFinish}
-          initialValues={timers}
+          initialValues={temperatures}
         >
           <Row gutter={[32, 32]}>
             {settings.map((setting) => (
@@ -101,4 +100,4 @@ const TimerSettingsPage: React.FC = () => {
   );
 };
 
-export default TimerSettingsPage; 
+export default TemperatureSettingsPage; 

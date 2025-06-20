@@ -4,15 +4,17 @@ import { restrictTo } from '@/middlewares/role.middleware';
 import { ROLES } from '@/config';
 import {
     getSettingTimer,
-    updateSettingTimer
+    updateSettingTimer,
+    getSettingTemperature,
+    updateSettingTemperature
 } from '@/controllers/setting.controller';
 
 import validate from '@/middlewares/validate.middleware';
-import { updateSettingTimerRules } from '@/validators/settings';
+import { updateSettingTimerRules, updateSettingTemperatureRules } from '@/validators/settings';
 
 const router = express.Router();
 
-// Get all settings timer
+// settings timer
 router.route('/settings/timer')
 .get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER), getSettingTimer)
 .patch(
@@ -23,6 +25,16 @@ router.route('/settings/timer')
   updateSettingTimer
 );
 
+// settings temperature
+router.route('/settings/temperature')
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER), getSettingTemperature)
+.patch(
+    validate(updateSettingTemperatureRules),
+    auth,
+    restrictTo(ROLES.ADMIN, ROLES.MANAGER),
+  
+  updateSettingTemperature
+);
 
 
 export default router; 
