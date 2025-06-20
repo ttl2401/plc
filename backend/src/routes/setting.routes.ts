@@ -6,11 +6,13 @@ import {
     getSettingTimer,
     updateSettingTimer,
     getSettingTemperature,
-    updateSettingTemperature
+    updateSettingTemperature,
+    getSettingRobot,
+    updateSettingRobot
 } from '@/controllers/setting.controller';
 
 import validate from '@/middlewares/validate.middleware';
-import { updateSettingTimerRules, updateSettingTemperatureRules } from '@/validators/settings';
+import { updateSettingTimerRules, updateSettingTemperatureRules, updateSettingRobotRules } from '@/validators/settings';
 
 const router = express.Router();
 
@@ -34,6 +36,18 @@ router.route('/settings/temperature')
     restrictTo(ROLES.ADMIN, ROLES.MANAGER),
   
   updateSettingTemperature
+);
+
+
+// settings robot
+router.route('/settings/robot')
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER), getSettingRobot)
+.patch(
+    validate(updateSettingRobotRules),
+    auth,
+    restrictTo(ROLES.ADMIN, ROLES.MANAGER),
+  
+  updateSettingRobot
 );
 
 
