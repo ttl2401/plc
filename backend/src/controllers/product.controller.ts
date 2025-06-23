@@ -238,8 +238,47 @@ export const updateProductSetting = async (
   try {
     const { id } = req.params;
     const { settings } = req.body;
+    const beforeProduct = await productService.getProductById(id);
+    const beforeSettings = beforeProduct.settings ?? null;
     const product = await productService.updateProductSetting(id, settings);
+    const afterSettings = product.settings ?? null;
+    // Log activity
+    if (req.user) {
+      await userActivityService.logActivity(
+        new mongoose.Types.ObjectId(String(req.user._id)),
+        ActivityAction.UPDATE_SETTING,
+        ActivityResource.PRODUCT,
+        new mongoose.Types.ObjectId(String(product._id)),
+        {
+          before: beforeSettings,
+          after: afterSettings
+        },
+        req
+      );
+    }
     res.status(200).json(returnMessage(product, 'Cập nhật cài đặt sản phẩm thành công'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// Get product setting changes 
+export const getProductSettingChanges = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const productId = req.params.id;
+
+    const activities = await userActivityService.getResourceActivities(
+      ActivityResource.PRODUCT,
+      new mongoose.Types.ObjectId(productId),
+      { limit: 0, action: ActivityAction.UPDATE_SETTING} // Set limit to 0 to disable pagination and load all
+    );
+    
+    return res.status(200).json(returnMessage(activities.docs, 'Product changes retrieved successfully'));
   } catch (error) {
     next(error);
   }

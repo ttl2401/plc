@@ -5,6 +5,7 @@ import mongoosePaginate from 'mongoose-paginate-v2';
 export enum ActivityAction {
   CREATE = 'create',
   UPDATE = 'update',
+  UPDATE_SETTING = 'update_setting',
   DELETE = 'delete',
 }
 
@@ -12,7 +13,6 @@ export enum ActivityAction {
 export enum ActivityResource {
   USER = 'user',
   PRODUCT = 'product',
-  PRODUCT_SETTING = 'product_setting',
   CATEGORY = 'category',
   // Add more resources as needed
 }

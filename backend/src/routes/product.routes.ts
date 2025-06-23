@@ -11,7 +11,8 @@ import {
   getProductChanges,
   downloadProducts,
   getProductSetting,
-  updateProductSetting
+  updateProductSetting,
+  getProductSettingChanges
 } from '@/controllers/product.controller';
 import { updateSettingPlatingRules } from '@/validators/product';
 
@@ -40,5 +41,9 @@ router.route('/products/:id')
 router.route('/products/:id/settings')
   .get(restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProductSetting) // Get a product settings
   .patch(restrictTo(ROLES.ADMIN, ROLES.MANAGER), updateSettingPlatingRules, updateProductSetting);
+
+// Routes Setting changes
+router.get('/products/:id/settings/changes',restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProductSettingChanges); // Get info changelog of prduct
+
 
 export default router; 

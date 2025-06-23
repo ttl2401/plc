@@ -195,4 +195,25 @@ export const updateProductSetting = async (productId: string, payload: any): Pro
   return response.json();
 }; 
 
+
+interface FetchProductSettingChangesResponse {
+  success: boolean;
+  message: string;
+  data: any[];
+}
+
+export const fetchProductSettingChanges = async (productId: string): Promise<FetchProductSettingChangesResponse> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${productId}/settings/changes`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  const data = await response.json();
+  return data as FetchProductSettingChangesResponse;
+};
+
 // You can add more settings-related API functions here as needed. 

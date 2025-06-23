@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { fetchProducts, fetchProductById, fetchProductChanges } from "@/services/productService";
-import { fetchProductSetting, updateProductSetting } from "@/services/settingService";
+import { fetchProducts, fetchProductById } from "@/services/productService";
+import { fetchProductSetting, updateProductSetting, fetchProductSettingChanges } from "@/services/settingService";
 import { Input, AutoComplete, Card, Typography, Spin, Row, Col, message, Radio, Image, Descriptions, Form, Button } from "antd";
 
 const { Title } = Typography;
@@ -17,6 +17,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
   const [infoLoading, setInfoLoading] = useState(false);
   const [runMode, setRunMode] = useState<'rack' | 'barrel'>('rack');
   const [form] = Form.useForm();
+  const [productIdToCode, setProductIdToCode] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (productSetting) {
@@ -53,8 +54,10 @@ const ElectroplatingSettingsPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await fetchProducts(1, 10, value);
-      setOptions(
-        res.data.map((prod: any) => ({
+      const idToCode: Record<string, string> = {};
+      const opts = res.data.map((prod: any) => {
+        idToCode[prod._id] = prod.code;
+        return {
           value: prod._id,
           label: (
             <div className="flex flex-row items-center gap-2">
@@ -62,8 +65,10 @@ const ElectroplatingSettingsPage: React.FC = () => {
               <span className="text-gray-400 text-xs">({prod.code})</span>
             </div>
           ),
-        }))
-      );
+        };
+      });
+      setOptions(opts);
+      setProductIdToCode(idToCode);
     } catch (err) {
       message.error("Không thể tìm sản phẩm");
     } finally {
@@ -73,12 +78,16 @@ const ElectroplatingSettingsPage: React.FC = () => {
 
   // Handle product selection
   const handleSelect = async (productId: string) => {
+    // Set the search input to the product code
+    if (productIdToCode[productId]) {
+      setSearch(productIdToCode[productId]);
+    }
     setInfoLoading(true);
     try {
       const [prodRes, settingRes, historyRes] = await Promise.all([
         fetchProductById(productId),
         fetchProductSetting(productId, 1),
-        fetchProductChanges(productId),
+        fetchProductSettingChanges(productId),
       ]);
       setSelectedProduct(prodRes.data);
       setProductSetting(settingRes.data);
@@ -179,6 +188,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
           onSelect={handleSelect}
           placeholder="Nhập mã sản phẩm hoặc tên sản phẩm để tìm kiếm"
           notFoundContent={loading ? <Spin size="small" /> : null}
+          value={search}
         >
           <Input.Search size="large" enterButton allowClear />
       </AutoComplete>
@@ -260,131 +270,132 @@ const ElectroplatingSettingsPage: React.FC = () => {
             onFinish={handleFormFinish}
             onValuesChange={runMode === 'rack' ? handleRackFieldChange : undefined}
           >
-            {/* Only show the selected mode's block */}
-            {runMode === 'rack' && (
-              <>
-                <div className="bg-white rounded-xl border p-4 mb-4">
-                  <div className="flex flex-row justify-between items-center mb-4">
-                    <span className="text-xl font-bold">Nạp thông số</span>
-                    <div className="flex flex-row gap-2">
-                      <div className="flex flex-col items-center">
-                        <span className="font-bold mb-1">Số Jig/Carrier</span>
-                        <Form.Item name="rack_jigCarrier" className="mb-0">
-                          <Input type="number" className="w-24 h-10 text-center" />
-                        </Form.Item>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <span className="font-bold mb-1">Số Pcs/Jig</span>
-                        <Form.Item name="rack_pcsJig" className="mb-0">
-                          <Input type="number" className="w-24 h-10 text-center" />
-                        </Form.Item>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {productSetting?.rackPlating?.tankAndGroups?.map((tank: any, idx: number) => (
-                      <div key={idx} className={`rounded-xl p-4 ${getTankColor(idx)}`}>
-                        <div className="font-bold text-l mb-4 text-center">{tank.modelName}</div>
-                        <div className="flex flex-row gap-1 mb-4 items-center justify-center">
-                          <div className="flex flex-col items-center flex-1">
-                            <span className="font-bold">Dòng điện / Jig</span>
-                            <Form.Item name={`rack_tank_${idx}_currentJig`} className="mb-0">
-                              <Input type="number" className="w-20 h-10 text-center" />
-                            </Form.Item>
-                          </div>
-                          <div className="flex flex-col items-center flex-1">
-                            <span className="font-bold">Dòng điện tổng</span>
-                            <Form.Item name={`rack_tank_${idx}_currentTotal`} className="mb-0">
-                              <Input type="number" className="w-20 h-10 text-center bg-gray-200" disabled />
-                            </Form.Item>
-                          </div>
-                        </div>
-                        <div className="flex flex-row gap-1 items-center justify-center">
-                          <div className="flex flex-col items-center flex-1">
-                            <span className="font-bold">T1</span>
-                            <Form.Item name={`rack_tank_${idx}_T1`} className="mb-0">
-                              <Input type="number" className="w-20 h-10 text-center" />
-                            </Form.Item>
-                          </div>
-                          <div className="flex flex-col items-center flex-1">
-                            <span className="font-bold">T2</span>
-                            <Form.Item name={`rack_tank_${idx}_T2`} className="mb-0">
-                              <Input type="number" className="w-20 h-10 text-center" />
-                            </Form.Item>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
-                  <span className="text-xl font-bold">Nạp Timer</span>
-                  <span className="ml-8 font-semibold">Nickel Plating (600-3600)</span>
-                  <Form.Item name="rack_timer" className="mb-0 ml-2">
-                    <Input type="number" className="w-32 h-10 text-center" />
-                  </Form.Item>
-                  <div className="flex-1 flex justify-end">
-                    <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">Áp dụng</Button>
-                  </div>
-                </div>
-              </>
-            )}
-            {runMode === 'barrel' && (
-              <>
-                <div className="bg-white rounded-xl border p-4 mb-4">
-                  <div className="flex flex-row justify-between items-center mb-4">
-                    <span className="text-xl font-bold">Nạp thông số</span>
+            <div
+              className={runMode === 'rack' ? '' : 'hidden'}
+              style={runMode === 'rack' ? {} : { display: 'none' }}
+            >
+              <div className="bg-white rounded-xl border p-4 mb-4">
+                <div className="flex flex-row justify-between items-center mb-4">
+                  <span className="text-xl font-bold">Nạp thông số</span>
+                  <div className="flex flex-row gap-2">
                     <div className="flex flex-col items-center">
-                      <span className="font-bold mb-1">Số Kg/Barrel</span>
-                      <Form.Item name="barrel_kgBarrel" className="mb-0">
-                        <Input type="number" className="w-24 h-10 text-center" />
+                      <span className="font-bold mb-1">Số Jig/Carrier</span>
+                      <Form.Item name="rack_jigCarrier" className="mb-0">
+                        <Input type="number" min={0} className="w-24 h-10 text-center" />
+                      </Form.Item>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <span className="font-bold mb-1">Số Pcs/Jig</span>
+                      <Form.Item name="rack_pcsJig" className="mb-0">
+                        <Input type="number" min={0} className="w-24 h-10 text-center" />
                       </Form.Item>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {productSetting?.barrelPlating?.tankAndGroups?.map((tank: any, idx: number) => (
-                      <div key={idx} className={`rounded-xl p-4 ${getTankColor(idx)}`}> 
-                        <div className="font-bold  mb-4 text-center">{tank.modelName}</div>
-                        <div className="flex flex-row mb-4 items-center">
-                          <div className="flex flex-col items-center flex-1">
-                            <span className="font-bold">Dòng điện tổng</span>
-                            <Form.Item name={`barrel_tank_${idx}_currentTotal`} className="mb-0">
-                              <Input type="number" className="w-20 h-10 text-center" />
-                            </Form.Item>
-                          </div>
-                          
-                          <div className="flex-1"></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {productSetting?.rackPlating?.tankAndGroups?.map((tank: any, idx: number) => (
+                    <div key={idx} className={`rounded-xl p-4 ${getTankColor(idx)}`}>
+                      <div className="font-bold text-l mb-4 text-center">{tank.modelName}</div>
+                      <div className="flex flex-row gap-1 mb-4 items-center justify-center">
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">Dòng điện / Jig</span>
+                          <Form.Item name={`rack_tank_${idx}_currentJig`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                          </Form.Item>
                         </div>
-                        <div className="flex flex-row gap-4 items-center">
-                          <div className="flex flex-col items-center flex-1">
-                            <span className="font-bold">T1</span>
-                            <Form.Item name={`barrel_tank_${idx}_T1`} className="mb-0">
-                              <Input type="number" className="w-20 h-10 text-center" />
-                            </Form.Item>
-                          </div>
-                          <div className="flex flex-col items-center flex-1">
-                            <span className="font-bold">T2</span>
-                            <Form.Item name={`barrel_tank_${idx}_T2`} className="mb-0">
-                              <Input type="number" className="w-20 h-10 text-center" />
-                            </Form.Item>
-                          </div>
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">Dòng điện tổng</span>
+                          <Form.Item name={`rack_tank_${idx}_currentTotal`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center bg-gray-200" disabled />
+                          </Form.Item>
                         </div>
                       </div>
-                    ))}
+                      <div className="flex flex-row gap-1 items-center justify-center">
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">T1</span>
+                          <Form.Item name={`rack_tank_${idx}_T1`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                          </Form.Item>
+                        </div>
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">T2</span>
+                          <Form.Item name={`rack_tank_${idx}_T2`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                          </Form.Item>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
+                <span className="text-xl font-bold">Nạp Timer</span>
+                <span className="ml-8 font-semibold">Nickel Plating (600-3600)</span>
+                <Form.Item name="rack_timer" className="mb-0 ml-2">
+                  <Input type="number" min={0} className="w-32 h-10 text-center" />
+                </Form.Item>
+                <div className="flex-1 flex justify-end">
+                  <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">Áp dụng</Button>
+                </div>
+              </div>
+            </div>
+            <div
+              className={runMode === 'barrel' ? '' : 'hidden'}
+              style={runMode === 'barrel' ? {} : { display: 'none' }}
+            >
+              <div className="bg-white rounded-xl border p-4 mb-4">
+                <div className="flex flex-row justify-between items-center mb-4">
+                  <span className="text-xl font-bold">Nạp thông số</span>
+                  <div className="flex flex-col items-center">
+                    <span className="font-bold mb-1">Số Kg/Barrel</span>
+                    <Form.Item name="barrel_kgBarrel" className="mb-0">
+                      <Input type="number" min={0} className="w-24 h-10 text-center" />
+                    </Form.Item>
                   </div>
                 </div>
-                <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
-                  <span className="text-xl font-bold">Nạp Timer</span>
-                  <span className="ml-8 font-semibold">Nickel Plating (600-3600)</span>
-                  <Form.Item name="barrel_timer" className="mb-0 ml-2">
-                    <Input type="number" className="w-32 h-10 text-center" />
-                  </Form.Item>
-                  <div className="flex-1 flex justify-end">
-                    <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">Áp dụng</Button>
-                  </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {productSetting?.barrelPlating?.tankAndGroups?.map((tank: any, idx: number) => (
+                    <div key={idx} className={`rounded-xl p-4 ${getTankColor(idx)}`}> 
+                      <div className="font-bold  mb-4 text-center">{tank.modelName}</div>
+                      <div className="flex flex-row mb-4 items-center">
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">Dòng điện tổng</span>
+                          <Form.Item name={`barrel_tank_${idx}_currentTotal`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                          </Form.Item>
+                        </div>
+                        
+                        <div className="flex-1"></div>
+                      </div>
+                      <div className="flex flex-row gap-4 items-center">
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">T1</span>
+                          <Form.Item name={`barrel_tank_${idx}_T1`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                          </Form.Item>
+                        </div>
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">T2</span>
+                          <Form.Item name={`barrel_tank_${idx}_T2`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                          </Form.Item>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </>
-            )}
+              </div>
+              <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
+                <span className="text-xl font-bold">Nạp Timer</span>
+                <span className="ml-8 font-semibold">Nickel Plating (600-3600)</span>
+                <Form.Item name="barrel_timer" className="mb-0 ml-2">
+                  <Input type="number" min={0} className="w-32 h-10 text-center" />
+                </Form.Item>
+                <div className="flex-1 flex justify-end">
+                  <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">Áp dụng</Button>
+                </div>
+              </div>
+            </div>
           </Form>
         </>
       ) : null}
