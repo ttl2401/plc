@@ -1,4 +1,4 @@
-import { Product, IProduct } from '@/models/product.model';
+import { Product, IProduct, IProductSetting } from '@/models/product.model';
 import { AppError } from '@/middlewares/error.middleware';
 import { PaginateResult } from '@/controllers/base.controller';
 import mongoose from 'mongoose';
@@ -120,5 +120,27 @@ export class ProductService {
   async getAllProductsSorted(): Promise<IProduct[]> {
     const products = await Product.find().sort({ createdAt: 1 }).lean();
     return products;
+  }
+
+  async updateProductSetting(id: string, newSetting: IProductSetting): Promise<IProduct> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError('Invalid product ID', 400);
+    }
+    const product = await Product.findById(id);
+    if (!product) {
+      throw new AppError('No product found with that ID', 404);
+    }
+    // Find the index of the setting for the given line
+    const settings = product.settings || [];
+    const settingIndex = settings.findIndex(s => s.line === newSetting.line);
+    if (settingIndex > -1) {
+      // If found, update the setting
+      product.settings[settingIndex] = newSetting;
+    } else {
+      // If not found, add the new setting to the array
+      product.settings = [newSetting];
+    }
+    await product.save();
+    return product;
   }
 } 

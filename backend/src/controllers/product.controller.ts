@@ -4,7 +4,9 @@ import { UserActivityService } from '@/services/user-activity.service';
 import { returnMessage, returnError, returnPaginationMessage } from '@/controllers/base.controller';
 import { ActivityAction, ActivityResource } from '@/models/user-activity.model';
 import mongoose from 'mongoose';
-import { getList, getDetail } from '@/transforms/product.transform'
+import { getList, getDetail, getSettingDetail } from '@/transforms/product.transform';
+import { validationResult } from 'express-validator';
+
 import exceljs from 'exceljs';
 
 const productService = new ProductService();
@@ -205,3 +207,40 @@ export const downloadProducts = async (
     next(error);
   }
 }; 
+
+
+// Get a single product settings
+export const getProductSetting = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const line = req.query.line || 1;
+    const product = await productService.getProductById(req.params.id);
+    const productTransform = await getSettingDetail(product, line as number);
+    return res.status(200).json(returnMessage(productTransform, 'Product and setting retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProductSetting = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json(returnError(errors.array()[0].msg));
+  }
+
+  try {
+    const { id } = req.params;
+    const { settings } = req.body;
+    const product = await productService.updateProductSetting(id, settings);
+    res.status(200).json(returnMessage(product, 'Cập nhật cài đặt sản phẩm thành công'));
+  } catch (error) {
+    next(error);
+  }
+};

@@ -251,4 +251,4 @@ export const fetchProductChanges = async (productId: string): Promise<FetchProdu
 
   const data = await response.json();
   return data as FetchProductChangesResponse;
-}; 
+};

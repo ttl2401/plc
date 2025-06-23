@@ -9,8 +9,11 @@ import {
   updateProduct,
   deleteProduct,
   getProductChanges,
-  downloadProducts
+  downloadProducts,
+  getProductSetting,
+  updateProductSetting
 } from '@/controllers/product.controller';
+import { updateSettingPlatingRules } from '@/validators/product';
 
 const router = express.Router();
 
@@ -33,5 +36,9 @@ router.route('/products/:id')
   .get(restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProduct) // Get a single product
   .patch(restrictTo(ROLES.ADMIN), updateProduct) // Update a product (only Admin)
   .delete(restrictTo(ROLES.ADMIN), deleteProduct); // Delete a product (only Admin)
+
+router.route('/products/:id/settings')
+  .get(restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProductSetting) // Get a product settings
+  .patch(restrictTo(ROLES.ADMIN, ROLES.MANAGER), updateSettingPlatingRules, updateProductSetting);
 
 export default router; 

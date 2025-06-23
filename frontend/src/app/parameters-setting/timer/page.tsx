@@ -59,8 +59,8 @@ const TimerSettingsPage: React.FC = () => {
   if (loading) return <div className="flex justify-center items-center h-96"><Spin size="large" /></div>;
 
   return (
-    <div className="p-8">
-      <Title level={2} className="mb-6">CÀI ĐẶT THÔNG SỐ TIMER</Title>
+    <div className="p-8 pt-0">
+      <Title level={3} className="mb-6">CÀI ĐẶT THÔNG SỐ TIMER</Title>
       <Card className="bg-white p-8 rounded-lg shadow-md">
         <Form
           form={form}

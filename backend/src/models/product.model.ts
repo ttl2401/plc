@@ -9,7 +9,7 @@ export interface IProduct extends Document {
   imageUrl?: string; // Derived from image path, optional
   createdAt: Date;
   updatedAt: Date;
-  settings?: IProductSetting;
+  settings: IProductSetting[];
 }
 
 // New interface for transformed product data (plain object)
@@ -25,38 +25,68 @@ export interface ITransformedProduct {
 }
 
 export interface IProductSetting {
+  line: number;
   rackPlating: {
     jigCarrier: number;
     pcsJig: number;
     timer: number;
-    tanks: [
-      {
-        tankId: string;
-        tankInfo: {
-          [key: string]: any;
-        };
-        currentJig: number;
-        T1: number;
-        T2: number;
-      }
-    ]
+    tankAndGroups: Array<{
+      model: string;
+      modelId: string;
+      modelKey: string;
+      modelName: string;
+      currentJig: number;
+      currentTotal: number;
+      T1: number;
+      T2: number;
+    }>;
   };
   barrelPlating: {
-    kgBarel: number;
-    timger: number;
-    tanks : [
-      {
-        tankId: string;
-        tankInfo: {
-          [key: string]: any;
-        };
-        currentJig: number;
-        T1: number;
-        T2: number;
-      }
-    ]
+    kgBarrel: number;
+    timer: number;
+    tankAndGroups: Array<{
+      model: string;
+      modelId: string;
+      modelKey: string;
+      modelName: string;
+      currentTotal: number;
+      T1: number;
+      T2: number;
+    }>;
   }
 }
+
+const productSettingSchemaEntry = new Schema({
+  line: { type: Number, required: true },
+  rackPlating: {
+    jigCarrier: Number,
+    pcsJig: Number,
+    timer: Number,
+    tankAndGroups: [{
+      model: String,
+      modelId: String,
+      modelKey: String,
+      modelName: String,
+      currentJig: Number,
+      currentTotal: Number,
+      T1: Number,
+      T2: Number
+    }]
+  },
+  barrelPlating: {
+    kgBarrel: Number,
+    timer: Number,
+    tankAndGroups: [{
+      model: String,
+      modelId: String,
+      modelKey: String,
+      modelName: String,
+      currentTotal: Number,
+      T1: Number,
+      T2: Number
+    }]
+  }
+}, { _id: false });
 
 const productSchema = new Schema<IProduct>(
   {
@@ -79,32 +109,8 @@ const productSchema = new Schema<IProduct>(
       type: String,
     },
     settings: {
-      type: {
-        rackPlating: {
-          jigCarrier: Number,
-          pcsJig: Number,
-          timer: Number,
-          tanks: [{
-            tankId: String,
-            tankInfo: Schema.Types.Mixed,
-            currentJig: Number,
-            T1: Number,
-            T2: Number
-          }]
-        },
-        barrelPlating: {
-          kgBarel: Number,
-          timger: Number,
-          tanks: [{
-            tankId: String,
-            tankInfo: Schema.Types.Mixed,
-            currentJig: Number,
-            T1: Number,
-            T2: Number
-          }]
-        }
-      },
-      default: undefined
+      type: [productSettingSchemaEntry],
+      default: null
     }
   },
   {
@@ -119,5 +125,18 @@ productSchema.plugin(mongoosePaginate);
 // Index for faster queries on code and name
 productSchema.index({ code: 1 });
 productSchema.index({ name: 1 });
+
+// Pre-save middleware to enforce uniqueness of 'line' in settings array
+productSchema.pre('save', function(next) {
+  if (this.settings && this.isModified('settings')) {
+    const lines = this.settings.map(s => s.line);
+    const hasDuplicates = new Set(lines).size !== lines.length;
+    if (hasDuplicates) {
+      const err = new Error('The "line" in product settings must be unique.');
+      return next(err);
+    }
+  }
+  next();
+});
 
 export const Product = mongoose.model<IProduct, mongoose.PaginateModel<IProduct>>('Product', productSchema); 

@@ -155,4 +155,44 @@ export const updateRobotSettings = async (payload: { list: RobotSetting[] }): Pr
   return data as UpdateRobotSettingsResponse;
 };
 
+// API for fetching product setting by productId and line
+export interface ProductSetting {
+  // Define fields as needed, for now use any
+  [key: string]: any;
+}
+
+export interface FetchProductSettingResponse {
+  success: boolean;
+  message: string;
+  data: ProductSetting;
+}
+
+export const fetchProductSetting = async (productId: string, line: number = 1): Promise<FetchProductSettingResponse> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${productId}/settings?line=${line}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  const data = await response.json();
+  return data as FetchProductSettingResponse;
+};
+
+
+export const updateProductSetting = async (productId: string, payload: any): Promise<any> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/${productId}/settings`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+  return response.json();
+}; 
+
 // You can add more settings-related API functions here as needed. 

@@ -12,6 +12,7 @@ export enum ActivityAction {
 export enum ActivityResource {
   USER = 'user',
   PRODUCT = 'product',
+  PRODUCT_SETTING = 'product_setting',
   CATEGORY = 'category',
   // Add more resources as needed
 }

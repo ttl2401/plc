@@ -40,7 +40,7 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Title level={2}>PLC Demo</Title>
+          <Title level={3}>PLC Demo</Title>
           <p className="text-gray-500">Sign in to your account</p>
         </div>
         <Form

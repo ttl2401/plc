@@ -222,7 +222,7 @@ const UsersPage: React.FC = () => {
 
   return (
     <div>
-      <Title level={2}>Users</Title>
+      <Title level={3}>Users</Title>
 
       <Flex justify="space-between" style={{ marginBottom: 16 }}>
         <Search

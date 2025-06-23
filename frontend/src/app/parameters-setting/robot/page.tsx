@@ -79,8 +79,8 @@ const RobotSettingsPage: React.FC = () => {
   if (loading) return <div className="flex justify-center items-center h-96"><Spin size="large" /></div>;
 
   return (
-    <div className="p-8">
-      <Title level={2} className="mb-6">CÀI ĐẶT THÔNG SỐ ROBOT</Title>
+    <div className="p-8 pt-0">
+      <Title level={3} className="mb-6">CÀI ĐẶT THÔNG SỐ ROBOT</Title>
       <Form
         form={form}
         layout="vertical"
@@ -92,50 +92,64 @@ const RobotSettingsPage: React.FC = () => {
             <Col key={robot._id} xs={24} sm={24} md={8}>
               <Card
                 className={`rounded-xl shadow-md h-full flex flex-col items-center ${idx === 0 ? 'border-2 border-gray-800' : 'border border-gray-300'}`}
-                bodyStyle={{ width: '100%', padding: 32 }}
+                bodyStyle={{ width: '100%', padding: 24 }}
               >
                 <div className="text-3xl font-bold text-center mb-6">{robot.name}</div>
                 {/* Rack Mode */}
                 <div className="mb-6 w-full">
                   <div className="text-lg font-semibold text-center mb-4 text-green-600">Chế độ chạy treo</div>
                   {dwellFields.map((field) => (
-                    <Form.Item
-                      key={`${robot._id}_rack_${field.key}`}
-                      label={<span className="font-medium">{field.label}</span>}
-                      name={`${robot._id}_rack_${field.key}`}
-                      className="mb-2"
-                    >
-                      <InputNumber
-                        min={0}
-                        className="w-20 h-10 text-xl font-medium text-center"
-                        addonAfter={<span className="text-base">s</span>}
-                      />
-                    </Form.Item>
+                    <div className="flex flex-row items-center gap-2">
+                        <span className="font-medium min-w-[140px] pb-5">{field.label}</span>
+                        <Form.Item
+                          key={`${robot._id}_rack_${field.key}`}
+                          name={`${robot._id}_rack_${field.key}`}
+                          className="mb-2"
+                          style={{ marginBottom: 12 }}
+                          colon={false}
+                          label={null}
+                        >
+                          
+                            <InputNumber
+                              min={0}
+                              className="w-40 h-10 text-xl font-medium text-center"
+                              addonAfter={<span className="text-base">s</span>}
+                            />
+                          
+                        </Form.Item>
+                    </div>
                   ))}
                 </div>
                 {/* Barrel Mode */}
                 <div className="w-full">
                   <div className="text-lg font-semibold text-center mb-4 text-green-600">Chế độ chạy quay</div>
                   {dwellFields.map((field) => (
-                    <Form.Item
-                      key={`${robot._id}_barrel_${field.key}`}
-                      label={<span className="font-medium">{field.label}</span>}
-                      name={`${robot._id}_barrel_${field.key}`}
-                      className="mb-2"
-                    >
-                      <InputNumber
-                        min={0}
-                        className="w-20 h-10 text-xl font-medium text-center"
-                        addonAfter={<span className="text-base">s</span>}
-                      />
-                    </Form.Item>
+                    <div className="flex flex-row items-center gap-2">
+                        <span className="font-medium min-w-[140px] pb-5">{field.label}</span>
+                        <Form.Item
+                          key={`${robot._id}_barrel_${field.key}`}
+                          name={`${robot._id}_barrel_${field.key}`}
+                          className="mb-2"
+                          style={{ marginBottom: 12 }}
+                          colon={false}
+                          label={null}
+                        >
+                          
+                            <InputNumber
+                              min={0}
+                              className="w-40 h-10 text-xl font-medium text-center"
+                              addonAfter={<span className="text-base">s</span>}
+                            />
+                          
+                        </Form.Item>
+                    </div>
                   ))}
                 </div>
               </Card>
             </Col>
           ))}
         </Row>
-        <div className="flex flex-row gap-4 justify-center mt-12">
+        <div className="flex flex-row gap-4 justify-center mt-6">
           <Button onClick={handleReset} className="h-12 w-40 text-lg border-black">Đặt lại</Button>
           <Button type="primary" htmlType="submit" className="h-12 w-60 text-lg font-semibold">Lưu thay đổi</Button>
         </div>
