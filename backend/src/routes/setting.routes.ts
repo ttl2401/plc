@@ -8,7 +8,9 @@ import {
     getSettingTemperature,
     updateSettingTemperature,
     getSettingRobot,
-    updateSettingRobot
+    updateSettingRobot,
+    getSettingChemistry,
+    updateSettingChemistry
 } from '@/controllers/setting.controller';
 
 import validate from '@/middlewares/validate.middleware';
@@ -50,5 +52,15 @@ router.route('/settings/robot')
   updateSettingRobot
 );
 
+
+// settings chemistry
+router.route('/settings/chemistry')
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER), getSettingChemistry)
+.patch(
+    validate(updateSettingRobotRules),
+    auth,
+    restrictTo(ROLES.ADMIN, ROLES.MANAGER),
+    updateSettingChemistry
+);
 
 export default router; 

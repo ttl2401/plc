@@ -48,16 +48,18 @@ const arrayRobot = [
 }
 ]
 
-const migrate = async (): Promise<void> => {
+const migrate = async (): Promise<Boolean> => {
   for (const robot of arrayRobot){
     try {
       await Robot.create(robot);  
     }
     catch(e){
-      console.error(e)
+      console.error(e);
+      return false;
     }
     
   }
+  return true;
 };
 
 export { migrate }; 

@@ -216,4 +216,18 @@ export const fetchProductSettingChanges = async (productId: string): Promise<Fet
   return data as FetchProductSettingChangesResponse;
 };
 
-// You can add more settings-related API functions here as needed. 
+
+// API for fetching setting chemisty of tank
+export const fetchChemistrySettings = async (): Promise<any> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/chemistry`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.json();
+}; 
+
+// You can add more settings-related API functions here as needed.

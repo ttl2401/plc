@@ -21,8 +21,8 @@ async function migrate(): Promise<void> {
           continue;
         }
         const migration = await import(files[i]);
-        await migration.migrate();
-        await Migrations.create({ file: fileName });
+        const result = await migration.migrate();
+        if (result) await Migrations.create({ file: fileName });
       }
     } else {
       console.log('No module imported');

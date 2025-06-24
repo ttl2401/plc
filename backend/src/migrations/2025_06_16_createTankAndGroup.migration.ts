@@ -271,7 +271,7 @@ const arrayTankGroups = [
     },
 ]
 
-const migrate = async (): Promise<void> => {
+const migrate = async (): Promise<Boolean> => {
   for (const tankGroupData of arrayTankGroups){
     try {
       await TankGroup.create(tankGroupData);
@@ -287,15 +287,21 @@ const migrate = async (): Promise<void> => {
         try {
           await Tank.create(payload)
         }
-        catch(e){console.error(e)}
+        catch(e){     
+          console.error(e);
+          return false;
+        }
         
       }
     }
     catch(e){
-      console.error(e)
+      console.error(e);
+      return false;
     }
     
   }
+
+  return true;
 };
 
 export { migrate }; 

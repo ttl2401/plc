@@ -9,7 +9,7 @@ const tankService = new TankService();
 const robotService = new RobotService();
 
 import { getListSettingTimer } from '@/transforms/tank-group.transform'
-import { getListSettingTemperature } from '@/transforms/tank.transform'
+import { getListSettingTemperature, getListSettingChemistry } from '@/transforms/tank.transform'
 import { getListSettingRobot } from '@/transforms/robot.transform'
 
 export const getSettingTimer = async (
@@ -102,6 +102,44 @@ export const updateSettingRobot = async (
     const { list } = req.body;
     const updatedRobots = await robotService.batchUpdateSettings(list);
     return res.status(200).json(returnMessage(updatedRobots, 'Robot settings updated successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSettingChemistry = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Get all tanks with chemistry setting
+    const tanks = await tankService.getTanksWithChemistrySetting();
+    const data = getListSettingChemistry(tanks);
+    return res.status(200).json(returnMessage(data, 'Tanks with chemistry setting retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateSettingChemistry = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { list } = req.body;
+    let result;
+    if (Array.isArray(list)) {
+      // Batch update
+      result = await tankService.batchUpdateChemistrySettings(list);
+    } else if (list && list._id && list.chemistry) {
+      // Single update
+      result = await tankService.updateChemistrySetting(list._id, list.chemistry);
+    } else {
+      return res.status(400).json(returnError('Invalid payload for chemistry update'));
+    }
+    return res.status(200).json(returnMessage(result, 'Chemistry settings updated successfully'));
   } catch (error) {
     next(error);
   }

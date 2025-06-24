@@ -51,4 +51,4 @@ tankGroupSchema.plugin(mongoosePaginate);
 // Index for faster queries on name
 tankGroupSchema.index({ name: 1 });
 
-export const TankGroup = mongoose.model<ITankGroup, mongoose.PaginateModel<ITankGroup>>('TankGroup', tankGroupSchema); 
+export const TankGroup = mongoose.model<ITankGroup, mongoose.PaginateModel<ITankGroup>>('TankGroups', tankGroupSchema); 

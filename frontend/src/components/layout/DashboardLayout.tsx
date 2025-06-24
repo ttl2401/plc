@@ -84,8 +84,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           label: <Link href="/parameters-setting/robot">Robot</Link>,
         },
         {
-          key: '/parameters-setting/chemical',
-          label: <Link href="/parameters-setting/chemical">Hóa chất lỏng</Link>,
+          key: '/parameters-setting/chemistry',
+          label: <Link href="/parameters-setting/chemistry">Hóa chất lỏng</Link>,
         },
       ],
     },

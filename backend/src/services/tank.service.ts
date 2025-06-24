@@ -37,7 +37,7 @@ export class TankService {
       limit = 10, 
       sort = { createdAt: -1 }, 
       select = '', 
-      populate = true,
+      populate = false,
       search,
       groupKey 
     } = query;
@@ -68,7 +68,7 @@ export class TankService {
   /**
    * Get a single tank by ID
    */
-  async getTankById(id: string, populate = true): Promise<ITank> {
+  async getTankById(id: string, populate = false): Promise<ITank> {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new AppError('Invalid tank ID', 400);
     }
@@ -86,7 +86,7 @@ export class TankService {
   /**
    * Get a single tank by key
    */
-  async getTankByKey(key: string, populate = true): Promise<ITank> {
+  async getTankByKey(key: string, populate = false): Promise<ITank> {
     const query = Tank.findOne({ key });
     if (populate) {
       query.populate('group');
@@ -185,6 +185,77 @@ export class TankService {
     // Return updated tank
     const ids = list.map(item => item._id);
     return await Tank.find({ _id: { $in: ids } });
+  }
+
+
+  /**
+   * Get all tanks where setting.chemistry exists
+   */
+  async getTanksWithChemistrySetting(): Promise<ITank[]> {
+    return await Tank.find({ 'settings.chemistry': { $exists: true }, active: true });
+  }
+
+
+  /**
+   * Update chemistry setting for a single tank
+   */
+  async updateChemistrySetting(id: string, chemistry: any): Promise<ITank> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError('Invalid tank ID', 400);
+    }
+    const tank = await Tank.findByIdAndUpdate(
+      id,
+      { $set: { 'settings.chemistry': chemistry } },
+      { new: true, runValidators: true }
+    );
+    if (!tank) {
+      throw new AppError('No tank found with that ID', 404);
+    }
+    return tank;
+  }
+
+  /**
+   * Batch update chemistry settings for multiple tanks
+   */
+  async batchUpdateChemistrySettings(list: { _id: string; chemistry: any }[]): Promise<ITank[]> {
+    const bulkOps = list.map(item => ({
+      updateOne: {
+        filter: { _id: item._id },
+        update: { $set: { 'settings.chemistry': item.chemistry } }
+      }
+    }));
+    if (bulkOps.length === 0) return [];
+    await Tank.bulkWrite(bulkOps);
+    const ids = list.map(item => item._id);
+    return await Tank.find({ _id: { $in: ids } });
+  }
+
+  /**
+   * Insert or update a pump in settings.chemistry.pumps for a tank
+   */
+  async updateChemistryPumpSetting(id: string, pump: any): Promise<ITank> {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new AppError('Invalid tank ID', 400);
+    }
+    const tank = await Tank.findById(id);
+    if (!tank) {
+      throw new AppError('No tank found with that ID', 404);
+    }
+    // Ensure chemistry exists
+    if (!tank.settings) tank.settings = {};
+    if (!tank.settings.chemistry) tank.settings.chemistry = { AHToAdded: 0, pumps: [] };
+    const pumps = tank.settings.chemistry.pumps || [];
+    const idx = pumps.findIndex((p: any) => p.pumpKey === pump.pumpKey);
+    if (idx > -1) {
+      // Update existing pump
+      pumps[idx] = { ...pumps[idx], ...pump };
+    } else {
+      // Insert new pump
+      pumps.push(pump);
+    }
+    tank.settings.chemistry.pumps = pumps;
+    await tank.save();
+    return tank;
   }
 } 
 

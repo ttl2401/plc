@@ -139,4 +139,4 @@ productSchema.pre('save', function(next) {
   next();
 });
 
-export const Product = mongoose.model<IProduct, mongoose.PaginateModel<IProduct>>('Product', productSchema); 
+export const Product = mongoose.model<IProduct, mongoose.PaginateModel<IProduct>>('Products', productSchema); 

@@ -7,7 +7,7 @@ interface AdminPayload {
   password: string;
 }
 
-const migrate = async (): Promise<void> => {
+const migrate = async (): Promise<Boolean> => {
   const payload: AdminPayload = {
     name: 'admin',
     email: 'admin@admin.com',
@@ -21,8 +21,9 @@ const migrate = async (): Promise<void> => {
   }
   catch (e){
     console.error(e);
+    return false;
   }
-  
+  return true;
 };
 
 export { migrate }; 
