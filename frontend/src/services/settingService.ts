@@ -230,4 +230,28 @@ export const fetchChemistrySettings = async (): Promise<any> => {
   return response.json();
 }; 
 
+// API for updating chemistry settings
+export interface ChemistrySetting {
+  _id: string;
+  name: string;
+  chemistry: {
+    AHToAdded: number;
+    pumps: { pumpKey: string; pumpType: string; pumpName: string; time: number }[];
+  };
+}
+
+export const updateChemistrySettings = async (payload: { list: ChemistrySetting[] }): Promise<any> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/chemistry`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+  return response.json();
+};
+
 // You can add more settings-related API functions here as needed.
