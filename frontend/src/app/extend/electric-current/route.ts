@@ -15,16 +15,9 @@ export function GET() {
   <div class="dashboard">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="logo">
-        <div class="logo-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-          </svg>
+     <div class="logo">
+          <img src="https://i.ibb.co/fGFHDGmw/Screenshot-2025-06-26-at-01-18-08.png" alt="Logo"  style="width: 50%; margin-left:20%"/>
         </div>
-        <span class="logo-text">ZTECHIUS</span>
-      </div>
       
       <nav class="nav">
         <div class="nav-section">
