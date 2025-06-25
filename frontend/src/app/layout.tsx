@@ -4,7 +4,6 @@ import { ConfigProvider, App as AntdApp } from "antd";
 import { ThemeProvider } from "next-themes";
 import NextTopLoader from "nextjs-toploader";
 import { AuthProvider } from "@/contexts/AuthContext";
-import DashboardLayout from "@/components/layout/DashboardLayout";
 
 export const metadata: Metadata = {
   title: "PLC Demo",
@@ -44,9 +43,9 @@ export default function RootLayout({
                   easing="ease"
                   speed={200}
                 />
-                <DashboardLayout>
+                
                   {children}
-                </DashboardLayout>
+                
               </AuthProvider>
             </AntdApp>
           </ConfigProvider>
