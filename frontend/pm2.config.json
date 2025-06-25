@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "name": "xima",
+      "script": "npm",
+      "args": "run dev",
+      "cwd": "./",
+      "watch": false,
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  ]
+} 
