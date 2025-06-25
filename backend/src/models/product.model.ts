@@ -26,6 +26,7 @@ export interface ITransformedProduct {
 
 export interface IProductSetting {
   line: number;
+  mode: string;
   rackPlating: {
     jigCarrier: number;
     pcsJig: number;
@@ -40,7 +41,7 @@ export interface IProductSetting {
       T1: number;
       T2: number;
     }>;
-  };
+  } | null;
   barrelPlating: {
     kgBarrel: number;
     timer: number;
@@ -53,38 +54,47 @@ export interface IProductSetting {
       T1: number;
       T2: number;
     }>;
-  }
+  } | null
 }
 
 const productSettingSchemaEntry = new Schema({
   line: { type: Number, required: true },
+  mode: { type: String, required: true, enum: ['rack', 'barrel'] },
   rackPlating: {
-    jigCarrier: Number,
-    pcsJig: Number,
-    timer: Number,
-    tankAndGroups: [{
-      model: String,
-      modelId: String,
-      modelKey: String,
-      modelName: String,
-      currentJig: Number,
-      currentTotal: Number,
-      T1: Number,
-      T2: Number
-    }]
+    type: {
+      jigCarrier: Number,
+      pcsJig: Number,
+      timer: Number,
+      tankAndGroups: [{
+        model: String,
+        modelId: String,
+        modelKey: String,
+        modelName: String,
+        currentJig: Number,
+        currentTotal: Number,
+        T1: Number,
+        T2: Number
+      }]
+    },
+    default: null,
+    required: false
   },
   barrelPlating: {
-    kgBarrel: Number,
-    timer: Number,
-    tankAndGroups: [{
-      model: String,
-      modelId: String,
-      modelKey: String,
-      modelName: String,
-      currentTotal: Number,
-      T1: Number,
-      T2: Number
-    }]
+    type: {
+      kgBarrel: Number,
+      timer: Number,
+      tankAndGroups: [{
+        model: String,
+        modelId: String,
+        modelKey: String,
+        modelName: String,
+        currentTotal: Number,
+        T1: Number,
+        T2: Number
+      }]
+    },
+    default: null,
+    required: false
   }
 }, { _id: false });
 

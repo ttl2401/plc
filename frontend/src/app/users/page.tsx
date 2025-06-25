@@ -222,11 +222,11 @@ const UsersPage: React.FC = () => {
 
   return (
     <div>
-      <Title level={3}>Users</Title>
+      <Title level={3}>DANH SÁCH NGƯỜI DÙNG</Title>
 
       <Flex justify="space-between" style={{ marginBottom: 16 }}>
         <Search
-          placeholder="Search user name or email"
+          placeholder="Nhập tên hoặc email để tìm kiếm"
           onSearch={handleSearch}
           onChange={(e) => setSearchText(e.target.value)}
           value={searchText}

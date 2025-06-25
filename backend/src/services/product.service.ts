@@ -143,4 +143,42 @@ export class ProductService {
     await product.save();
     return product;
   }
+
+  /**
+   * Get all products that have a non-empty settings array, paginated, with search
+   */
+  async getProductsWithSettings(query: QueryOptions): Promise<PaginateResult<IProduct>> {
+    const { page = 1, limit = 10, sort = { createdAt: -1 }, select = '', search, mode, line = 1 } = query;
+
+    const options = {
+      page: Number(page),
+      limit: Number(limit),
+      sort,
+      select,
+    };
+
+    // Filter by line and mode in settings array if provided
+    const elemMatch: any = {};
+    if(mode){
+      elemMatch.mode = mode;
+    }
+    if(line){
+      elemMatch.line = Number(line);
+    }
+    const queryFilters: Record<string, any> = {
+      settings: {
+        $exists: true, $ne: [],
+        $elemMatch: elemMatch
+      }
+    };
+
+    if (search) {
+      queryFilters.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { code: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    return await Product.paginate(queryFilters, options);
+  }
 } 

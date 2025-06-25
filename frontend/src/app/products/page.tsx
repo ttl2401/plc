@@ -236,7 +236,7 @@ const ProductsPage: React.FC = () => {
 
   return (
     <div>
-      <Title level={3}>Sản phẩm</Title>
+      <Title level={3}>DANH SÁCH SẢN PHẨM</Title>
 
       <Flex justify="space-between" style={{ marginBottom: 16 }}>
         <Search

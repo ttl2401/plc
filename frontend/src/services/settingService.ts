@@ -254,4 +254,15 @@ export const updateChemistrySettings = async (payload: { list: ChemistrySetting[
   return response.json();
 };
 
+export async function fetchInformationPlating({ page = 1, limit = 10, search = '', mode = '', line = 1 }) {
+  const params = new URLSearchParams();
+  params.append('page', String(page));
+  params.append('limit', String(limit));
+  if (search) params.append('search', search);
+  if (mode) params.append('mode', mode);
+  if (line) params.append('line', String(line));
+  const res = await fetch(`/api/v1/information/plating?${params.toString()}`);
+  return res.json();
+}
+
 // You can add more settings-related API functions here as needed.

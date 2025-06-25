@@ -7,6 +7,11 @@ export const updateSettingPlatingRules = [
   body('settings.line')
     .isInt({ min: 1 }).withMessage('Line phải là số nguyên lớn hơn 0'),
 
+  body('settings.mode')
+    .isString().withMessage('Mode phải là một chuỗi')
+    .notEmpty().withMessage('Mode không được để trống')
+    .isIn(['rack', 'barrel']).withMessage('Mode phải là "rack" hoặc "barrel"'),
+
   body('settings.rackPlating')
     .isObject().withMessage('rackPlating phải là một object'),
   body('settings.rackPlating.tankAndGroups')

@@ -27,64 +27,64 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
   // Find the setting for the specific line
   let settingForLine = settings.find((s: any) => s.line == line);
 
-  // If settings for the line does not exist, build it
-  if (!settingForLine) {
-    // Helper to resolve model info by key
-    const resolveModel = async (model: string, key: string, mode: string) => {
-      if (model === 'Tanks') {
-        const tank = await Tank.findOne({ key });
-        if (!tank) return null;
-        if (mode === 'rack') {
-          return {
-            model: 'Tanks',
-            modelId: tank._id,
-            modelKey: tank.key,
-            modelName: tank.name,
-            currentJig: 0,
-            currentTotal: 0,
-            T1: 0,
-            T2: 0
-          };
-        } else if (mode === 'barrel') {
-          return {
-            model: 'Tanks',
-            modelId: tank._id,
-            modelKey: tank.key,
-            modelName: tank.name,
-            currentTotal: 0,
-            T1: 0,
-            T2: 0
-          };
-        }
-      } else if (model === 'TankGroups') {
-        const group = await TankGroup.findOne({ key });
-        if (!group) return null;
-        if (mode === 'rack') {
-          return {
-            model: 'TankGroups',
-            modelId: group._id,
-            modelKey: group.key,
-            modelName: group.name,
-            currentJig: 0,
-            currentTotal: 0,
-            T1: 0,
-            T2: 0
-          };
-        } else if (mode === 'barrel') {
-          return {
-            model: 'TankGroups',
-            modelId: group._id,
-            modelKey: group.key,
-            modelName: group.name,
-            currentTotal: 0,
-            T1: 0,
-            T2: 0
-          };
-        }
+  // Helper to resolve model info by key
+  const resolveModel = async (model: string, key: string, mode: string) => {
+    if (model === 'Tanks') {
+      const tank = await Tank.findOne({ key });
+      if (!tank) return null;
+      if (mode === 'rack') {
+        return {
+          model: 'Tanks',
+          modelId: tank._id,
+          modelKey: tank.key,
+          modelName: tank.name,
+          currentJig: 0,
+          currentTotal: 0,
+          T1: 0,
+          T2: 0
+        };
+      } else if (mode === 'barrel') {
+        return {
+          model: 'Tanks',
+          modelId: tank._id,
+          modelKey: tank.key,
+          modelName: tank.name,
+          currentTotal: 0,
+          T1: 0,
+          T2: 0
+        };
       }
-      return null;
-    };
-    
+    } else if (model === 'TankGroups') {
+      const group = await TankGroup.findOne({ key });
+      if (!group) return null;
+      if (mode === 'rack') {
+        return {
+          model: 'TankGroups',
+          modelId: group._id,
+          modelKey: group.key,
+          modelName: group.name,
+          currentJig: 0,
+          currentTotal: 0,
+          T1: 0,
+          T2: 0
+        };
+      } else if (mode === 'barrel') {
+        return {
+          model: 'TankGroups',
+          modelId: group._id,
+          modelKey: group.key,
+          modelName: group.name,
+          currentTotal: 0,
+          T1: 0,
+          T2: 0
+        };
+      }
+    }
+    return null;
+  };
+
+  // If settings for the line does not exist, build it completely
+  if (!settingForLine) {
     const rackTankAndGroups = (await Promise.all(
       ProductSettingDefaultTanks.map(item => resolveModel(item.model, item.key, 'rack'))
     )).filter(Boolean) as any[];
@@ -95,6 +95,7 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
 
     settingForLine = {
       line: line,
+      mode: 'rack', 
       rackPlating: {
         jigCarrier: 0,
         pcsJig: 0,
@@ -107,8 +108,40 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
         tankAndGroups: barrelTankAndGroups
       }
     };
+  } else {
+    if (!settingForLine.rackPlating){
+        // If settingForLine exists, check mode and set defaults for the other plating type
+      const rackTankAndGroups = (await Promise.all(
+        ProductSettingDefaultTanks.map(item => resolveModel(item.model, item.key, 'rack'))
+      )).filter(Boolean) as any[];
+      settingForLine.rackPlating = {
+        jigCarrier: 0,
+        pcsJig: 0,
+        timer: 0,
+        tankAndGroups: rackTankAndGroups
+      }
+    } else if (!settingForLine.barrelPlating){
+      const barrelTankAndGroups = (await Promise.all(
+        ProductSettingDefaultTanks.map(item => resolveModel(item.model, item.key, 'barrel'))
+      )).filter(Boolean) as any[];
+      settingForLine.barrelPlating = {
+        kgBarrel: 0,
+        timer: 0,
+        tankAndGroups: barrelTankAndGroups
+      }
+    }
+
   }
   
   // Return the base product details along with the specific setting for the line
   return settingForLine;
+};
+
+
+export const getSettingList = (data: PaginateResult<IProduct>) => {
+  const products = data.docs.map(product => ({
+    ...product.toObject(),
+    imageUrl: product.image ? `${API_URL}/${product.image}` : '',
+  }));
+  return { ...data, docs: products };
 };

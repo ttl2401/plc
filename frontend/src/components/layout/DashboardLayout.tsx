@@ -13,6 +13,8 @@ import {
   DownOutlined,
   UpOutlined,
   HistoryOutlined,
+  InfoCircleOutlined,
+  BarsOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -59,7 +61,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     {
       key: '/users',
       icon: <TeamOutlined />,
-      label: <Link href="/users">Users</Link>,
+      label: <Link href="/users">Người dùng</Link>,
       meta: { roles: ['admin'] },
     },
     {
@@ -90,10 +92,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       ],
     },
     {
-      key: '/charts',
-      icon: <BarChartOutlined />,
-      label: <Link href="/charts">Charts</Link>,
+      key: '/information',
+      icon: <InfoCircleOutlined />,
+      label: 'Thông tin',
+      children: [
+        {
+          key: '/information/electroplating',
+          label: <Link href="/information/electroplating">Thông tin xi mạ</Link>,
+        },
+        {
+          key: '/information/temperature',
+          label: <Link href="/information/temperature">Thông tin nhiệt độ</Link>,
+        },
+        {
+          key: '/information/timer',
+          label: <Link href="/information/timer">Thông tin thời gian</Link>,
+        }
+      ],
     },
+    
     {
       key: '/lich-su',
       icon: <HistoryOutlined />,
@@ -107,6 +124,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           key: '/bo-sung-hoa-chat',
           label: <Link href="/lich-su/bo-sung-hoa-chat">Lịch Sử Bổ Sung Hóa Chất</Link>,
         },
+      ],
+    },
+
+    {
+      key: '/extend',
+      icon: <BarsOutlined />,
+      label: 'Mở rộng',
+      children: [
+        {
+          key: '/extend/electric-current',
+          label: <Link href="/extend/electric-current">Bảng thông tin dòng điện</Link>,
+        }
       ],
     },
   ];

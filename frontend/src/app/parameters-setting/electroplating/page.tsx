@@ -92,6 +92,11 @@ const ElectroplatingSettingsPage: React.FC = () => {
       setSelectedProduct(prodRes.data);
       setProductSetting(settingRes.data);
       setProductHistory(historyRes.data);
+      
+      // Set runMode based on productSetting.mode
+      if (settingRes.data?.mode) {
+        setRunMode(settingRes.data.mode);
+      }
     } catch (err) {
       message.error("Không thể tải thông tin sản phẩm");
       setSelectedProduct(null);
@@ -129,6 +134,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
       const payload = {
         settings: {
           line: 1,
+          mode: runMode, // Include the current runMode in the payload
           rackPlating: {
             jigCarrier: values.rack_jigCarrier || 0,
             pcsJig: values.rack_pcsJig || 0,
@@ -399,6 +405,17 @@ const ElectroplatingSettingsPage: React.FC = () => {
           </Form>
         </>
       ) : null}
+
+      <style jsx global>{`
+        .ant-input-group .ant-input-search-button {
+          height: 32px!important;
+          padding: 0 10px!important;
+        }
+          .ant-input-group .ant-input-outlined {
+          height: 32px!important;
+        }
+      `}
+      </style>
     </div>
   );
 };
