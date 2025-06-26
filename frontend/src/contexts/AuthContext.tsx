@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = Cookies.get('auth_token');
         if (token) {
           // Use the service function to fetch user profile
-          const profileResponse = await fetchUserProfile(token);
+          const profileResponse = await fetchUserProfile();
           if (profileResponse.success) {
             setUser(profileResponse.data);
           } else {
