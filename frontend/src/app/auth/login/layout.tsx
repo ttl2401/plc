@@ -12,9 +12,7 @@ export default function LoginLayout({
     <ThemeProvider attribute="class" defaultTheme="light">
       <ConfigProvider>
         <AntdApp>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+            {children} 
         </AntdApp>
       </ConfigProvider>
     </ThemeProvider>

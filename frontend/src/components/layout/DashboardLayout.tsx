@@ -59,15 +59,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       meta: { roles: ['admin', 'manager'] },
     },
     {
-      key: '/users',
-      icon: <TeamOutlined />,
-      label: <Link href="/users">Người dùng</Link>,
-      meta: { roles: ['admin'] },
-    },
-    {
       key: '/parameters-setting',
       icon: <BarChartOutlined />,
       label: 'Cài đặt thông số',
+      meta: { roles: ['admin', 'manager'] },
       children: [
         {
           key: '/parameters-setting/electroplating',
@@ -95,6 +90,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       key: '/information',
       icon: <InfoCircleOutlined />,
       label: 'Thông tin',
+      meta: { roles: ['admin', 'manager'] },
       children: [
         {
           key: '/information/electroplating',
@@ -147,6 +143,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       label: <Link href="/profile">Profile</Link>,
     },
     {
+      key: '/users',
+      icon: <TeamOutlined />,
+      label: <Link href="/users">Người dùng</Link>,
+      meta: { roles: ['admin'] },
+    },
+    {
       key: 'settings',
       icon: <SettingOutlined />,
       label: <Link href="/settings">Settings</Link>,
@@ -163,6 +165,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   ];
 
   const filteredMainMenuItems = mainMenuItems.filter(item => {
+    if (!item.meta || !item.meta.roles) {
+      return true;
+    }
+    return user && item.meta.roles.includes(user.role);
+  });
+
+  const filteredUserDropdownItems = userDropdownItems.filter(item => {
     if (!item.meta || !item.meta.roles) {
       return true;
     }
@@ -198,7 +207,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
         {user && (
           <Dropdown
-            menu={{ items: userDropdownItems }}
+            menu={{ items: filteredUserDropdownItems }}
             trigger={['click']}
             onOpenChange={setDropdownOpen}
             open={dropdownOpen}
