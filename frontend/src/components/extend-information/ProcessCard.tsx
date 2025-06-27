@@ -1,24 +1,43 @@
-
 import React from 'react';
 import { Thermometer, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface ProcessCardProps {
   title: string;
-  value: number;
+  value?: number;
   target: number;
   unit: string;
-  status: 'normal' | 'low' | 'high';
+  status?: 'normal' | 'low' | 'high';
   type: 'temperature' | 'electrical';
 }
 
 const ProcessCard: React.FC<ProcessCardProps> = ({ 
   title, 
-  value, 
+  value: propValue, 
   target, 
   unit, 
-  status, 
+  status: propStatus, 
   type 
 }) => {
+  const [value, setValue] = useState<number>(
+    typeof propValue === 'number' ? propValue : randomValue()
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setValue(randomValue());
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  function randomValue() {
+    return Math.round((Math.random() * (55 - 38) + 38) * 10) / 10;
+  }
+
+  let status: 'normal' | 'low' | 'high' = 'normal';
+  if (value > 51) status = 'high';
+  else if (value < 47) status = 'low';
+
   const getStatusColor = () => {
     switch (status) {
       case 'high': return 'text-red-500';
