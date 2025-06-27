@@ -58,7 +58,7 @@ const TemperatureSettingsPage: React.FC = () => {
   if (loading) return <div className="flex justify-center items-center h-96"><Spin size="large" /></div>;
 
   return (
-    <div className="p-8 pt-0">
+    <div className="pt-0">
       <Title level={3} className="mb-6">CÀI ĐẶT THÔNG SỐ NHIỆT ĐỘ</Title>
       <Card className="bg-white p-8 rounded-lg shadow-md">
         <Form

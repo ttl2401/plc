@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { fetchProducts, fetchProductById } from "@/services/productService";
 import { fetchProductSetting, updateProductSetting, fetchProductSettingChanges } from "@/services/settingService";
-import { Input, AutoComplete, Card, Typography, Spin, Row, Col, message, Radio, Image, Descriptions, Form, Button } from "antd";
+import { Input, Card, Typography, Spin, Row, Col, message, Radio, Image, Descriptions, Form, Button } from "antd";
 
 const { Title } = Typography;
+const { Search } = Input;
 
 const ElectroplatingSettingsPage: React.FC = () => {
   const [search, setSearch] = useState("");
-  const [options, setOptions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [productSetting, setProductSetting] = useState<any>(null);
@@ -17,7 +17,6 @@ const ElectroplatingSettingsPage: React.FC = () => {
   const [infoLoading, setInfoLoading] = useState(false);
   const [runMode, setRunMode] = useState<'rack' | 'barrel'>('rack');
   const [form] = Form.useForm();
-  const [productIdToCode, setProductIdToCode] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (productSetting) {
@@ -44,56 +43,38 @@ const ElectroplatingSettingsPage: React.FC = () => {
     }
   }, [productSetting, form]);
 
-  // Handle search input change
+  // New search handler
   const handleSearch = async (value: string) => {
     setSearch(value);
     if (!value || value.length < 2) {
-      setOptions([]);
+      setSelectedProduct(null);
+      setProductSetting(null);
+      setProductHistory([]);
       return;
     }
     setLoading(true);
-    try {
-      const res = await fetchProducts(1, 10, value);
-      const idToCode: Record<string, string> = {};
-      const opts = res.data.map((prod: any) => {
-        idToCode[prod._id] = prod.code;
-        return {
-          value: prod._id,
-          label: (
-            <div className="flex flex-row items-center gap-2">
-              <span>{prod.name}</span>
-              <span className="text-gray-400 text-xs">({prod.code})</span>
-            </div>
-          ),
-        };
-      });
-      setOptions(opts);
-      setProductIdToCode(idToCode);
-    } catch (err) {
-      message.error("Không thể tìm sản phẩm");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle product selection
-  const handleSelect = async (productId: string) => {
-    // Set the search input to the product code
-    if (productIdToCode[productId]) {
-      setSearch(productIdToCode[productId]);
-    }
     setInfoLoading(true);
     try {
+      // Try to find product by code or name
+      const res = await fetchProducts(1, 1, value);
+      if (!res.data || res.data.length === 0) {
+        message.error("Không tìm thấy sản phẩm phù hợp");
+        setSelectedProduct(null);
+        setProductSetting(null);
+        setProductHistory([]);
+        setLoading(false);
+        setInfoLoading(false);
+        return;
+      }
+      const product = res.data[0];
       const [prodRes, settingRes, historyRes] = await Promise.all([
-        fetchProductById(productId),
-        fetchProductSetting(productId, 1),
-        fetchProductSettingChanges(productId),
+        fetchProductById(product._id),
+        fetchProductSetting(product._id, 1),
+        fetchProductSettingChanges(product._id),
       ]);
       setSelectedProduct(prodRes.data);
       setProductSetting(settingRes.data);
       setProductHistory(historyRes.data);
-      
-      // Set runMode based on productSetting.mode
       if (settingRes.data?.mode) {
         setRunMode(settingRes.data.mode);
       }
@@ -103,6 +84,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
       setProductSetting(null);
       setProductHistory([]);
     } finally {
+      setLoading(false);
       setInfoLoading(false);
     }
   };
@@ -151,7 +133,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
       const res = await updateProductSetting(selectedProduct._id, payload);
       if (res.success) {
         message.success('Áp dụng thành công!');
-        handleSelect(selectedProduct._id)
+        handleSearch(search);
       } else {
         message.error(res.message || 'Có lỗi xảy ra khi áp dụng.');
       }
@@ -185,19 +167,17 @@ const ElectroplatingSettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-8 pt-0">
+    <div className="pt-0">
       <Title level={3} className="mb-6">CÀI ĐẶT THÔNG SỐ XI MẠ</Title>
-      <AutoComplete
-          options={options}
-          style={{ width: 400, marginBottom: "24px" }}
-          onSearch={handleSearch}
-          onSelect={handleSelect}
-          placeholder="Nhập mã sản phẩm hoặc tên sản phẩm để tìm kiếm"
-          notFoundContent={loading ? <Spin size="small" /> : null}
-          value={search}
-        >
-          <Input.Search size="large" enterButton allowClear />
-      </AutoComplete>
+      <Search
+        placeholder="Nhập mã sản phẩm hoặc tên sản phẩm để tìm kiếm"
+        onSearch={handleSearch}
+        onChange={e => setSearch(e.target.value)}
+        value={search}
+        allowClear
+        loading={loading}
+        style={{ width: 350, marginBottom: "24px" }}
+      />
       
       {infoLoading ? (
         <div className="flex justify-center items-center h-60">
@@ -406,16 +386,6 @@ const ElectroplatingSettingsPage: React.FC = () => {
         </>
       ) : null}
 
-      <style jsx global>{`
-        .ant-input-group .ant-input-search-button {
-          height: 32px!important;
-          padding: 0 10px!important;
-        }
-          .ant-input-group .ant-input-outlined {
-          height: 32px!important;
-        }
-      `}
-      </style>
     </div>
   );
 };

@@ -129,7 +129,7 @@ const ChemistrySettingsPage: React.FC = () => {
   const maxRows = Math.max(leftTanks.length, rightTanks.length);
 
   return (
-    <div className="p-8 pt-0">
+    <div className="pt-0">
       <Title level={3} className="mb-6">CÀI ĐẶT BỔ SUNG HÓA CHẤT LỎNG</Title>
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         <div className="grid grid-cols-2 gap-8">

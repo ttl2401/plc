@@ -209,7 +209,7 @@ const InformationElectroplatingPage: React.FC = () => {
   ];
 
   return (
-    <div className="p-8 pt-0">
+    <div className="pt-0">
       <Title level={3} className="mb-6">THÔNG TIN XI MẠ</Title>
       <div className="flex flex-row justify-between items-center mb-4">
         <Search
