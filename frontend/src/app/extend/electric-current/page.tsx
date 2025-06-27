@@ -2,10 +2,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Sidebar from '@/components/loveappComponents/components/Sidebar';
-import ProcessCard from '@/components/loveappComponents/components/ProcessCard';
-import AlertBanner from '@/components/loveappComponents/components/AlertBanner';
-import StatusIndicator from '@/components/loveappComponents/components/StatusIndicator';
+import Sidebar from '@/components/extend-information/Sidebar';
+import ProcessCard from '@/components/extend-information/ProcessCard';
+import AlertBanner from '@/components/extend-information/AlertBanner';
+import StatusIndicator from '@/components/extend-information/StatusIndicator';
 import { Thermometer, Zap } from 'lucide-react';
 
 const Index = () => {

@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const hideMenuRoutes = ["/auth/login", "/auth/register"];
+  const hideMenuRoutes = ["/auth/login", "/auth/register", "/extend/electric-current"];
   const hideMenu = hideMenuRoutes.includes(pathname);
 
   if (hideMenu) return <>{children}</>;

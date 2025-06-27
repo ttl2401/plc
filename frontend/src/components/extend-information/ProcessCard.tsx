@@ -36,14 +36,14 @@ const ProcessCard: React.FC<ProcessCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-md border">
+    <div className="bg-white rounded-lg p-3 shadow-md border">
       <div className="bg-slate-700 text-white px-3 py-2 rounded-md text-sm font-medium mb-3 text-center">
         {title}
       </div>
       
       <div className="flex items-center justify-between">
         <div className="flex-1 text-center">
-          <div className={`text-3xl font-bold ${getStatusColor()}`}>
+          <div className={`text-2xl font-bold ${getStatusColor()}`}>
             {value}
           </div>
           {status !== 'normal' && (
