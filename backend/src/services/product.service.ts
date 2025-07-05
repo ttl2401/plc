@@ -148,13 +148,14 @@ export class ProductService {
    * Get all products that have a non-empty settings array, paginated, with search
    */
   async getProductsWithSettings(query: QueryOptions): Promise<PaginateResult<IProduct>> {
-    const { page = 1, limit = 10, sort = { createdAt: -1 }, select = '', search, mode, line = 1 } = query;
+    const { page = 1, limit, sort = { createdAt: -1 }, select = '', search, mode, line = 1 } = query;
 
     const options = {
       page: Number(page),
-      limit: Number(limit),
+      limit,
       sort,
       select,
+      pagination: limit === 0 ? false : true
     };
 
     // Filter by line and mode in settings array if provided

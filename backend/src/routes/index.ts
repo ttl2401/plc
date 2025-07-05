@@ -6,6 +6,7 @@ import uploadRoutes from './upload.routes';
 import productRoutes from './product.routes';
 import settingRoutes from './setting.routes';
 import informationRoutes from './information.routes';
+import testRoutes from './test.routes';
 
 const router = express.Router();
 
@@ -13,8 +14,10 @@ router.use(userRoutes);
 router.use(authRoutes);
 router.use(userActivitiesRoutes);
 router.use(uploadRoutes);
-router.use(productRoutes);
+
 router.use(settingRoutes);
 router.use(informationRoutes);
+router.use(testRoutes);
+router.use(productRoutes);
 
 export default router; 

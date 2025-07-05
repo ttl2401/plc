@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Typography, message, Input, Button, Space, Image, Select } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
-import { fetchInformationPlating } from '@/services/informationService';
+import { fetchInformationPlating, handleExportExcel } from '@/services/informationService';
 import { ExportOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
@@ -18,6 +18,7 @@ const modeOptions = [
 const InformationElectroplatingPage: React.FC = () => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const [pagination, setPagination] = useState({
     totalDocs: 0,
     limit: 10,
@@ -79,6 +80,23 @@ const InformationElectroplatingPage: React.FC = () => {
     setMode(value);
     setPagination(prev => ({ ...prev, page: 1 }));
     loadData(1, pagination.limit, searchText, value);
+  };
+
+  const handleExportClick = async () => {
+    setExportLoading(true);
+    try {
+      await handleExportExcel({ 
+        line: 1, // Default line, you can make this configurable
+        mode: mode || '', 
+        limit: 0 // 0 means all data
+      });
+      message.success('Xuất Excel thành công!');
+    } catch (error) {
+      console.error('Export error:', error);
+      message.error('Không thể xuất Excel. Vui lòng thử lại!');
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   // Helper to render plating columns
@@ -225,7 +243,14 @@ const InformationElectroplatingPage: React.FC = () => {
             onChange={handleModeChange}
             style={{ width: 180 }}
           />
-          <Button icon={<ExportOutlined />} type="default">Xuất Excel</Button>
+          <Button 
+            icon={<ExportOutlined />} 
+            type="default" 
+            loading={exportLoading}
+            onClick={handleExportClick}
+          >
+            Xuất Excel
+          </Button>
         </div>
       </div>
       <Table

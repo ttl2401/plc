@@ -16,4 +16,25 @@ export const closeInfluxDB = async () => {
   } catch (error) {
     console.error('Error closing InfluxDB connection:', error);
   }
+};
+
+export const checkInfluxDB = async () => {
+  try {
+    // Try a simple query to check InfluxDB health
+    const fluxQuery = `buckets() |> limit(n:1)`;
+    await new Promise<void>((resolve, reject) => {
+      queryApi.queryRows(fluxQuery, {
+        next() {},
+        error(error) {
+          reject(error);
+        },
+        complete() {
+          resolve();
+        },
+      });
+    });
+    console.log('InfluxDB connected successfully');
+  } catch (error) {
+    console.error('Error connecting to InfluxDB:', error);
+  }
 }; 
