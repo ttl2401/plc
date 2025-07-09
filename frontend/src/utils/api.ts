@@ -33,3 +33,10 @@ export const authenticatedFetch = async (url: string, options?: RequestInit) => 
 
   return response;
 };
+
+// i18n translation loader
+export async function loadTranslations(lang: string): Promise<Record<string, string>> {
+  const res = await fetch(`/locales/${lang}.json`);
+  if (!res.ok) throw new Error('Failed to load translations');
+  return res.json();
+}

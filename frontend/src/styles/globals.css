@@ -57,3 +57,58 @@ body { /* Added rule to remove default body margin */
   color: white !important;
   opacity: 0.9;
 } 
+
+/* Language dropdown custom styles */
+.lang-dropdown-root {
+  position: relative;
+}
+.lang-dropdown-btn {
+  display: flex;
+  align-items: center;
+  background: #001532;
+  border: none;
+  border-radius: 24px;
+  padding: 6px 18px 6px 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+  cursor: pointer;
+  min-width: 80px;
+  transition: box-shadow 0.2s;
+}
+.lang-dropdown-btn.open,
+.lang-dropdown-btn:focus {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.lang-dropdown-list {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  min-width: 180px;
+  z-index: 1000;
+  padding: 8px 0;
+}
+.lang-dropdown-list > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6b7280;
+  background: transparent;
+  font-size: 17px;
+  transition: background 0.15s, color 0.15s;
+}
+.lang-dropdown-list > div:hover {
+  background: #f3f4f6;
+  color: #001532;
+}
+.lang-dropdown-list > div[style*='font-weight: 700'] {
+  color: #001532;
+  background: rgba(255, 230, 0, 0.08);
+  font-weight: 700;
+} 

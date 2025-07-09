@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
 import { Layout, Menu, theme, Dropdown, Space, Avatar, Typography } from 'antd';
 import {
   DashboardOutlined,
@@ -20,6 +20,58 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { loadTranslations } from '@/utils/api';
+
+// Add at the top, after imports
+import Image from 'next/image';
+import { Menu as AntMenu } from 'antd';
+import Cookies from 'js-cookie';
+
+// Language context for i18n
+const LanguageContext = createContext({
+  lang: 'en',
+  setLang: (lang: string) => {},
+  t: (key: string) => key,
+});
+
+export const useLanguage = () => useContext(LanguageContext);
+
+const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
+  const [lang, setLang] = useState('en');
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+
+  // On mount, set lang from cookie if present, and always load translations for current lang
+  useEffect(() => {
+    const cookieLang = Cookies.get('lang');
+    const initialLang = cookieLang || lang;
+    setLang(initialLang);
+    loadTranslations(initialLang).then(setTranslations).catch(() => setTranslations({}));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // When lang changes (by user), load translations
+  useEffect(() => {
+    loadTranslations(lang).then(setTranslations).catch(() => setTranslations({}));
+  }, [lang]);
+
+  const t = (key: string) => translations[key] || key;
+
+  // Wrap setLang to also set cookie and update translations immediately
+  const setLangAndCookie = (newLang: string) => {
+    Cookies.set('lang', newLang, { expires: 365 });
+    setLang((prev) => {
+      if (prev !== newLang) {
+        loadTranslations(newLang).then(setTranslations).catch(() => setTranslations({}));
+      }
+      return newLang;
+    });
+  };
+  return (
+    <LanguageContext.Provider value={{ lang, setLang: setLangAndCookie, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -32,7 +84,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { lang, setLang, t } = useLanguage();
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -55,7 +109,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     {
       key: '/products',
       icon: <ShoppingCartOutlined />,
-      label: <Link href="/products">Sản Phẩm</Link>,
+      label: <Link href="/products">{t('product')}</Link>,
       meta: { roles: ['admin', 'manager'] },
     },
     {
@@ -178,6 +232,49 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return user && item.meta.roles.includes(user.role);
   });
 
+  const LANGUAGES = [
+    {
+      code: 'en',
+      label: 'English',
+      short: 'EN',
+      flag: '/flags/uk.svg',
+    },
+    {
+      code: 'vi',
+      label: 'Vietnamese',
+      short: 'VI',
+      flag: '/flags/vn.svg',
+    },
+  ];
+
+  const languageMenuItems = LANGUAGES.map((l) => ({
+    key: l.code,
+    icon: (
+      <Image
+        src={l.flag}
+        alt={l.label}
+        width={24}
+        height={24}
+        style={{ borderRadius: '50%', background: 'white' }}
+      />
+    ),
+    label: (
+      <span
+        style={{
+          fontWeight: lang === l.code ? 700 : 400,
+          color: lang === l.code ? '#001532' : '#000000',
+          fontSize: 14,
+        }}
+      >
+        {l.label}
+      </span>
+    ),
+    onClick: () => setLang(l.code),
+    style: lang === l.code
+      ? { background: 'rgba(255,230,0,0.09)' }
+      : {},
+  }));
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header
@@ -204,23 +301,62 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             }}
           />
         </div>
-
-        {user && (
+        {/* Language dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 0, position: 'relative' }}>
           <Dropdown
-            menu={{ items: filteredUserDropdownItems }}
             trigger={['click']}
-            onOpenChange={setDropdownOpen}
-            open={dropdownOpen}
+            open={langDropdownOpen}
+            
+            onOpenChange={(open) => {
+              setLangDropdownOpen(open);
+              if (open) setUserDropdownOpen(false);
+            }}
+            menu={{ items: languageMenuItems }}
           >
-            <a onClick={(e) => e.preventDefault()}>
-              <Space style={{ color: 'white', marginLeft: 20, cursor: 'pointer' }}>
-                <Avatar icon={<UserOutlined />} />
-                <Text style={{ color: 'white' }}>{user.name}</Text>
-                {dropdownOpen ? <UpOutlined /> : <DownOutlined />}
-              </Space>
-            </a>
+            <button
+              className={`lang-dropdown-btn${langDropdownOpen ? ' open' : ''}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: '#001532',
+                border: 'none',
+                color: 'white',
+                padding: '0 0 0 8px',
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: 'pointer',
+                boxShadow: langDropdownOpen ? '0 2px 8px rgba(0,0,0,0.12)' : 'none',
+                outline: 'none',
+                height: '100%'
+           
+              }}
+              type="button"
+            >
+              <Image src={LANGUAGES.find(l => l.code === lang)?.flag || ''} alt={lang} width={24} height={24} style={{ borderRadius: '50%', marginRight: 8 }} />
+              <span style={{ fontSize: 10 }}>{langDropdownOpen ? <UpOutlined /> : <DownOutlined />}</span>
+            </button>
           </Dropdown>
-        )}
+          {user && (
+            <Dropdown
+              menu={{ items: filteredUserDropdownItems }}
+              trigger={['click']}
+              
+              onOpenChange={(open) => {
+                setUserDropdownOpen(open);
+                if (open) setLangDropdownOpen(false);
+              }}
+              open={userDropdownOpen}
+            >
+              <a onClick={(e) => e.preventDefault()}>
+                <Space style={{ color: 'white', marginLeft: 0, cursor: 'pointer' }}>
+                  <Avatar icon={<UserOutlined />} />
+                  <Text style={{ color: 'white' }}>{user.name}</Text>
+                  {userDropdownOpen ? <UpOutlined style={{ fontSize: 10 }}/> : <DownOutlined style={{ fontSize: 10 }}/>} 
+                </Space>
+              </a>
+            </Dropdown>
+          )}
+        </div>
       </Header>
 
       <Layout>
@@ -241,4 +377,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   );
 };
 
-export default DashboardLayout; 
+// Wrap the layout with LanguageProvider
+export default function DashboardLayoutWithProvider(props: DashboardLayoutProps) {
+  return (
+    <LanguageProvider>
+      <DashboardLayout {...props} />
+    </LanguageProvider>
+  );
+} 

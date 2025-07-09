@@ -318,7 +318,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
                 <span className="text-xl font-bold">Nạp Timer</span>
                 <span className="ml-8 font-semibold">Nickel Plating (600-3600)</span>
                 <Form.Item name="rack_timer" className="mb-0 ml-2">
-                  <Input type="number" min={0} className="w-32 h-10 text-center" />
+                  <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" />
                 </Form.Item>
                 <div className="flex-1 flex justify-end">
                   <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">Áp dụng</Button>

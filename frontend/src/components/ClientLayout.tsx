@@ -1,7 +1,7 @@
 // components/ClientLayout.tsx
 "use client";
 import { usePathname } from "next/navigation";
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import DashboardLayoutWithProvider from "@/components/layout/DashboardLayout";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -9,5 +9,5 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const hideMenu = hideMenuRoutes.includes(pathname);
 
   if (hideMenu) return <>{children}</>;
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return <DashboardLayoutWithProvider>{children}</DashboardLayoutWithProvider>;
 }

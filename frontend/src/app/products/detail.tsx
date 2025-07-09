@@ -199,7 +199,7 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
               label="Mã sản phẩm"
               rules={[{ required: true, message: 'Vui lòng nhập mã sản phẩm' }]}
             >
-              <Input placeholder="Nhập mã sản phẩm" onChange={handleCodeChange} disabled={!formEditable} />
+              <Input placeholder="Nhập mã sản phẩm" onChange={handleCodeChange} disabled={!!productId} />
             </Form.Item>
 
             <Form.Item
