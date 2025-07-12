@@ -4,6 +4,7 @@
   "main": "dist/index.js",
   "scripts": {
     "migrate": "ts-node src/migrations/index.ts",
+    "faker": "ts-node src/faker/index.ts",
     "start": "node -r module-alias/register dist/index.js",
     "dev": "nodemon -r ts-node/register/transpile-only -r module-alias/register src/index.ts",
     "build": "tsc",

@@ -7,7 +7,7 @@ export const influxDB = new InfluxDB({
 });
 
 export const queryApi = influxDB.getQueryApi(INFLUXDB.ORG);
-export const writeApi = influxDB.getWriteApi(INFLUXDB.ORG, INFLUXDB.BUCKET, 'ns');
+export const writeApi = influxDB.getWriteApi(INFLUXDB.ORG, INFLUXDB.BUCKET, 's');
 
 export const closeInfluxDB = async () => {
   try {
