@@ -354,6 +354,26 @@ export const getInformationTimer = async (
   }
 };
 
+export const getInformationTimerDetail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { code } = req.params;
+    if (!code) {
+      return res.status(400).json(returnError(new Error('Missing code parameter')));
+    }
+    const data = await timerService.getInformationTimer([code]);
+    if (!data || data.length === 0) {
+      return res.status(404).json(returnError(new Error('No timer information found for this code')));
+    }
+    return res.status(200).json(returnMessage(data[0], 'Fetched timer information detail successfully'));
+  } catch (error) {
+    return res.status(500).json(returnError(error as Error));
+  }
+};
+
 
 export const downloadInformationTimer = async (
   req: Request,
@@ -361,17 +381,38 @@ export const downloadInformationTimer = async (
   next: NextFunction
 ) => {
   try {
-    const { line = 1, search = '' } = req.query;
-    // Get all products matching search and line (no limit)
-    const result = await productService.getProductsWithSettings({
-      page: 1,
-      limit: 0, // 0 to get all data
-      line: Number(line),
-      search: search as string,
-    });
-    const codesArray = result.docs.map((product) => product.code);
-    const data = await temperatureService.getInformationTemperature(codesArray);
+    const { line = 1, search = '', from, to, tank } = req.query;
+    let codesArray: any[] = [];
+    let data: any[] = [];
 
+    // If filtering by Influx (from, to, tank)
+    if (from || to || tank) {
+      // Convert from/to to numbers if present
+      const fromNum = from ? Number(from) : undefined;
+      const toNum = to ? Number(to) : undefined;
+      // Get all codes matching filter (no pagination)
+      const influxResult = await timerService.getProductCodesFromInflux({
+        from: fromNum,
+        to: toNum,
+        tank: typeof tank === 'string' ? tank : undefined,
+        page: 1,
+        limit: 0, // 0 = all
+        search: typeof search === 'string' ? search : undefined,
+      });
+      codesArray = influxResult.result.map((item: any) => item.code);
+      data = await timerService.getInformationTimer(codesArray);
+    } else {
+      // Get all products matching search/line (no pagination)
+      const result = await productService.getProductsWithSettings({
+        page: 1,
+        limit: 0,
+        line: Number(line),
+        search: search as string,
+      });
+      codesArray = result.docs.map((product) => product.code);
+      data = await timerService.getInformationTimer(codesArray);
+    }
+    
     // Tank order and labels must match frontend
     const tankOrder = [
       "washing",
@@ -402,34 +443,25 @@ export const downloadInformationTimer = async (
       { header: 'Giờ vào', key: 'gio_vao', width: 12 },
       { header: 'Giờ ra', key: 'gio_ra', width: 12 },
     ];
-    // Tank columns: each tank has children (oC, A, Slot as appropriate)
+    // Tank columns: each tank has children (Vào, Trong, Slot as appropriate)
     const tankColumns = tankOrder.flatMap((tank) => {
-      if (tank === 'electro_degreasing' || tank === 'nickel_plating') {
+      if (["electro_degreasing", "nickel_plating", "dryer"].includes(tank)) {
         return [
-          { header: `${tankLabels[tank]} - oC`, key: `${tank}_temperature`, width: 10 },
-          { header: `${tankLabels[tank]} - A`, key: `${tank}_ampere`, width: 10 },
-          { header: `${tankLabels[tank]} - Slot`, key: `${tank}_slot`, width: 8 },
-        ];
-      } else if (tank === 'pre_nickel_plating') {
-        return [
-          { header: `${tankLabels[tank]} - oC`, key: `${tank}_temperature`, width: 10 },
-          { header: `${tankLabels[tank]} - A`, key: `${tank}_ampere`, width: 10 },
-        ];
-      } else if (tank === 'dryer') {
-        return [
-          { header: `${tankLabels[tank]} - oC`, key: `${tank}_temperature`, width: 10 },
+          { header: `${tankLabels[tank]} - Vào`, key: `${tank}_vao`, width: 10 },
+          { header: `${tankLabels[tank]} - Trong`, key: `${tank}_trong`, width: 10 },
           { header: `${tankLabels[tank]} - Slot`, key: `${tank}_slot`, width: 8 },
         ];
       } else {
         return [
-          { header: `${tankLabels[tank]} - oC`, key: `${tank}_temperature`, width: 10 },
+          { header: `${tankLabels[tank]} - Vào`, key: `${tank}_vao`, width: 10 },
+          { header: `${tankLabels[tank]} - Trong`, key: `${tank}_trong`, width: 10 },
         ];
       }
     });
     const worksheetColumns = [...baseColumns, ...tankColumns];
 
     const workbook = new exceljs.Workbook();
-    const worksheet = workbook.addWorksheet('Information Temperature');
+    const worksheet = workbook.addWorksheet('Information Timer');
     worksheet.columns = worksheetColumns;
 
     // Add rows
@@ -445,18 +477,13 @@ export const downloadInformationTimer = async (
       };
       for (const tank of tankOrder) {
         const tankInfo = item.tanks.find((t: any) => t.name === tank) || {};
-        if (tank === 'electro_degreasing' || tank === 'nickel_plating') {
-          row[`${tank}_temperature`] = tankInfo.temperature ?? '-';
-          row[`${tank}_ampere`] = tankInfo.ampere ?? '-';
-          row[`${tank}_slot`] = tankInfo.slot ?? '-';
-        } else if (tank === 'pre_nickel_plating') {
-          row[`${tank}_temperature`] = tankInfo.temperature ?? '-';
-          row[`${tank}_ampere`] = tankInfo.ampere ?? '-';
-        } else if (tank === 'dryer') {
-          row[`${tank}_temperature`] = tankInfo.temperature ?? '-';
+        if (["electro_degreasing", "nickel_plating", "dryer"].includes(tank)) {
+          row[`${tank}_vao`] = tankInfo.timeIn ? dayjs.unix(tankInfo.timeIn).format('HH:mm:ss') : '-';
+          row[`${tank}_trong`] = tankInfo.timeIn && tankInfo.timeOut ? (tankInfo.timeOut - tankInfo.timeIn) : '-';
           row[`${tank}_slot`] = tankInfo.slot ?? '-';
         } else {
-          row[`${tank}_temperature`] = tankInfo.temperature ?? '-';
+          row[`${tank}_vao`] = tankInfo.timeIn ? dayjs.unix(tankInfo.timeIn).format('HH:mm:ss') : '-';
+          row[`${tank}_trong`] = tankInfo.timeIn && tankInfo.timeOut ? (tankInfo.timeOut - tankInfo.timeIn) : '-';
         }
       }
       worksheet.addRow(row);
@@ -469,7 +496,7 @@ export const downloadInformationTimer = async (
     );
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename=' + 'information-temperature.xlsx'
+      'attachment; filename=' + 'information-timer.xlsx'
     );
 
     await workbook.xlsx.write(res);

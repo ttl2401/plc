@@ -8,6 +8,7 @@ import { ExportOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { getTankGroup, TankGroup } from "@/services/resourceService";
 import moment from "moment";
+import { useRouter } from "next/navigation";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -65,6 +66,7 @@ const InformationTimerPage: React.FC = () => {
   const [tankGroups, setTankGroups] = useState<TankGroup[]>([]);
   const [selectedTank, setSelectedTank] = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<[moment.Moment | null, moment.Moment | null] | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     getTankGroup().then(res => setTankGroups(res.data)).catch(() => setTankGroups([]));
@@ -297,6 +299,10 @@ const InformationTimerPage: React.FC = () => {
         onChange={handleTableChange}
         bordered
         scroll={{ x: 'max-content' }}
+        onRow={(record) => ({
+          onClick: () => router.push(`/information/timer/${record.code}`),
+          style: { cursor: 'pointer' },
+        })}
       />
       <style jsx global>{`
         table th {

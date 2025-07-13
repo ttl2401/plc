@@ -131,8 +131,13 @@ export class TimerService {
     // 3. Phân trang
     codeArr.sort((a, b) => a.timeIn - b.timeIn);
     const total = codeArr.length;
-    const start = (page - 1) * limit;
-    const paged = codeArr.slice(start, start + limit);
+    let paged: typeof codeArr;
+    if (!limit || limit === 0) {
+      paged = codeArr; // Lấy hết
+    } else {
+      const start = (page - 1) * limit;
+      paged = codeArr.slice(start, start + limit);
+    }
     const pagedCodes = paged.map((c) => c.code);
   
     // 4. Query tất cả tanks của các code này

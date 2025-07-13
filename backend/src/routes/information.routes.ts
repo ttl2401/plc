@@ -8,7 +8,8 @@ import {
     getInformationTemperature,
     downloadInformationTemperature,
     getInformationTimer,
-    downloadInformationTimer
+    downloadInformationTimer,
+    getInformationTimerDetail
 } from '@/controllers/information.controller';
 
 
@@ -32,7 +33,7 @@ router.route('/information/timer')
 .get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTimer);
 // Route for downloading temperature information as Excel 
 router.get('/information/timer/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadInformationTimer);
-
-
+// timer information detail for each code
+router.get('/information/timer/:code', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTimerDetail);
 
 export default router; 

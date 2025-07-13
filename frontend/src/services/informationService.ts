@@ -290,3 +290,22 @@ export const handleExportExcelTimer = async ({ line = 1, search = '', from = '',
     throw error;
   }
 }; 
+
+export interface FetchInformationTimerDetailResponse {
+  success: boolean;
+  message: string;
+  data: InformationTimer;
+}
+
+export const fetchInformationTimerDetail = async (code: string): Promise<FetchInformationTimerDetailResponse> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/information/timer/${code}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.json();
+}; 
