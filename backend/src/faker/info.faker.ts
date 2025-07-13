@@ -151,7 +151,7 @@ const faker = async (): Promise<Boolean> => {
               .tag('code', code)
               .tag('tank', tank.name);
         
-            const timeIn = moment().unix();
+            const timeIn = Number(moment().unix());
             point.intField('timeIn', timeIn);
         
             // ➕ Sinh giá trị random theo range
@@ -170,7 +170,7 @@ const faker = async (): Promise<Boolean> => {
         
             await sleep(5); // Giả lập thời gian thực
         
-            const timeOut = moment().unix();
+            const timeOut = Number(moment().unix());
             point.intField('timeOut', timeOut);
         
             writeApi.writePoint(point);

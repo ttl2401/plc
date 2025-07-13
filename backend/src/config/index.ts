@@ -23,7 +23,7 @@ export const INFLUXDB = {
   URL: process.env.INFLUX_URL || 'http://localhost:8086',
   TOKEN: process.env.INFLUX_TOKEN || '',
   ORG: process.env.INFLUX_ORG || 'xima',
-  BUCKET: process.env.INFLUX_BUCKET || 'plc-data',
+  BUCKET: process.env.INFLUX_BUCKET || 'plc-influx',
 };
 
 // JWT configuration

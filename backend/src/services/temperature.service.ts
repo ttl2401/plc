@@ -15,7 +15,7 @@ export class TemperatureService {
     const codeFilter = codes.map(code => `r.code == "${code}"`).join(' or ');
     // Use time or default to -1d
     const range = time ? `|> range(start: ${time})` : '|> range(start: -1d)';
-    const fluxQuery = `from(bucket: "${process.env.INFLUX_BUCKET || 'plc-data'}")
+    const fluxQuery = `from(bucket: "${process.env.INFLUX_BUCKET || 'plc-influx'}")
       ${range}
       |> filter(fn: (r) => r._measurement == "temperature" and (${codeFilter}))
       |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")`;

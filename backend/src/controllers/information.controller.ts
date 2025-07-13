@@ -299,16 +299,55 @@ export const getInformationTimer = async (
 ) => {
   try {
     const { page = 1, limit = 10, line = 1, search = '', from, to, tank } = req.query;
-    const result = await productService.getProductsWithSettings({
-      page: Number(page),
-      limit: Number(limit),
-      search,
-      line
-    });
-    const codesArray = result.docs.map((product) => product.code);
-    const data = await timerService.getInformationTimer(codesArray);
 
-    result.docs = data;
+    let result;
+    let codesArray: any[] = [];
+
+    // Nếu có filter từ Influx
+    if (from || to || tank) {
+      // Convert from/to sang unix second nếu là string
+      const fromNum = from ? Number(from) : undefined;
+      const toNum = to ? Number(to) : undefined;
+
+      // Lấy code và phân trang
+      const influxResult = await timerService.getProductCodesFromInflux({
+        from: fromNum,
+        to: toNum,
+        tank: typeof tank === 'string' ? tank : undefined,
+        page: Number(page),
+        limit: Number(limit),
+        search: typeof search === 'string' ? search : undefined,
+      });
+
+      codesArray = influxResult.result;
+      // Fake result docs để giữ nguyên logic trả về (docs, totalDocs, etc)
+      result = {
+        docs: codesArray, // sẽ map sang info tank ở dưới
+        totalDocs: influxResult.total,
+        totalPages: Math.ceil(influxResult.total / influxResult.limit),
+        page: influxResult.page,
+        limit: influxResult.limit,
+        "pagingCounter": 1,
+        "hasPrevPage": false,
+        "hasNextPage": false,
+        "prevPage": null,
+        "nextPage": null
+      };
+    } else {
+      // Lấy code từ Mongo như cũ (productService.getProductsWithSettings)
+      result = await productService.getProductsWithSettings({
+        page: Number(page),
+        limit: Number(limit),
+        search,
+        line,
+      });
+      codesArray = result.docs.map((product) => product.code);
+      const data = await timerService.getInformationTimer(codesArray);
+      // Map kết quả vào docs
+      result.docs = data;
+    }
+
+    
     return res.status(200).json(returnPaginationMessage(result, 'Fetched information timer successfully'));
   } catch (error) {
     return res.status(500).json(returnError(error as Error));

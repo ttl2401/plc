@@ -35,7 +35,7 @@ export const readInflux = async (req: Request, res: Response, next: NextFunction
     // Use measurement and range from query if provided, else default
     const measurement = req.query.measurement || 'test_measurement';
     const range = req.query.range || '-1d';
-    const fluxQuery = `from(bucket: "${process.env.INFLUX_BUCKET || 'plc-data'}")
+    const fluxQuery = `from(bucket: "${process.env.INFLUX_BUCKET || 'plc-influx'}")
       |> range(start: ${range})
       |> filter(fn: (r) => r._measurement == "${measurement}")
       |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")`;
