@@ -59,8 +59,8 @@ export class TemperatureService {
     // Flux query: lọc measurement và code, gom tank theo code
     const fluxQuery = `
       from(bucket: "${bucket}")
-        |> range(start: -30d)
-        |> filter(fn: (r) => r._measurement == "information_temperature")
+        |> range(start: -300d)
+        |> filter(fn: (r) => r._measurement == "information_process")
         |> filter(fn: (r) => ${codeFilter})
         |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
         |> keep(columns: ["_time", "code", "tank", "temperature", "ampere", "slot", "timeIn", "timeOut"])
@@ -109,7 +109,39 @@ export class TemperatureService {
       tanks: tanks.sort((a, b) => a.timeIn - b.timeIn)
     }))
     return result
-  } 
+  };
+
+  /**
+   * Check product already has information or not
+   * @param code code
+   * @returns 
+   */
+  async isProductExistInInflux (code: string): Promise<boolean>  {
+    const fluxQuery = `
+      from(bucket: "${bucket}")
+        |> range(start: -300d)
+        |> filter(fn: (r) => r._measurement == "information_process")
+        |> filter(fn: (r) => r.code == "${code}")
+        |> limit(n: 1)
+    `;
+  
+    return new Promise((resolve, reject) => {
+      let found = false;
+  
+      queryApi.queryRows(fluxQuery, {
+        next() {
+          found = true;
+        },
+        error(err) {
+          console.error(`❌ Influx query error for code ${code}:`, err);
+          reject(err);
+        },
+        complete() {
+          resolve(found);
+        },
+      });
+    });
+  };
 }
 
 export const temperatureService = new TemperatureService(); 

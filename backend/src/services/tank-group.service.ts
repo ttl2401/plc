@@ -38,6 +38,7 @@ export class TankGroupService {
       limit: Number(limit),
       sort,
       select,
+      pagination: Number(limit) === 0 ? false : true
     };
 
     const queryFilters: Record<string, any> = {};

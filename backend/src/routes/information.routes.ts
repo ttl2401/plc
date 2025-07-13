@@ -6,7 +6,9 @@ import {
     getInformationPlating,
     downloadInformationPlating,
     getInformationTemperature,
-    downloadInformationTemperature
+    downloadInformationTemperature,
+    getInformationTimer,
+    downloadInformationTimer
 } from '@/controllers/information.controller';
 
 
@@ -22,7 +24,15 @@ router.get('/information/plating/download', auth, restrictTo(ROLES.ADMIN, ROLES.
 router.route('/information/temperature')
 .get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTemperature);
 // Route for downloading temperature information as Excel 
-router.get('/information/plating/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadInformationTemperature);
+router.get('/information/temperature/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadInformationTemperature);
+
+
+// timer information 
+router.route('/information/timer')
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTimer);
+// Route for downloading temperature information as Excel 
+router.get('/information/timer/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadInformationTimer);
+
 
 
 export default router; 

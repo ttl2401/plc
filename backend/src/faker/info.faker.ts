@@ -1,6 +1,9 @@
 import { Product } from '@/models/product.model';
 import { Point } from '@influxdata/influxdb-client'
 import { writeApi, queryApi } from '@/config/influxdb'
+import { TemperatureService } from '@/services/temperature.service'
+const temperatureService = new TemperatureService();
+
 import moment from 'moment';
 
 const processTanks = [
@@ -79,6 +82,15 @@ const processTanks = [
         ]
     },
     {
+        name : "cascade_rinse",
+        value : [
+            {
+                type: "slot",
+                range : [1,3]
+            }
+        ]
+    },
+    {
         name : "hot_rinse",
         value : [
             {
@@ -100,6 +112,24 @@ const processTanks = [
             }
         ]
     },
+    {
+        name : "cascade_rinse",
+        value : [
+            {
+                type: "slot",
+                range : [4,8]
+            }
+        ]
+    },
+    {
+        name : "cascade_rinse",
+        value : [
+            {
+                type: "slot",
+                range : [9,10]
+            }
+        ]
+    },
 ];
 const sleep = async (s: number) => {
     return new Promise(resolve => setTimeout(resolve, s * 1000));
@@ -110,11 +140,14 @@ const faker = async (): Promise<Boolean> => {
   try {
     for (const product of products){
         const code = product.code;
-        const point = new Point("information_temperature")
-        .tag('code', code);
-        
+        const exists = await temperatureService.isProductExistInInflux(code);
+        if (exists) {
+            console.log(`⏭️ Product ${code} already exists in InfluxDB. Skipping.`);
+            continue;
+        }
+
         for (const tank of processTanks) {
-            const point = new Point("information_temperature")
+            const point = new Point("information_process")
               .tag('code', code)
               .tag('tank', tank.name);
         
