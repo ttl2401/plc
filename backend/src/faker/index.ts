@@ -4,14 +4,15 @@ import { checkInfluxDB, closeInfluxDB} from '@/config/influxdb';
 import {glob } from 'glob';
 import path from 'path';
 import { faker as infoFaker } from './info.faker';
+import { faker as historyOpFaker } from './history-operation.faker';
 
 async function faker(): Promise<void> {
   try {
     await connectMongoDB();
     await checkInfluxDB();
 
-    await infoFaker();
-
+    // await infoFaker();
+    await historyOpFaker();
   } catch (error) {
     console.error('❌ Faker data error:', error);
   } finally {

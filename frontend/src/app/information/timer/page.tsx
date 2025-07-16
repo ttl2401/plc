@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 import { getTankGroup, TankGroup } from "@/services/resourceService";
 import moment from "moment";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/components/layout/DashboardLayout";
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -25,28 +26,6 @@ const tankOrder = [
   "hot_rinse",
   "dryer",
 ];
-
-const tankLabels: Record<string, string> = {
-  washing: "Washing",
-  boiling_degreasing: "Boiling Degreasing",
-  electro_degreasing: "Electro Degreasing",
-  pre_nickel_plating: "Pre-Nickel",
-  nickel_plating: "Nickel Plating",
-  ultrasonic_hot_rinse: "Ultrasonic",
-  hot_rinse: "Hot rinse",
-  dryer: "Dryer",
-};
-
-const colorMap: Record<string, string> = {
-  washing: "#F5F7FA",
-  boiling_degreasing: "#F5F7FA",
-  electro_degreasing: "#D1F2EB",
-  pre_nickel_plating: "#FCF3CF",
-  nickel_plating: "#D6EAF8",
-  ultrasonic_hot_rinse: "#FDEDEC",
-  hot_rinse: "#FADBD8",
-  dryer: "#E8DAEF",
-};
 
 const InformationTimerPage: React.FC = () => {
   const [data, setData] = useState<InformationTimer[]>([]);
@@ -67,6 +46,29 @@ const InformationTimerPage: React.FC = () => {
   const [selectedTank, setSelectedTank] = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<[moment.Moment | null, moment.Moment | null] | null>(null);
   const router = useRouter();
+  const { t } = useLanguage();
+
+  const tankLabels: Record<string, string> = {
+    washing: t("washing"),
+    boiling_degreasing: t("boiling_degreasing"),
+    electro_degreasing: t("electro_degreasing"),
+    pre_nickel_plating: t("pre_nickel_plating"),
+    nickel_plating: t("nickel_plating"),
+    ultrasonic_hot_rinse: t("ultrasonic_hot_rinse"),
+    hot_rinse: t("hot_rinse"),
+    dryer: t("dryer"),
+  };
+
+  const colorMap: Record<string, string> = {
+    washing: "#F5F7FA",
+    boiling_degreasing: "#F5F7FA",
+    electro_degreasing: "#D1F2EB",
+    pre_nickel_plating: "#FCF3CF",
+    nickel_plating: "#D6EAF8",
+    ultrasonic_hot_rinse: "#FDEDEC",
+    hot_rinse: "#FADBD8",
+    dryer: "#E8DAEF",
+  };
 
   useEffect(() => {
     getTankGroup().then(res => setTankGroups(res.data)).catch(() => setTankGroups([]));
@@ -141,20 +143,20 @@ const InformationTimerPage: React.FC = () => {
   // Build columns dynamically for tanks
   const columns: ColumnsType<InformationTimer> = [
     {
-      title: "#",
+      title: t("table_index"),
       dataIndex: "index",
       key: "index",
       width: 50,
       render: (_: any, __: any, idx: number) => (pagination.page - 1) * pagination.limit + idx + 1,
     },
     {
-      title: "Mã sản phẩm",
+      title: t("product_code"),
       dataIndex: "code",
       key: "code",
       render: (code: string) => <span style={{ color: '#27ae60', fontWeight: 600 }}>{code}</span>,
     },
     {
-      title: "Ngày bắt đầu",
+      title: t("start_date"),
       key: "ngay_bat_dau",
       render: (_: any, record: InformationTimer) => {
         const firstTank = record.tanks[0];
@@ -163,7 +165,7 @@ const InformationTimerPage: React.FC = () => {
       },
     },
     {
-      title: "Giờ vào",
+      title: t("time_in"),
       key: "gio_vao",
       render: (_: any, record: InformationTimer) => {
         const firstTank = record.tanks[0];
@@ -172,7 +174,7 @@ const InformationTimerPage: React.FC = () => {
       },
     },
     {
-      title: "Giờ ra",
+      title: t("time_out"),
       key: "gio_ra",
       render: (_: any, record: InformationTimer) => {
         const lastTank = record.tanks[record.tanks.length - 1];
@@ -187,7 +189,7 @@ const InformationTimerPage: React.FC = () => {
       if (["electro_degreasing", "nickel_plating", "dryer"].includes(tank)) {
         children = [
           {
-            title: 'Vào',
+            title: t("time_in"),
             key: `${tank}_vao`,
             align: "center" as const,
             render: (_: any, record: InformationTimer) => {
@@ -196,7 +198,7 @@ const InformationTimerPage: React.FC = () => {
             },
           },
           {
-            title: 'Trong',
+            title: t("duration"),
             key: `${tank}_trong`,
             align: "center" as const,
             render: (_: any, record: InformationTimer) => {
@@ -205,7 +207,7 @@ const InformationTimerPage: React.FC = () => {
             },
           },
           {
-            title: 'Slot',
+            title: t("slot"),
             key: `${tank}_slot`,
             align: "center" as const,
             render: (_: any, record: InformationTimer) => {
@@ -217,7 +219,7 @@ const InformationTimerPage: React.FC = () => {
       } else {
         children = [
           {
-            title: 'Vào',
+            title: t("time_in"),
             key: `${tank}_vao`,
             align: "center" as const,
             render: (_: any, record: InformationTimer) => {
@@ -226,7 +228,7 @@ const InformationTimerPage: React.FC = () => {
             },
           },
           {
-            title: 'Trong',
+            title: t("duration"),
             key: `${tank}_trong`,
             align: "center" as const,
             render: (_: any, record: InformationTimer) => {
@@ -259,10 +261,10 @@ const InformationTimerPage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">THÔNG TIN THỜI GIAN</Title>
+      <Title level={3} className="mb-6">{t("timer_information")}</Title>
       <div className="flex flex-row justify-between items-center mb-4 gap-3">
         <Search
-          placeholder="Nhập mã sản phẩm hoặc tên sản phẩm để tìm kiếm"
+          placeholder={t("search_product_placeholder")}
           onSearch={handleSearch}
           allowClear
           style={{ width: 350 }}
@@ -271,17 +273,17 @@ const InformationTimerPage: React.FC = () => {
           style={{ minWidth: 220 }}
           onChange={handleDateChange}
           value={dateRange as any}
-          placeholder={["Chọn thời gian", "Chọn thời gian"]}
+          placeholder={[t("select_time"), t("select_time")]} 
         />
         <Select
           style={{ minWidth: 180 }}
-          placeholder="Chọn hồ"
+          placeholder={t("select_tank_group")}
           allowClear
           value={selectedTank}
           onChange={handleTankChange}
           options={tankGroups?.map(tg => ({ label: tg.name, value: tg.key }))}
         />
-        <Button icon={<ExportOutlined />} type="default" onClick={() => handleExportExcel(searchText)}>Xuất Excel</Button>
+        <Button icon={<ExportOutlined />} type="default" onClick={() => handleExportExcel(searchText)}>{t("export_excel")}</Button>
       </div>
       <Table
         columns={columns}

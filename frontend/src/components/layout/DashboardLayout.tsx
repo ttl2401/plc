@@ -104,7 +104,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     {
       key: '/dashboard',
       icon: <DashboardOutlined />,
-      label: <Link href="/dashboard">Dashboard</Link>,
+      label: <Link href="/dashboard">{t('dashboard')}</Link>,
     },
     {
       key: '/products',
@@ -115,76 +115,78 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     {
       key: '/parameters-setting',
       icon: <BarChartOutlined />,
-      label: 'Cài đặt thông số',
+      label: t('parameter_setting'),
       meta: { roles: ['admin', 'manager'] },
       children: [
         {
           key: '/parameters-setting/electroplating',
-          label: <Link href="/parameters-setting/electroplating">Xi mạ</Link>,
+          label: <Link href="/parameters-setting/electroplating">{t('electroplating_setting')}</Link>,
         },
         {
           key: '/parameters-setting/temperature',
-          label: <Link href="/parameters-setting/temperature">Nhiệt độ</Link>,
+          label: <Link href="/parameters-setting/temperature">{t('temperature_setting')}</Link>,
         },
         {
           key: '/parameters-setting/timer',
-          label: <Link href="/parameters-setting/timer">Timer</Link>,
+          label: <Link href="/parameters-setting/timer">{t('timer_setting')}</Link>,
         },
         {
           key: '/parameters-setting/robot',
-          label: <Link href="/parameters-setting/robot">Robot</Link>,
+          label: <Link href="/parameters-setting/robot">{t('robot_setting')}</Link>,
         },
         {
           key: '/parameters-setting/chemistry',
-          label: <Link href="/parameters-setting/chemistry">Hóa chất lỏng</Link>,
+          label: <Link href="/parameters-setting/chemistry">{t('chemistry_setting')}</Link>,
         },
       ],
     },
     {
       key: '/information',
       icon: <InfoCircleOutlined />,
-      label: 'Thông tin',
+      label: t('information'),
       meta: { roles: ['admin', 'manager'] },
       children: [
         {
           key: '/information/electroplating',
-          label: <Link href="/information/electroplating">Thông tin xi mạ</Link>,
+          label: <Link href="/information/electroplating">{t('information_electroplating')}</Link>,
         },
         {
           key: '/information/temperature',
-          label: <Link href="/information/temperature">Thông tin nhiệt độ</Link>,
+          label: <Link href="/information/temperature">{t('information_temperature')}</Link>,
         },
         {
           key: '/information/timer',
-          label: <Link href="/information/timer">Thông tin thời gian</Link>,
+          label: <Link href="/information/timer">{t('information_timer')}</Link>,
         }
       ],
     },
-    
     {
-      key: '/lich-su',
+      key: '/history',
       icon: <HistoryOutlined />,
-      label: 'Lịch Sử',
+      label: t('history'),
       children: [
         {
-          key: '/lich-su-van-hanh',
-          label: <Link href="/lich-su-van-hanh">Lịch Sử Vận Hành</Link>,
+          key: '/history/operation',
+          label: <Link href="/history/operation">{t('operation_history')}</Link>,
         },
         {
-          key: '/bo-sung-hoa-chat',
-          label: <Link href="/lich-su/bo-sung-hoa-chat">Lịch Sử Bổ Sung Hóa Chất</Link>,
+          key: '/history/chemical-addition',
+          label: <Link href="/history/chemical-addition">{t('chemical_addition_history')}</Link>,
+        },
+        {
+          key: '/history/water-addition',
+          label: <Link href="/history/water-addition">{t('water_addition_history')}</Link>,
         },
       ],
     },
-
     {
       key: '/extend',
       icon: <BarsOutlined />,
-      label: 'Mở rộng',
+      label: t('extend'),
       children: [
         {
           key: '/extend/electric-current',
-          label: <Link href="/extend/electric-current">Bảng thông tin dòng điện</Link>,
+          label: <Link href="/extend/electric-current">{t('electric_current_info')}</Link>,
         }
       ],
     },
@@ -194,23 +196,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: <Link href="/profile">Profile</Link>,
+      label: <Link href="/profile">{t('profile')}</Link>,
     },
     {
       key: '/users',
       icon: <TeamOutlined />,
-      label: <Link href="/users">Người dùng</Link>,
+      label: <Link href="/users">{t('users')}</Link>,
       meta: { roles: ['admin'] },
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: <Link href="/settings">Settings</Link>,
+      label: <Link href="/settings">{t('settings')}</Link>,
     },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Logout',
+      label: t('logout'),
       onClick: () => {
         logout();
         router.push('/login');
@@ -235,13 +237,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const LANGUAGES = [
     {
       code: 'en',
-      label: 'English',
+      label: t('english'),
       short: 'EN',
       flag: '/flags/uk.svg',
     },
     {
       code: 'vi',
-      label: 'Vietnamese',
+      label: t('vietnamese'),
       short: 'VI',
       flag: '/flags/vn.svg',
     },

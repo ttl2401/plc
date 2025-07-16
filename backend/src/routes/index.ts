@@ -8,6 +8,7 @@ import settingRoutes from './setting.routes';
 import informationRoutes from './information.routes';
 import testRoutes from './test.routes';
 import resourceRoutes from './resource.routes';
+import historyRoutes from './history.routes';
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.use(uploadRoutes);
 
 router.use(settingRoutes);
 router.use(informationRoutes);
+router.use(historyRoutes);
 router.use(testRoutes);
 router.use(productRoutes);
 router.use(resourceRoutes);
