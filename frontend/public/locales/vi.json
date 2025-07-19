@@ -53,5 +53,10 @@
   "pump_3_duration": "Thời gian bơm 3 (s)",
   "ampere_consumption": "Dòng tiêu thụ (A)",
   "cannot_load_data": "Không thể tải dữ liệu",
-  "feature_coming_soon": "Tính năng sắp ra mắt"
+  "feature_coming_soon": "Tính năng sắp ra mắt",
+  "date": "Ngày thực hiện",
+  "action": "Hành động",
+  "times": "Lần thứ",
+  "started_at": "Giờ bắt đầu",
+  "ended_at": "Giờ kết thúc"
 } 

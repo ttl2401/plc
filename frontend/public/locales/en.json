@@ -53,5 +53,10 @@
   "pump_3_duration": "Pump 3 Duration (s)",
   "ampere_consumption": "Ampere Consumption (A)",
   "cannot_load_data": "Cannot load data",
-  "feature_coming_soon": "Feature coming soon"
+  "feature_coming_soon": "Feature coming soon",
+  "date": "Date",
+  "action": "Action",
+  "times": "Times",
+  "started_at": "Started At",
+  "ended_at": "Ended At"
 } 

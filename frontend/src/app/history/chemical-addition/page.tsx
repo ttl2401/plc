@@ -111,12 +111,14 @@ const HistoryChemicalAdditionPage: React.FC = () => {
       dataIndex: 'index',
       key: 'index',
       width: 50,
+      className: 'text-center',
       render: (_: any, __: any, idx: number) => (pagination.page - 1) * pagination.limit + idx + 1,
     },
     {
       title: t('date') || 'Ngày thực hiện',
       dataIndex: 'date',
       key: 'date',
+      className: 'text-center',
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
     },
     {
@@ -132,6 +134,7 @@ const HistoryChemicalAdditionPage: React.FC = () => {
       title: t('first_pump_time') || 'Giờ bổ sung',
       dataIndex: 'pumps',
       key: 'firstStartedAt',
+      className: 'text-center',
       render: (pumps: any[]) => formatTime(getFirstStartedAt(pumps)),
     },
     ...[0, 1, 2].map((i) => ([
@@ -139,12 +142,14 @@ const HistoryChemicalAdditionPage: React.FC = () => {
         title: t(`pump_${i+1}_end_time`) || `Giờ kết thúc bơm ${i+1}`,
         dataIndex: 'pumps',
         key: `pump${i+1}EndedAt`,
+        className: 'text-center',
         render: (pumps: any[]) => formatTime(pumps[i]?.endedAt || null),
       },
       {
         title: t(`pump_${i+1}_duration`) || `Thời gian bơm ${i+1}`,
         dataIndex: 'pumps',
         key: `pump${i+1}Duration`,
+        className: 'text-center',
         render: (pumps: any[]) => {
           const duration = getPumpDuration(pumps[i] || {});
           return duration !== null ? duration : '';
@@ -155,6 +160,7 @@ const HistoryChemicalAdditionPage: React.FC = () => {
       title: t('ampere_consumption') || 'Dòng tiêu thụ (A)',
       dataIndex: 'ampereConsumption',
       key: 'ampereConsumption',
+      className: 'text-center',
       render: (val: number) => val?.toLocaleString() || '',
     },
   ];

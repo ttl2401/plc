@@ -96,12 +96,14 @@ const HistoryOperationPage: React.FC = () => {
       dataIndex: 'index',
       key: 'index',
       width: 50,
+      className: 'text-center',
       render: (_: any, __: any, idx: number) => (pagination.page - 1) * pagination.limit + idx + 1,
     },
     {
       title: t('date') || 'Ngày thực hiện',
       dataIndex: 'date',
       key: 'date',
+      className: 'text-center',
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
     },
     {
@@ -117,18 +119,21 @@ const HistoryOperationPage: React.FC = () => {
       title: t('times') || 'Lần thứ',
       dataIndex: 'countPerDay',
       key: 'countPerDay',
+      className: 'text-center',
       render: (_: any, record: any) => record.countPerDay,
     },
     {
       title: t('started_at') || 'Giờ bắt đầu',
       dataIndex: 'startedAt',
       key: 'startedAt',
+      className: 'text-center',
       render: (startedAt: string) => startedAt ? dayjs(startedAt).format('HH:mm:ss') : '',
     },
     {
       title: t('ended_at') || 'Giờ kết thúc',
       dataIndex: 'endedAt',
       key: 'endedAt',
+      className: 'text-center',
       render: (endedAt: string) => endedAt ? dayjs(endedAt).format('HH:mm:ss') : '',
     },
   ];
