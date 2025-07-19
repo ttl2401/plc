@@ -177,6 +177,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           key: '/history/water-addition',
           label: <Link href="/history/water-addition">{t('water_addition_history')}</Link>,
         },
+        {
+          key: '/history/liquid-warning',
+          label: <Link href="/history/liquid-warning">{t('liquid_warning_history')}</Link>,
+        },
       ],
     },
     {

@@ -58,5 +58,11 @@
   "action": "Hành động",
   "times": "Lần thứ",
   "started_at": "Giờ bắt đầu",
-  "ended_at": "Giờ kết thúc"
+  "ended_at": "Giờ kết thúc",
+  "water_tank": "Hồ",
+  "liquid_warning_history": "Cảnh báo mực chất lỏng",
+  "warning_at": "Thời gian",
+  "warning_level": "Mực chất lỏng",
+  "warning_level_low": "Thấp",
+  "warning_level_high": "Cao"
 } 

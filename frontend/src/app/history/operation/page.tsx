@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Typography, message, Button, DatePicker, Select } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { getHistoryOperation, HistoryOperation, FetchHistoryOperationResponse } from "@/services/historyService";
+import { getHistoryOperation, downloadHistoryOperation, HistoryOperation, FetchHistoryOperationResponse } from "@/services/historyService";
 import { ExportOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useLanguage } from "@/components/layout/DashboardLayout";
@@ -87,7 +87,9 @@ const HistoryOperationPage: React.FC = () => {
 
   // Placeholder for Excel export
   const handleExportExcel = async () => {
-    message.info(t('feature_coming_soon'));
+    const from = dateRange && dateRange[0] ? dateRange[0].format('YYYY-MM-DD') : '';
+    const to = dateRange && dateRange[1] ? dateRange[1].format('YYYY-MM-DD') : '';
+    await downloadHistoryOperation({ action: selectedAction, from, to });
   };
 
   const columns: ColumnsType<HistoryOperation> = [
@@ -103,6 +105,9 @@ const HistoryOperationPage: React.FC = () => {
       title: t('date') || 'Ngày thực hiện',
       dataIndex: 'date',
       key: 'date',
+      onHeaderCell: () => ({
+        style: { textAlign: 'center' }
+      }),
       className: 'text-center',
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
     },
@@ -119,6 +124,9 @@ const HistoryOperationPage: React.FC = () => {
       title: t('times') || 'Lần thứ',
       dataIndex: 'countPerDay',
       key: 'countPerDay',
+      onHeaderCell: () => ({
+        style: { textAlign: 'center' }
+      }),
       className: 'text-center',
       render: (_: any, record: any) => record.countPerDay,
     },
@@ -126,6 +134,9 @@ const HistoryOperationPage: React.FC = () => {
       title: t('started_at') || 'Giờ bắt đầu',
       dataIndex: 'startedAt',
       key: 'startedAt',
+      onHeaderCell: () => ({
+        style: { textAlign: 'center' }
+      }),
       className: 'text-center',
       render: (startedAt: string) => startedAt ? dayjs(startedAt).format('HH:mm:ss') : '',
     },
@@ -133,6 +144,9 @@ const HistoryOperationPage: React.FC = () => {
       title: t('ended_at') || 'Giờ kết thúc',
       dataIndex: 'endedAt',
       key: 'endedAt',
+      onHeaderCell: () => ({
+        style: { textAlign: 'center' }
+      }),
       className: 'text-center',
       render: (endedAt: string) => endedAt ? dayjs(endedAt).format('HH:mm:ss') : '',
     },

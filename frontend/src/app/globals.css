@@ -38,3 +38,7 @@ body {
 .no-fouc.ant-app * {
   visibility: visible;
 }
+
+.text-center {
+  text-align: center !important;
+}

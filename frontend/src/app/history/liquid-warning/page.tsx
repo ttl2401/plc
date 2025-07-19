@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { Table, Typography, message, Button, DatePicker, Select } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { getHistoryChemicalAddition, downloadHistoryChemicalAddition, HistoryChemicalAddition, FetchHistoryChemicalAdditionResponse } from "@/services/historyService";
+import { getLiquidWarning, downloadLiquidWarning, LiquidWarning, FetchLiquidWarningResponse } from "@/services/historyService";
+import { getTanks, Tank } from "@/services/resourceService";
 import { ExportOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useLanguage } from "@/components/layout/DashboardLayout";
@@ -12,29 +13,15 @@ const { Title } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-const ACTIONS = [
-  { value: '', label: 'Tất cả loại bổ sung' },
-  { value: 'chemical_washing_tank', label: 'Hóa chất Hồ Washing' },
-  { value: 'chemical_pre_nickel_plating_tank', label: 'Hóa chất Hồ Pre-Nickel' },
-  { value: 'chemical_boiling_degreasing_tank', label: 'Hóa chất Hồ Boiling Degreasing' },
-];
-
-const getFirstStartedAt = (pumps: any[]) => {
-  const found = pumps.find(p => p.startedAt);
-  return found ? found.startedAt : null;
-};
-
-const getPumpDuration = (pump: any) => {
-  if (pump.startedAt && pump.endedAt) {
-    return dayjs(pump.endedAt).diff(dayjs(pump.startedAt), 'second');
-  }
-  return null;
+const WARNING_LEVELS: Record<string, string> = {
+  low: 'Thấp',
+  high: 'Cao',
 };
 
 const formatTime = (val: string | null) => val ? dayjs(val).format('HH:mm:ss') : '';
 
-const HistoryChemicalAdditionPage: React.FC = () => {
-  const [data, setData] = useState<HistoryChemicalAddition[]>([]);
+const LiquidWarningHistoryPage: React.FC = () => {
+  const [data, setData] = useState<LiquidWarning[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     totalDocs: 0,
@@ -47,16 +34,21 @@ const HistoryChemicalAdditionPage: React.FC = () => {
     prevPage: null,
     nextPage: null,
   });
-  const [selectedAction, setSelectedAction] = useState('');
+  const [tankOptions, setTankOptions] = useState<Tank[]>([]);
+  const [selectedTank, setSelectedTank] = useState('');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
   const { t } = useLanguage();
 
-  const loadData = async (page = 1, limit = 10, action = selectedAction, range = dateRange) => {
+  useEffect(() => {
+    getTanks().then(res => setTankOptions(res.data || []));
+  }, []);
+
+  const loadData = async (page = 1, limit = 10, tank = selectedTank, range = dateRange) => {
     setLoading(true);
     try {
       const from = range && range[0] ? range[0].format('YYYY-MM-DD') : '';
       const to = range && range[1] ? range[1].format('YYYY-MM-DD') : '';
-      const res: FetchHistoryChemicalAdditionResponse = await getHistoryChemicalAddition({ page, limit, action, from, to });
+      const res: FetchLiquidWarningResponse = await getLiquidWarning({ page, limit, tank, from, to });
       if (res.success) {
         setData(res.data);
         setPagination({
@@ -78,9 +70,9 @@ const HistoryChemicalAdditionPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData(pagination.page, pagination.limit, selectedAction, dateRange);
+    loadData(pagination.page, pagination.limit, selectedTank, dateRange);
     // eslint-disable-next-line
-  }, [pagination.page, pagination.limit, selectedAction, dateRange]);
+  }, [pagination.page, pagination.limit, selectedTank, dateRange]);
 
   const handleTableChange = (pagination: TablePaginationConfig) => {
     setPagination(prev => ({
@@ -90,8 +82,8 @@ const HistoryChemicalAdditionPage: React.FC = () => {
     }));
   };
 
-  const handleActionChange = (value: string) => {
-    setSelectedAction(value);
+  const handleTankChange = (value: string) => {
+    setSelectedTank(value);
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
@@ -100,14 +92,13 @@ const HistoryChemicalAdditionPage: React.FC = () => {
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  // Placeholder for Excel export
   const handleExportExcel = async () => {
     const from = dateRange && dateRange[0] ? dateRange[0].format('YYYY-MM-DD') : '';
     const to = dateRange && dateRange[1] ? dateRange[1].format('YYYY-MM-DD') : '';
-    await downloadHistoryChemicalAddition({ action: selectedAction, from, to });
+    await downloadLiquidWarning({ tank: selectedTank, from, to });
   };
 
-  const columns: ColumnsType<HistoryChemicalAddition> = [
+  const columns: ColumnsType<LiquidWarning> = [
     {
       title: t('table_index') || '#',
       dataIndex: 'index',
@@ -120,70 +111,52 @@ const HistoryChemicalAdditionPage: React.FC = () => {
       title: t('date') || 'Ngày thực hiện',
       dataIndex: 'date',
       key: 'date',
+      className: 'text-center',
       onHeaderCell: () => ({
         style: { textAlign: 'center' }
       }),
-      className: 'text-center',
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
     },
     {
-      title: t('chemical_addition_type') || 'Loại bổ sung',
-      dataIndex: 'action',
-      key: 'action',
-      render: (action: string) => {
-        const found = ACTIONS.find(a => a.value === action);
-        return found ? found.label : action;
+      title: t('water_tank') || 'Hồ',
+      dataIndex: 'tank',
+      key: 'tank',
+      render: (tank: string) => {
+        const found = tankOptions.find(t => t.key === tank);
+        return found ? found.name : tank;
       },
     },
     {
-      title: t('first_pump_time') || 'Giờ bổ sung',
-      dataIndex: 'pumps',
-      key: 'firstStartedAt',
+      title: t('warning_at') || 'Thời gian',
+      dataIndex: 'warningAt',
+      key: 'warningAt',
+      className: 'text-center',
       onHeaderCell: () => ({
         style: { textAlign: 'center' }
       }),
-      className: 'text-center',
-      render: (pumps: any[]) => formatTime(getFirstStartedAt(pumps)),
+      render: (warningAt: string) => formatTime(warningAt),
     },
-    ...[0, 1, 2].map((i) => ([
-      {
-        title: t(`pump_${i+1}_end_time`) || `Giờ kết thúc bơm ${i+1}`,
-        dataIndex: 'pumps',
-        key: `pump${i+1}EndedAt`,
-        className: 'text-center',
-        render: (pumps: any[]) => formatTime(pumps[i]?.endedAt || null),
-      },
-      {
-        title: t(`pump_${i+1}_duration`) || `Thời gian bơm ${i+1}`,
-        dataIndex: 'pumps',
-        key: `pump${i+1}Duration`,
-        className: 'text-center',
-        render: (pumps: any[]) => {
-          const duration = getPumpDuration(pumps[i] || {});
-          return duration !== null ? duration : '';
-        },
-      }
-    ])).flat(),
     {
-      title: t('ampere_consumption') || 'Dòng tiêu thụ (A)',
-      dataIndex: 'ampereConsumption',
-      key: 'ampereConsumption',
-      className: 'text-center',
-      render: (val: number) => val?.toLocaleString() || '',
+      title: t('warning_level') || 'Mực chất lỏng',
+      dataIndex: 'warningLevel',
+      key: 'warningLevel',
+      render: (level: string) => t(`warning_level_${level}`) || WARNING_LEVELS[level] || level,
     },
   ];
 
   return (
     <div className="p-6">
-      <Title level={2}>{t('chemical_addition_history') || 'LỊCH SỬ BỔ SUNG HÓA CHẤT'}</Title>
+      <Title level={2}>{t('liquid_warning_history') || 'CẢNH BÁO MỰC CHẤT LỎNG'}</Title>
       <div className="flex flex-wrap gap-4 items-center mb-4">
         <Select
-          value={selectedAction}
-          onChange={handleActionChange}
+          value={selectedTank}
+          onChange={handleTankChange}
           style={{ minWidth: 200 }}
+          placeholder={t('select_tank_group') || 'Chọn hồ'}
         >
-          {ACTIONS.map(action => (
-            <Option key={action.value} value={action.value}>{action.label}</Option>
+          <Option value="">{t('select_tank_group') || 'Chọn hồ'}</Option>
+          {tankOptions.map(tank => (
+            <Option key={tank.key} value={tank.key}>{tank.name}</Option>
           ))}
         </Select>
         <RangePicker
@@ -219,4 +192,4 @@ const HistoryChemicalAdditionPage: React.FC = () => {
   );
 };
 
-export default HistoryChemicalAdditionPage; 
+export default LiquidWarningHistoryPage; 

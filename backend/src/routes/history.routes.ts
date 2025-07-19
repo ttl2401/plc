@@ -9,7 +9,9 @@ import {
     getHistoryChemicalAddition,
     downloadHistoryChemicalAddition,
     getHistoryWaterAddition,
-    downloadHistoryWaterAddition
+    downloadHistoryWaterAddition,
+    getLiquidWarning,
+    downloadLiquidWarning
 
 } from '@/controllers/history.controller';
 
@@ -34,6 +36,12 @@ router.route('/history/water-addition')
 .get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getHistoryWaterAddition);
 // Route for downloading history operating as Excel 
 router.get('/history/water-addition/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadHistoryWaterAddition);
+
+// history liquid warning
+router.route('/history/liquid-warning')
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getLiquidWarning);
+// Route for downloading liquid warning as Excel 
+router.get('/history/liquid-warning/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadLiquidWarning);
 
 
 

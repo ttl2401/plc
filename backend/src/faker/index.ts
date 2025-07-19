@@ -7,6 +7,7 @@ import { faker as infoFaker } from './info.faker';
 import { faker as historyOpFaker } from './history-operation.faker';
 import { faker as historyChAddFaker } from './history-chemical-addition.faker';
 import { faker as historyWtAddFaker } from './history-water-addition.faker';
+import { faker as liquidWarnFaker } from './liquid-warning.faker';
 
 async function faker(): Promise<void> {
   try {
@@ -17,6 +18,7 @@ async function faker(): Promise<void> {
     // await historyOpFaker();
     // await historyChAddFaker();
     // await historyWtAddFaker();
+    // await liquidWarnFaker();
 
   } catch (error) {
     console.error('❌ Faker data error:', error);

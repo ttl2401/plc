@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { HistoryOperatingService } from '@/services/history-operating.service';
 import { HistoryChemicalAdditionService } from '@/services/history-chemical-addition.service';
 import { HistoryWaterAdditionService } from '@/services/history-water-addition.service';
+import { LiquidWarningService } from '@/services/liquid-warning.service';
 
 import { returnPaginationMessage, returnError } from '@/controllers/base.controller';
 import exceljs from 'exceljs';
@@ -9,6 +10,7 @@ import exceljs from 'exceljs';
 const historyOperatingService = new HistoryOperatingService();
 const historyChemicalAdditionService = new HistoryChemicalAdditionService();
 const historyWaterAdditionService = new HistoryWaterAdditionService();
+const liquidWarningService = new LiquidWarningService();
 
 // Get all history operating (paginated)
 export const getHistoryOperating = async (
@@ -197,6 +199,70 @@ export const downloadHistoryWaterAddition = async (
     res.setHeader(
       'Content-Disposition',
       'attachment; filename=history-water-addition.xlsx'
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    next(error);
+  }
+}; 
+
+// Get all liquid warnings (paginated)
+export const getLiquidWarning = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const query = req.query;
+    const data = await liquidWarningService.getLiquidWarnings(query);
+    return res.status(200).json(returnPaginationMessage(data, 'Liquid warnings retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Download liquid warnings as Excel file
+export const downloadLiquidWarning = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const warnings = await liquidWarningService.getAllLiquidWarningsSorted();
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet('LiquidWarning');
+
+    worksheet.columns = [
+      { header: '#', key: 'id', width: 5 },
+      { header: 'Tank', key: 'tank', width: 20 },
+      { header: 'Date', key: 'date', width: 15 },
+      { header: 'Warning Level', key: 'warningLevel', width: 20 },
+      { header: 'Warning At', key: 'warningAt', width: 25 },
+      { header: 'Created At', key: 'createdAt', width: 25 },
+      { header: 'Updated At', key: 'updatedAt', width: 25 },
+    ];
+
+    warnings.forEach((warning, index) => {
+      worksheet.addRow({
+        id: index + 1,
+        tank: warning.tank,
+        date: warning.date,
+        warningLevel: warning.warningLevel || '',
+        warningAt: warning.warningAt ? new Date(warning.warningAt).toLocaleString() : '',
+        createdAt: warning.createdAt ? new Date(warning.createdAt).toLocaleString() : '',
+        updatedAt: warning.updatedAt ? new Date(warning.updatedAt).toLocaleString() : '',
+      });
+    });
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=liquid-warning.xlsx'
     );
 
     await workbook.xlsx.write(res);
