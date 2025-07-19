@@ -7,7 +7,9 @@ import {
     getHistoryOperating,
     downloadHistoryOperating,
     getHistoryChemicalAddition,
-    downloadHistoryChemicalAddition
+    downloadHistoryChemicalAddition,
+    getHistoryWaterAddition,
+    downloadHistoryWaterAddition
 
 } from '@/controllers/history.controller';
 
@@ -25,6 +27,13 @@ router.route('/history/chemical-addition')
 .get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getHistoryChemicalAddition);
 // Route for downloading history operating as Excel 
 router.get('/history/chemical-addition/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadHistoryChemicalAddition);
+
+
+// history water addition 
+router.route('/history/water-addition')
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getHistoryWaterAddition);
+// Route for downloading history operating as Excel 
+router.get('/history/water-addition/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadHistoryWaterAddition);
 
 
 

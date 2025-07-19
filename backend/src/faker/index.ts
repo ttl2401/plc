@@ -6,6 +6,7 @@ import path from 'path';
 import { faker as infoFaker } from './info.faker';
 import { faker as historyOpFaker } from './history-operation.faker';
 import { faker as historyChAddFaker } from './history-chemical-addition.faker';
+import { faker as historyWtAddFaker } from './history-water-addition.faker';
 
 async function faker(): Promise<void> {
   try {
@@ -14,8 +15,9 @@ async function faker(): Promise<void> {
 
     // await infoFaker();
     // await historyOpFaker();
-    await historyChAddFaker();
-    
+    // await historyChAddFaker();
+    // await historyWtAddFaker();
+
   } catch (error) {
     console.error('❌ Faker data error:', error);
   } finally {
