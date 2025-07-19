@@ -42,5 +42,16 @@
   "settings": "Settings",
   "logout": "Logout",
   "english": "English",
-  "vietnamese": "Vietnamese"
+  "vietnamese": "Vietnamese",
+  "chemical_addition_type": "Chemical Addition Type",
+  "first_pump_time": "First Pump Time",
+  "pump_1_end_time": "Pump 1 End Time",
+  "pump_1_duration": "Pump 1 Duration (s)",
+  "pump_2_end_time": "Pump 2 End Time",
+  "pump_2_duration": "Pump 2 Duration (s)",
+  "pump_3_end_time": "Pump 3 End Time",
+  "pump_3_duration": "Pump 3 Duration (s)",
+  "ampere_consumption": "Ampere Consumption (A)",
+  "cannot_load_data": "Cannot load data",
+  "feature_coming_soon": "Feature coming soon"
 } 

@@ -45,7 +45,7 @@ export class HistoryOperatingService {
 
     const queryFilters: Record<string, any> = {};
 
-    if (action && ACTIONS.includes(action as any)) {
+    if (action) {
       queryFilters.action = action;
     }
     if (from || to) {

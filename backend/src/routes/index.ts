@@ -24,4 +24,5 @@ router.use(testRoutes);
 router.use(productRoutes);
 router.use(resourceRoutes);
 
+
 export default router; 

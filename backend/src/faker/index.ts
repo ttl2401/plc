@@ -5,6 +5,7 @@ import {glob } from 'glob';
 import path from 'path';
 import { faker as infoFaker } from './info.faker';
 import { faker as historyOpFaker } from './history-operation.faker';
+import { faker as historyChAddFaker } from './history-chemical-addition.faker';
 
 async function faker(): Promise<void> {
   try {
@@ -12,7 +13,9 @@ async function faker(): Promise<void> {
     await checkInfluxDB();
 
     // await infoFaker();
-    await historyOpFaker();
+    // await historyOpFaker();
+    await historyChAddFaker();
+    
   } catch (error) {
     console.error('❌ Faker data error:', error);
   } finally {

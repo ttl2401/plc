@@ -47,4 +47,46 @@ export const getHistoryOperation = async ({ page = 1, limit = 10, action = '', f
   );
   const data = await response.json();
   return data as FetchHistoryOperationResponse;
+};
+
+export interface Pump {
+  startedAt: string | null;
+  endedAt: string | null;
+}
+
+export interface HistoryChemicalAddition {
+  _id: string;
+  action: string;
+  date: string;
+  pumps: Pump[];
+  ampereConsumption: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface FetchHistoryChemicalAdditionResponse {
+  success: boolean;
+  message: string;
+  data: HistoryChemicalAddition[];
+  pagination: PaginateResult<HistoryChemicalAddition>;
+}
+
+export const getHistoryChemicalAddition = async ({ page = 1, limit = 10, action = '', from = '', to = '' }) : Promise<FetchHistoryChemicalAdditionResponse> => {
+  const params = new URLSearchParams();
+  params.append('page', String(page));
+  params.append('limit', String(limit));
+  if (action) params.append('action', action);
+  if (from) params.append('from', from);
+  if (to) params.append('to', to);
+
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/history/chemical-addition?${params.toString()}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  const data = await response.json();
+  return data as FetchHistoryChemicalAdditionResponse;
 }; 

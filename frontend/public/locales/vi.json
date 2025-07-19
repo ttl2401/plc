@@ -42,5 +42,16 @@
   "settings": "Cài đặt",
   "logout": "Đăng xuất",
   "english": "Tiếng Anh",
-  "vietnamese": "Tiếng Việt"
+  "vietnamese": "Tiếng Việt",
+  "chemical_addition_type": "Loại bổ sung",
+  "first_pump_time": "Giờ bổ sung",
+  "pump_1_end_time": "Giờ kết thúc bơm 1",
+  "pump_1_duration": "Thời gian bơm 1 (s)",
+  "pump_2_end_time": "Giờ kết thúc bơm 2",
+  "pump_2_duration": "Thời gian bơm 2 (s)",
+  "pump_3_end_time": "Giờ kết thúc bơm 3",
+  "pump_3_duration": "Thời gian bơm 3 (s)",
+  "ampere_consumption": "Dòng tiêu thụ (A)",
+  "cannot_load_data": "Không thể tải dữ liệu",
+  "feature_coming_soon": "Tính năng sắp ra mắt"
 } 
