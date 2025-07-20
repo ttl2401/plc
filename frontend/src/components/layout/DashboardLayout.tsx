@@ -101,10 +101,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   const mainMenuItems = [
-    {
+    /*{
       key: '/dashboard',
       icon: <DashboardOutlined />,
       label: <Link href="/dashboard">{t('dashboard')}</Link>,
+    },*/
+    {
+      key: '/plc-control',
+      icon: <SettingOutlined />, // You can change to another icon if preferred
+      label: <Link href="/plc-control">{t('plc_controller')}</Link>,
     },
     {
       key: '/products',
@@ -191,6 +196,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {
           key: '/extend/electric-current',
           label: <Link href="/extend/electric-current">{t('electric_current_info')}</Link>,
+        },
+        {
+          key: '/extend/card-scanner',
+          label: <Link href="/extend/card-scanner">{t('card_scanner')}</Link>,
         }
       ],
     },

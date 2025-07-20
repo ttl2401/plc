@@ -15,9 +15,9 @@ const LoginPage = () => {
   const { message } = App.useApp();
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect to PLC Control
     if (user) {
-      router.replace('/dashboard');
+      router.replace('/plc-control');
     }
   }, [user, router]);
 
@@ -27,7 +27,7 @@ const LoginPage = () => {
       await login(values.email, values.password);
       message.success('Login successful!');
       // Use replace to prevent going back to login page
-      router.replace('/dashboard');
+      router.replace('/plc-control');
     } catch (error) {
       console.error('Login failed:', error);
       message.error('Login failed. Please try again.');

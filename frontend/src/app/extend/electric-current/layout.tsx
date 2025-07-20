@@ -1,4 +1,4 @@
-export default function LoginLayout({ children }: { children: React.ReactNode }) {
+export default function ExtendElectricLayout({ children }: { children: React.ReactNode }) {
     return (
       <>
           {children}
