@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { useLanguage } from '@/components/layout/DashboardLayout';
 import { Card, Button, Typography } from 'antd';
 
-const ACTIVE_GREEN = '#00C48C'; // nearly green, adjust as needed
+const ACTIVE_GREEN = 'limegreen';
 const RED = '#FF0000';
 const { Title } = Typography;
 

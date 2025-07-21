@@ -115,7 +115,7 @@ const ProductsPage: React.FC = () => {
           <Image src={record.imageUrl} alt={record.name} width={50} height={50} style={{ objectFit: 'cover' }} />
           <Space direction="vertical" size={0}>
             <Text>{record.name}</Text>
-            <Text type="secondary" style={{ color: '#52c41a' }}>{t('product_code')}: {record.code}</Text>
+            <Text type="secondary" style={{ color: 'limegreen' }}>{t('product_code')}: {record.code}</Text>
           </Space>
         </Space>
       ),

@@ -42,7 +42,7 @@ const ProcessCard: React.FC<ProcessCardProps> = ({
     switch (status) {
       case 'high': return 'text-red-500';
       case 'low': return 'text-red-500';
-      default: return 'text-green-500';
+      default: return '';
     }
   };
 
@@ -78,7 +78,7 @@ const ProcessCard: React.FC<ProcessCardProps> = ({
         <div className="text-center">
           <div className="bg-gray-100 px-3 py-2 rounded border text-sm">
             <div className="text-xs text-gray-500 mb-1 text-center">Cài đặt</div>
-            <div className="font-bold text-green-600 text-center">{target}</div>
+            <div className="font-bold text-center" style={{ color: 'limegreen' }}>{target}</div>
           </div>
         </div>
       </div>

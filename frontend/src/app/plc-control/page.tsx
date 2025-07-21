@@ -128,9 +128,9 @@ const Index = () => {
                   <Card
                     hoverable
                     onClick={() => handleMachineToggle(machine.id)}
+                    className={machineStates[machine.id] ? 'bg-green-100' : ''}
                     style={{
-                      background: machineStates[machine.id] ? "#f6ffed" : "#fff",
-                      borderColor: machineStates[machine.id] ? "#b7eb8f" : "#f0f0f0",
+                      borderColor: machineStates[machine.id] ? "limegreen" : "#f0f0f0",
                       cursor: "pointer",
                       transition: "all 0.3s"
                     }}
@@ -145,8 +145,8 @@ const Index = () => {
                           width: 60,
                           height: 60,
                           borderRadius: "50%",
-                          border: `4px solid ${machineStates[machine.id] ? "#52c41a" : "#d9d9d9"}`,
-                          background: machineStates[machine.id] ? "#52c41a" : "#f5f6fa",
+                          border: `4px solid ${machineStates[machine.id] ? "limegreen" : "#d9d9d9"}`,
+                          background: machineStates[machine.id] ? "limegreen" : "#f5f6fa",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -165,7 +165,7 @@ const Index = () => {
                         style={{
                           fontSize: 13,
                           fontWeight: 600,
-                          color: machineStates[machine.id] ? "#389e0d" : "#bbb"
+                          color: machineStates[machine.id] ? "limegreen" : "#bbb"
                         }}
                       >
                         {machineStates[machine.id] ? t('plc_on') : t('plc_off')}

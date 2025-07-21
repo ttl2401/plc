@@ -150,19 +150,25 @@ const Index = () => {
     </div>
   );
 
-  // Process Card
+  const colors = [
+    'bg-green-100',
+    'bg-yellow-100',
+    'bg-gray-100',
+    'bg-red-100',
+  ];
+
   const ProcessCard = ({
     title,
     currentPerJig,
     totalCurrent,
     t1,
     t2,
-    backgroundColor
-  }: typeof processData[0]) => (
+    index
+  }: typeof processData[0] & { index: number }) => (
     <Card
       bordered={false}
+      className={colors[index % colors.length]}
       style={{
-        background: backgroundColor,
         marginBottom: 20,
         borderRadius: 16,
         boxShadow: "0 2px 12px #00000008"
@@ -326,7 +332,7 @@ const Index = () => {
             <StatusBar jigCarrier={49.6} pcsJig={30} />
             <Space direction="vertical" style={{ width: "100%" }} size={0}>
               {processData.map((process, index) => (
-                <ProcessCard key={index} {...process} />
+                <ProcessCard key={index} {...process} index={index} />
               ))}
             </Space>
           </Col>

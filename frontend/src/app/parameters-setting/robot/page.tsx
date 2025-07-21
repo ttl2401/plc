@@ -100,7 +100,7 @@ const RobotSettingsPage: React.FC = () => {
                 <div className="text-3xl font-bold text-center mb-6">{robot.name}</div>
                 {/* Rack Mode */}
                 <div className="mb-6 w-full">
-                  <div className="text-lg font-semibold text-center mb-4 text-green-600">{t('robot_rack_mode')}</div>
+                  <div className="text-lg font-semibold text-center mb-4" style={{ color: 'limegreen' }}>{t('robot_rack_mode')}</div>
                   {dwellFields.map((field) => (
                     <div className="flex flex-row items-center gap-2">
                         <span className="font-medium min-w-[140px] pb-5">{field.label}</span>
@@ -123,7 +123,7 @@ const RobotSettingsPage: React.FC = () => {
                 </div>
                 {/* Barrel Mode */}
                 <div className="w-full">
-                  <div className="text-lg font-semibold text-center mb-4 text-green-600">{t('robot_barrel_mode')}</div>
+                  <div className="text-lg font-semibold text-center mb-4" style={{ color: 'limegreen' }}>{t('robot_barrel_mode')}</div>
                   {dwellFields.map((field) => (
                     <div className="flex flex-row items-center gap-2">
                         <span className="font-medium min-w-[140px] pb-5">{field.label}</span>

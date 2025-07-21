@@ -71,7 +71,7 @@ const TimerDetailPage: React.FC = () => {
             {/* You can add a Select for tank group filter here if needed */}
             <div>
               <span className="font-semibold">{t('product_code')} </span>
-              <span className="text-green-600 font-bold text-lg">{timer.code}</span>
+              <span style={{ color: 'limegreen' }} className="font-bold text-lg">{timer.code}</span>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
