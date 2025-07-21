@@ -5,6 +5,7 @@ import { Table, Typography, message, Input, Button, Space, Image, Select } from 
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { fetchInformationPlating, handleExportExcel } from '@/services/informationService';
 import { ExportOutlined } from '@ant-design/icons';
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -16,6 +17,7 @@ const modeOptions = [
 ];
 
 const InformationElectroplatingPage: React.FC = () => {
+  const { t } = useLanguage();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
@@ -228,17 +230,17 @@ const InformationElectroplatingPage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">THÔNG TIN XI MẠ</Title>
+      <Title level={3} className="mb-6">{t('electroplating_information')}</Title>
       <div className="flex flex-row justify-between items-center mb-4">
         <Search
-          placeholder="Nhập mã sản phẩm hoặc tên sản phẩm để tìm kiếm"
+          placeholder={t('search_product_placeholder')}
           onSearch={handleSearch}
           allowClear
           style={{ width: 350 }}
         />
         <div className="flex flex-row gap-3">
           <Select
-            options={modeOptions}
+            options={modeOptions.map(opt => ({ ...opt, label: t(opt.label) }))}
             value={mode}
             onChange={handleModeChange}
             style={{ width: 180 }}
@@ -249,7 +251,7 @@ const InformationElectroplatingPage: React.FC = () => {
             loading={exportLoading}
             onClick={handleExportClick}
           >
-            Xuất Excel
+            {t('export_excel')}
           </Button>
         </div>
       </div>
@@ -264,7 +266,7 @@ const InformationElectroplatingPage: React.FC = () => {
           total: pagination.totalDocs,
           showSizeChanger: true,
           pageSizeOptions: ['10', '20', '50'],
-          showTotal: (total) => `Show result: ${total}`,
+          showTotal: (total) => `${t('show_result')}: ${total}`,
         }}
         onChange={handleTableChange}
         bordered
@@ -272,7 +274,6 @@ const InformationElectroplatingPage: React.FC = () => {
       />
       <style jsx global>{`
         table th {
-          
           padding: 8px 8px!important;
         }
       `}

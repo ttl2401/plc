@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { fetchTemperatureSettings, updateTemperatureSettings, TempSetting, FetchTempSettingsResponse } from '@/services/settingService';
 import { Form, InputNumber, Button, Typography, Row, Col, message, Spin, Card } from 'antd';
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title } = Typography;
 
 const TemperatureSettingsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [settings, setSettings] = useState<TempSetting[]>([]);
   const [temperatures, setTemperatures] = useState<{ [_id: string]: number | null }>({});
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ const TemperatureSettingsPage: React.FC = () => {
       setTemperatures(initialTemps);
       form.setFieldsValue(initialTemps);
     } catch (err) {
-      message.error('Không thể tải dữ liệu nhiệt độ');
+      message.error(t('cannot_load_temperature_data'));
     } finally {
       setLoading(false);
     }
@@ -45,13 +47,13 @@ const TemperatureSettingsPage: React.FC = () => {
     try {
       const response = await updateTemperatureSettings({ list });
       if (response.success) {
-        message.success('Áp dụng thành công!');
+        message.success(t('apply_success'));
         fetchSettings();
       } else {
-        message.error(response.message || 'Có lỗi xảy ra khi áp dụng.');
+        message.error(response.message || t('apply_error'));
       }
     } catch (err) {
-      message.error('Có lỗi xảy ra khi áp dụng.');
+      message.error(t('apply_error'));
     }
   };
 
@@ -59,7 +61,7 @@ const TemperatureSettingsPage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">CÀI ĐẶT THÔNG SỐ NHIỆT ĐỘ</Title>
+      <Title level={3} className="mb-6">{t('temperature_setting_title')}</Title>
       <Card className="bg-white p-8 rounded-lg shadow-md">
         <Form
           form={form}
@@ -91,7 +93,7 @@ const TemperatureSettingsPage: React.FC = () => {
               className="px-12 py-3 text-md"
               size="large"
             >
-              Áp dụng
+              {t('apply')}
             </Button>
           </div>
         </Form>

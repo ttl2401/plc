@@ -109,97 +109,101 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     {
       key: '/plc-control',
       icon: <SettingOutlined />, // You can change to another icon if preferred
-      label: <Link href="/plc-control">{t('plc_controller')}</Link>,
+      label: <Link href="/plc-control">{t('menu_plc_controller')}</Link>,
     },
     {
       key: '/products',
       icon: <ShoppingCartOutlined />,
-      label: <Link href="/products">{t('product')}</Link>,
+      label: <Link href="/products">{t('menu_product')}</Link>,
       meta: { roles: ['admin', 'manager'] },
     },
     {
       key: '/parameters-setting',
       icon: <BarChartOutlined />,
-      label: t('parameter_setting'),
+      label: t('menu_parameter_setting'),
       meta: { roles: ['admin', 'manager'] },
       children: [
         {
           key: '/parameters-setting/electroplating',
-          label: <Link href="/parameters-setting/electroplating">{t('electroplating_setting')}</Link>,
+          label: <Link href="/parameters-setting/electroplating">{t('menu_electroplating_setting')}</Link>,
         },
         {
           key: '/parameters-setting/temperature',
-          label: <Link href="/parameters-setting/temperature">{t('temperature_setting')}</Link>,
+          label: <Link href="/parameters-setting/temperature">{t('menu_temperature_setting')}</Link>,
         },
         {
           key: '/parameters-setting/timer',
-          label: <Link href="/parameters-setting/timer">{t('timer_setting')}</Link>,
+          label: <Link href="/parameters-setting/timer">{t('menu_timer_setting')}</Link>,
         },
         {
           key: '/parameters-setting/robot',
-          label: <Link href="/parameters-setting/robot">{t('robot_setting')}</Link>,
+          label: <Link href="/parameters-setting/robot">{t('menu_robot_setting')}</Link>,
         },
         {
           key: '/parameters-setting/chemistry',
-          label: <Link href="/parameters-setting/chemistry">{t('chemistry_setting')}</Link>,
+          label: <Link href="/parameters-setting/chemistry">{t('menu_chemistry_setting')}</Link>,
         },
       ],
     },
     {
       key: '/information',
       icon: <InfoCircleOutlined />,
-      label: t('information'),
+      label: t('menu_information'),
       meta: { roles: ['admin', 'manager'] },
       children: [
         {
           key: '/information/electroplating',
-          label: <Link href="/information/electroplating">{t('information_electroplating')}</Link>,
+          label: <Link href="/information/electroplating">{t('menu_information_electroplating')}</Link>,
         },
         {
           key: '/information/temperature',
-          label: <Link href="/information/temperature">{t('information_temperature')}</Link>,
+          label: <Link href="/information/temperature">{t('menu_information_temperature')}</Link>,
         },
         {
           key: '/information/timer',
-          label: <Link href="/information/timer">{t('information_timer')}</Link>,
+          label: <Link href="/information/timer">{t('menu_information_timer')}</Link>,
         }
       ],
     },
     {
       key: '/history',
       icon: <HistoryOutlined />,
-      label: t('history'),
+      label: t('menu_history'),
       children: [
         {
           key: '/history/operation',
-          label: <Link href="/history/operation">{t('operation_history')}</Link>,
+          label: <Link href="/history/operation">{t('menu_operation_history')}</Link>,
         },
         {
           key: '/history/chemical-addition',
-          label: <Link href="/history/chemical-addition">{t('chemical_addition_history')}</Link>,
+          label: <Link href="/history/chemical-addition">{t('menu_chemical_addition_history')}</Link>,
         },
         {
           key: '/history/water-addition',
-          label: <Link href="/history/water-addition">{t('water_addition_history')}</Link>,
+          label: <Link href="/history/water-addition">{t('menu_water_addition_history')}</Link>,
         },
         {
           key: '/history/liquid-warning',
-          label: <Link href="/history/liquid-warning">{t('liquid_warning_history')}</Link>,
+          label: <Link href="/history/liquid-warning">{t('menu_liquid_warning_history')}</Link>,
         },
       ],
     },
     {
       key: '/extend',
       icon: <BarsOutlined />,
-      label: t('extend'),
+      label: t('menu_extend'),
       children: [
         {
           key: '/extend/electric-current',
-          label: <Link href="/extend/electric-current">{t('electric_current_info')}</Link>,
+          label: <Link href="/extend/electric-current">{t('menu_electric_current_info')}</Link>,
         },
         {
           key: '/extend/card-scanner',
-          label: <Link href="/extend/card-scanner">{t('card_scanner')}</Link>,
+          label: <Link href="/extend/card-scanner">{t('menu_card_scanner')}</Link>,
+        },
+        {
+          key: '/extend/maintenance',
+          label: <Link href="/extend/maintenance">{t('menu_maintenance')}</Link>,
         }
       ],
     },
@@ -209,23 +213,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: <Link href="/profile">{t('profile')}</Link>,
+      label: <Link href="/profile">{t('menu_profile')}</Link>,
     },
     {
       key: '/users',
       icon: <TeamOutlined />,
-      label: <Link href="/users">{t('users')}</Link>,
+      label: <Link href="/users">{t('menu_users')}</Link>,
       meta: { roles: ['admin'] },
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: <Link href="/settings">{t('settings')}</Link>,
+      label: <Link href="/settings">{t('menu_settings')}</Link>,
     },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: t('logout'),
+      label: t('menu_logout'),
       onClick: () => {
         logout();
         router.push('/login');
@@ -250,13 +254,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const LANGUAGES = [
     {
       code: 'en',
-      label: t('english'),
+      label: t('menu_english'),
       short: 'EN',
       flag: '/flags/uk.svg',
     },
     {
       code: 'vi',
-      label: t('vietnamese'),
+      label: t('menu_vietnamese'),
       short: 'VI',
       flag: '/flags/vn.svg',
     },

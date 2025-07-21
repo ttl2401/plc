@@ -163,8 +163,8 @@ const HistoryWaterAdditionPage: React.FC = () => {
   ];
 
   return (
-    <div className="p-6">
-      <Title level={2}>{t('water_addition_history') || 'LỊCH SỬ BỔ SUNG NƯỚC'}</Title>
+    <div className="pt-0">
+      <Title level={3}>{t('water_addition_history') || 'LỊCH SỬ BỔ SUNG NƯỚC'}</Title>
       <div className="flex flex-wrap gap-4 items-center mb-4">
         <Select
           value={selectedAction}

@@ -145,8 +145,8 @@ const LiquidWarningHistoryPage: React.FC = () => {
   ];
 
   return (
-    <div className="p-6">
-      <Title level={2}>{t('liquid_warning_history') || 'CẢNH BÁO MỰC CHẤT LỎNG'}</Title>
+    <div className="pt-0">
+      <Title level={3}>{t('liquid_warning_history') || 'CẢNH BÁO MỰC CHẤT LỎNG'}</Title>
       <div className="flex flex-wrap gap-4 items-center mb-4">
         <Select
           value={selectedTank}

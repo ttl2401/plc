@@ -4,11 +4,13 @@ import React, { useEffect, useState } from "react";
 import { fetchProducts, fetchProductById } from "@/services/productService";
 import { fetchProductSetting, updateProductSetting, fetchProductSettingChanges } from "@/services/settingService";
 import { Input, Card, Typography, Spin, Row, Col, message, Radio, Image, Descriptions, Form, Button } from "antd";
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title } = Typography;
 const { Search } = Input;
 
 const ElectroplatingSettingsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -58,7 +60,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
       // Try to find product by code or name
       const res = await fetchProducts(1, 1, value);
       if (!res.data || res.data.length === 0) {
-        message.error("Không tìm thấy sản phẩm phù hợp");
+        message.error(t('product_not_found'));
         setSelectedProduct(null);
         setProductSetting(null);
         setProductHistory([]);
@@ -79,7 +81,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
         setRunMode(settingRes.data.mode);
       }
     } catch (err) {
-      message.error("Không thể tải thông tin sản phẩm");
+      message.error(t('failed_to_load_product_info'));
       setSelectedProduct(null);
       setProductSetting(null);
       setProductHistory([]);
@@ -132,13 +134,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
       };
       const res = await updateProductSetting(selectedProduct._id, payload);
       if (res.success) {
-        message.success('Áp dụng thành công!');
+        message.success(t('apply_successfully'));
         handleSearch(search);
       } else {
-        message.error(res.message || 'Có lỗi xảy ra khi áp dụng.');
+        message.error(res.message || t('error_occurred_when_applying'));
       }
     } catch (err) {
-      message.error('Có lỗi xảy ra khi áp dụng.');
+      message.error(t('error_occurred_when_applying'));
     }
   };
 
@@ -168,9 +170,9 @@ const ElectroplatingSettingsPage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">CÀI ĐẶT THÔNG SỐ XI MẠ</Title>
+      <Title level={3} className="mb-6">{t('electroplating_setting_title')}</Title>
       <Search
-        placeholder="Nhập mã sản phẩm hoặc tên sản phẩm để tìm kiếm"
+        placeholder={t('search_product_placeholder')}
         onSearch={handleSearch}
         onChange={e => setSearch(e.target.value)}
         value={search}
@@ -189,22 +191,22 @@ const ElectroplatingSettingsPage: React.FC = () => {
             {/* Chi tiết sản phẩm */}
             <Col xs={24} md={8}>
               <div className="bg-white rounded-xl border p-6 h-full">
-                <div className="text-xl font-bold mb-4">Chi tiết sản phẩm</div>
+                <div className="text-xl font-bold mb-4">{t('product_details')}</div>
                 <div className="flex flex-row gap-6 items-start">
                   {selectedProduct.imageUrl && (
                     <Image src={selectedProduct.imageUrl} width={180} height={180} alt={selectedProduct.name} style={{ objectFit: 'contain', borderRadius: 8 }} />
                   )}
                   <div className="flex flex-col gap-1 flex-1">
                     <div>
-                      <div className="text-sm mb-1">Mã sản phẩm</div>
+                      <div className="text-sm mb-1">{t('product_code')}</div>
                       <Input value={selectedProduct.code} disabled className="font-bold" />
                     </div>
                     <div>
-                      <div className="text-sm mb-1">Tên sản phẩm</div>
+                      <div className="text-sm mb-1">{t('product_name')}</div>
                       <Input value={selectedProduct.name} disabled />
                     </div>
                     <div>
-                      <div className="text-sm mb-1">Kích thước (dm2)</div>
+                      <div className="text-sm mb-1">{t('product_size')}</div>
                       <Input value={selectedProduct.sizeDm2} disabled />
                     </div>
                   </div>
@@ -214,18 +216,18 @@ const ElectroplatingSettingsPage: React.FC = () => {
             {/* Thông tin cập nhật */}
             <Col xs={24} md={8}>
               <div className="bg-white rounded-xl border p-6 h-full">
-                <div className="text-xl font-bold mb-4">Thông tin cập nhật</div>
+                <div className="text-xl font-bold mb-4">{t('update_info')}</div>
                 <div className="flex flex-col gap-1">
                   <div>
-                    <div className="text-sm mb-1">Line</div>
+                    <div className="text-sm mb-1">{t('line')}</div>
                     <Input value="1" disabled />
                   </div>
                   <div>
-                    <div className="text-sm mb-1">Người thực hiện</div>
+                    <div className="text-sm mb-1">{t('user_performed')}</div>
                     <Input value={productHistory[0]?.user?.name || ''} disabled  />
                   </div>
                   <div>
-                    <div className="text-sm mb-1">Ngày thực hiện</div>
+                    <div className="text-sm mb-1">{t('date_performed')}</div>
                     <Input value={productHistory[0] ? new Date(productHistory[0].createdAt).toLocaleDateString('vi-VN') : ''} disabled />
                   </div>
                 </div>
@@ -234,17 +236,17 @@ const ElectroplatingSettingsPage: React.FC = () => {
             {/* Chế độ chạy */}
             <Col xs={24} md={8}>
               <div className="bg-white rounded-xl border p-6 h-full flex flex-col items-center">
-                <div className="text-xl font-bold mb-4">Chế độ chạy</div>
+                <div className="text-xl font-bold mb-4">{t('run_mode')}</div>
                 <Radio.Group
                   value={runMode}
                   onChange={e => setRunMode(e.target.value)}
                   className="flex flex-col gap-1 w-full"
                 >
                   <Radio.Button value="rack" className={`w-full h-14 flex items-center font-bold justify-start px-6 border-2 ${runMode === 'rack' ? 'bg-[#181B39] text-white border-[#181B39]' : 'bg-white text-black border-gray-300'}`}> 
-                    {runMode === 'rack' && <span className="mr-2 text-green-500 text-xl">✔</span>} Chạy Treo
+                    {runMode === 'rack' && <span className="mr-2 text-green-500 text-xl">✔</span>} {t('run_suspended')}
                   </Radio.Button>
                   <Radio.Button value="barrel" className={`w-full h-14 flex items-center font-bold justify-start px-6 border-2 ${runMode === 'barrel' ? 'bg-[#181B39] text-white border-[#181B39]' : 'bg-white text-black border-gray-300'}`}> 
-                    {runMode === 'barrel' && <span className="mr-2 text-green-500 text-xl">✔</span>} Chạy Quay
+                    {runMode === 'barrel' && <span className="mr-2 text-green-500 text-xl">✔</span>} {t('run_rotating')}
                   </Radio.Button>
                 </Radio.Group>
               </div>
@@ -262,16 +264,16 @@ const ElectroplatingSettingsPage: React.FC = () => {
             >
               <div className="bg-white rounded-xl border p-4 mb-4">
                 <div className="flex flex-row justify-between items-center mb-4">
-                  <span className="text-xl font-bold">Nạp thông số</span>
+                  <span className="text-xl font-bold">{t('load_parameters')}</span>
                   <div className="flex flex-row gap-2">
                     <div className="flex flex-col items-center">
-                      <span className="font-bold mb-1">Số Jig/Carrier</span>
+                      <span className="font-bold mb-1">{t('number_of_jigs_per_carrier')}</span>
                       <Form.Item name="rack_jigCarrier" className="mb-0">
                         <Input type="number" min={0} className="w-24 h-10 text-center" />
                       </Form.Item>
                     </div>
                     <div className="flex flex-col items-center">
-                      <span className="font-bold mb-1">Số Pcs/Jig</span>
+                      <span className="font-bold mb-1">{t('number_of_pcs_per_jig')}</span>
                       <Form.Item name="rack_pcsJig" className="mb-0">
                         <Input type="number" min={0} className="w-24 h-10 text-center" />
                       </Form.Item>
@@ -284,13 +286,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
                       <div className="font-bold text-l mb-4 text-center">{tank.modelName}</div>
                       <div className="flex flex-row gap-1 mb-4 items-center justify-center">
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold">Dòng điện / Jig</span>
+                          <span className="font-bold">{t('current_current_per_jig')}</span>
                           <Form.Item name={`rack_tank_${idx}_currentJig`} className="mb-0">
                             <Input type="number" min={0} className="w-28 h-10 text-center" />
                           </Form.Item>
                         </div>
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold">Dòng điện tổng</span>
+                          <span className="font-bold">{t('total_current')}</span>
                           <Form.Item name={`rack_tank_${idx}_currentTotal`} className="mb-0">
                             <Input type="number" min={0} className="w-28 h-10 text-center bg-gray-200" disabled />
                           </Form.Item>
@@ -298,13 +300,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
                       </div>
                       <div className="flex flex-row gap-1 items-center justify-center">
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold">T1</span>
+                          <span className="font-bold">{t('t1')}</span>
                           <Form.Item name={`rack_tank_${idx}_T1`} className="mb-0">
                             <Input type="number" min={0} className="w-28 h-10 text-center" />
                           </Form.Item>
                         </div>
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold">T2</span>
+                          <span className="font-bold">{t('t2')}</span>
                           <Form.Item name={`rack_tank_${idx}_T2`} className="mb-0">
                             <Input type="number" min={0} className="w-28 h-10 text-center" />
                           </Form.Item>
@@ -315,13 +317,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
-                <span className="text-xl font-bold">Nạp Timer</span>
-                <span className="ml-8 font-semibold">Nickel Plating (600-3600)</span>
+                <span className="text-xl font-bold">{t('load_timer')}</span>
+                <span className="ml-8 font-semibold">{t('nickel_plating_timer')}</span>
                 <Form.Item name="rack_timer" className="mb-0 ml-2">
                   <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" />
                 </Form.Item>
                 <div className="flex-1 flex justify-end">
-                  <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">Áp dụng</Button>
+                  <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">{t('apply')}</Button>
                 </div>
               </div>
             </div>
@@ -331,9 +333,9 @@ const ElectroplatingSettingsPage: React.FC = () => {
             >
               <div className="bg-white rounded-xl border p-4 mb-4">
                 <div className="flex flex-row justify-between items-center mb-4">
-                  <span className="text-xl font-bold">Nạp thông số</span>
+                  <span className="text-xl font-bold">{t('load_parameters')}</span>
                   <div className="flex flex-col items-center">
-                    <span className="font-bold mb-1">Số Kg/Barrel</span>
+                    <span className="font-bold mb-1">{t('kg_per_barrel')}</span>
                     <Form.Item name="barrel_kgBarrel" className="mb-0">
                       <Input type="number" min={0} className="w-24 h-10 text-center" />
                     </Form.Item>
@@ -345,7 +347,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
                       <div className="font-bold  mb-4 text-center">{tank.modelName}</div>
                       <div className="flex flex-row mb-4 items-center">
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold">Dòng điện tổng</span>
+                          <span className="font-bold">{t('total_current')}</span>
                           <Form.Item name={`barrel_tank_${idx}_currentTotal`} className="mb-0">
                             <Input type="number" min={0} className="w-28 h-10 text-center" />
                           </Form.Item>
@@ -355,13 +357,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
                       </div>
                       <div className="flex flex-row gap-4 items-center">
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold">T1</span>
+                          <span className="font-bold">{t('t1')}</span>
                           <Form.Item name={`barrel_tank_${idx}_T1`} className="mb-0">
                             <Input type="number" min={0} className="w-28 h-10 text-center" />
                           </Form.Item>
                         </div>
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold">T2</span>
+                          <span className="font-bold">{t('t2')}</span>
                           <Form.Item name={`barrel_tank_${idx}_T2`} className="mb-0">
                             <Input type="number" min={0} className="w-28 h-10 text-center" />
                           </Form.Item>
@@ -372,13 +374,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
-                <span className="text-xl font-bold">Nạp Timer</span>
-                <span className="ml-8 font-semibold">Nickel Plating (600-3600)</span>
+                <span className="text-xl font-bold">{t('load_timer')}</span>
+                <span className="ml-8 font-semibold">{t('nickel_plating_timer')}</span>
                 <Form.Item name="barrel_timer" className="mb-0 ml-2">
                   <Input type="number" min={0} className="w-32 h-10 text-center" />
                 </Form.Item>
                 <div className="flex-1 flex justify-end">
-                  <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">Áp dụng</Button>
+                  <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">{t('apply')}</Button>
                 </div>
               </div>
             </div>

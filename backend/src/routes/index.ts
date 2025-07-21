@@ -9,6 +9,7 @@ import informationRoutes from './information.routes';
 import testRoutes from './test.routes';
 import resourceRoutes from './resource.routes';
 import historyRoutes from './history.routes';
+import systemSettingRoutes from './system-setting.routes';
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.use(historyRoutes);
 router.use(testRoutes);
 router.use(productRoutes);
 router.use(resourceRoutes);
+router.use(systemSettingRoutes);
 
 
 export default router; 

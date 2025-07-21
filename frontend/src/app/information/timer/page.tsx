@@ -49,14 +49,14 @@ const InformationTimerPage: React.FC = () => {
   const { t } = useLanguage();
 
   const tankLabels: Record<string, string> = {
-    washing: t("washing"),
-    boiling_degreasing: t("boiling_degreasing"),
-    electro_degreasing: t("electro_degreasing"),
-    pre_nickel_plating: t("pre_nickel_plating"),
-    nickel_plating: t("nickel_plating"),
-    ultrasonic_hot_rinse: t("ultrasonic_hot_rinse"),
-    hot_rinse: t("hot_rinse"),
-    dryer: t("dryer"),
+    washing: t('washing'),
+    boiling_degreasing: t('boiling_degreasing'),
+    electro_degreasing: t('electro_degreasing'),
+    pre_nickel_plating: t('pre_nickel_plating'),
+    nickel_plating: t('nickel_plating'),
+    ultrasonic_hot_rinse: t('ultrasonic_hot_rinse'),
+    hot_rinse: t('hot_rinse'),
+    dryer: t('dryer'),
   };
 
   const colorMap: Record<string, string> = {
@@ -261,10 +261,10 @@ const InformationTimerPage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">{t("timer_information")}</Title>
+      <Title level={3} className="mb-6">{t('timer_information')}</Title>
       <div className="flex flex-row justify-between items-center mb-4 gap-3">
         <Search
-          placeholder={t("search_product_placeholder")}
+          placeholder={t('search_product_placeholder')}
           onSearch={handleSearch}
           allowClear
           style={{ width: 350 }}
@@ -273,17 +273,17 @@ const InformationTimerPage: React.FC = () => {
           style={{ minWidth: 220 }}
           onChange={handleDateChange}
           value={dateRange as any}
-          placeholder={[t("select_time"), t("select_time")]} 
+          placeholder={[t('select_time'), t('select_time')]}
         />
         <Select
           style={{ minWidth: 180 }}
-          placeholder={t("select_tank_group")}
+          placeholder={t('select_tank_group')}
           allowClear
           value={selectedTank}
           onChange={handleTankChange}
           options={tankGroups?.map(tg => ({ label: tg.name, value: tg.key }))}
         />
-        <Button icon={<ExportOutlined />} type="default" onClick={() => handleExportExcel(searchText)}>{t("export_excel")}</Button>
+        <Button icon={<ExportOutlined />} type="default" onClick={() => handleExportExcel(searchText)}>{t('export_excel')}</Button>
       </div>
       <Table
         columns={columns}
@@ -296,7 +296,7 @@ const InformationTimerPage: React.FC = () => {
           total: pagination.totalDocs,
           showSizeChanger: true,
           pageSizeOptions: ["10", "20", "50"],
-          showTotal: (total) => `Show result: ${total}`,
+          showTotal: (total) => `${t('show_result')}: ${total}`,
         }}
         onChange={handleTableChange}
         bordered

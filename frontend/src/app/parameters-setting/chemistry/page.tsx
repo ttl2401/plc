@@ -3,10 +3,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { fetchChemistrySettings, updateChemistrySettings } from "@/services/settingService";
 import { Input, Typography, Spin, Button, Form, InputNumber, message } from "antd";
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title } = Typography;
 
 const ChemistrySettingsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [tanks, setTanks] = useState<any[]>([]);
   const [form] = Form.useForm();
@@ -22,6 +24,7 @@ const ChemistrySettingsPage: React.FC = () => {
         setTanks(res.data || []);
       } catch (err) {
         setTanks([]);
+        message.error(t('cannot_load_chemistry_data'));
       } finally {
         setLoading(false);
       }
@@ -113,10 +116,10 @@ const ChemistrySettingsPage: React.FC = () => {
     }));
     try {
       await updateChemistrySettings({ list: updatedList });
-      message.success("Cập nhật thành công!");
+      message.success(t('update_success'));
       animateProgress(updatedList);
     } catch (e) {
-      message.error("Cập nhật thất bại!");
+      message.error(t('update_failed'));
     }
   };
 
@@ -130,7 +133,7 @@ const ChemistrySettingsPage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">CÀI ĐẶT BỔ SUNG HÓA CHẤT LỎNG</Title>
+      <Title level={3} className="mb-6">{t('chemistry_setting_title')}</Title>
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         <div className="grid grid-cols-2 gap-8">
           {/* Render as rows: right | left */}
@@ -144,13 +147,13 @@ const ChemistrySettingsPage: React.FC = () => {
                       <div className="text-lg font-bold min-w-[160px] max-w-[180px] flex-shrink-0">{rightTanks[idx].name}</div>
                       <div className="flex flex-row items-center border-2 border-green-400 rounded-xl px-6 py-2 gap-8 flex-1">
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold text-sm mb-1">A/H Cần Bổ Sung</span>
+                          <span className="font-bold text-sm mb-1">{t('ah_to_add')}</span>
                           <Form.Item name={`AHToAdded_${rightTanks[idx]._id}`} noStyle rules={[{ required: true, type: 'number', min: 0 }]}> 
                             <InputNumber min={0} className="w-32 h-8 text-center" disabled={disabled} />
                           </Form.Item>
                         </div>
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold text-sm mb-1">A/H Cần Tiêu Thụ</span>
+                          <span className="font-bold text-sm mb-1">{t('ah_to_consume')}</span>
                           {renderProgress(rightTanks[idx]._id, form.getFieldValue(`AHToAdded_${rightTanks[idx]._id}`) || 0)}
                         </div>
                       </div>
@@ -164,7 +167,7 @@ const ChemistrySettingsPage: React.FC = () => {
                               {pump.pumpType === 'electric' && <span className="text-md">⚡</span>}
                               {pump.pumpName}
                             </div>
-                            <span className="text-sm mb-1">Thời gian bơm</span>
+                            <span className="text-sm mb-1">{t('pump_time')}</span>
                             <Form.Item name={`pumpTime_${rightTanks[idx]._id}_${pump.pumpKey}`} noStyle rules={[{ required: true, type: 'number', min: 0 }]}> 
                               <InputNumber min={0} className="w-24 h-8 text-center" />
                             </Form.Item>
@@ -179,7 +182,7 @@ const ChemistrySettingsPage: React.FC = () => {
                               {pump.pumpType === 'electric' && <span className="text-md">⚡</span>}
                               {pump.pumpName}
                             </div>
-                            <span className="text-sm mb-1">Thời gian bơm</span>
+                            <span className="text-sm mb-1">{t('pump_time')}</span>
                             <Form.Item name={`pumpTime_${rightTanks[idx]._id}_${pump.pumpKey}`} noStyle rules={[{ required: true, type: 'number', min: 0 }]}> 
                               <InputNumber min={0} className="w-32 h-8 text-center" />
                             </Form.Item>
@@ -198,13 +201,13 @@ const ChemistrySettingsPage: React.FC = () => {
                       <div className="text-lg font-bold min-w-[160px] max-w-[180px] flex-shrink-0">{leftTanks[idx].name}</div>
                       <div className="flex flex-row items-center border-2 border-green-400 rounded-xl px-6 py-2 gap-8 flex-1">
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold text-sm mb-1">A/H Cần Bổ Sung</span>
+                          <span className="font-bold text-sm mb-1">{t('ah_to_add')}</span>
                           <Form.Item name={`AHToAdded_${leftTanks[idx]._id}`} noStyle rules={[{ required: true, type: 'number', min: 0 }]}> 
                             <InputNumber min={0} className="w-32 h-8 text-center" disabled={disabled} />
                           </Form.Item>
                         </div>
                         <div className="flex flex-col items-center flex-1">
-                          <span className="font-bold text-sm mb-1">A/H Cần Tiêu Thụ</span>
+                          <span className="font-bold text-sm mb-1">{t('ah_to_consume')}</span>
                           {renderProgress(leftTanks[idx]._id, form.getFieldValue(`AHToAdded_${leftTanks[idx]._id}`) || 0)}
                         </div>
                       </div>
@@ -218,7 +221,7 @@ const ChemistrySettingsPage: React.FC = () => {
                               {pump.pumpType === 'electric' && <span className="text-md">⚡</span>}
                               {pump.pumpName}
                             </div>
-                            <span className="text-sm mb-1">Thời gian bơm</span>
+                            <span className="text-sm mb-1">{t('pump_time')}</span>
                             <Form.Item name={`pumpTime_${leftTanks[idx]._id}_${pump.pumpKey}`} noStyle rules={[{ required: true, type: 'number', min: 0 }]}> 
                               <InputNumber min={0} className="w-24 h-8 text-center" />
                             </Form.Item>
@@ -233,7 +236,7 @@ const ChemistrySettingsPage: React.FC = () => {
                               {pump.pumpType === 'electric' && <span className="text-md">⚡</span>}
                               {pump.pumpName}
                             </div>
-                            <span className="text-sm mb-1">Thời gian bơm</span>
+                            <span className="text-sm mb-1">{t('pump_time')}</span>
                             <Form.Item name={`pumpTime_${leftTanks[idx]._id}_${pump.pumpKey}`} noStyle rules={[{ required: true, type: 'number', min: 0 }]}> 
                               <InputNumber min={0} className="w-24 h-8 text-center" />
                             </Form.Item>
@@ -248,7 +251,7 @@ const ChemistrySettingsPage: React.FC = () => {
           ))}
         </div>
         <div className="flex w-full justify-end mt-8">
-          <Button type="primary" htmlType="submit" className="h-8 w-48 font-bold bg-black text-white border-black" disabled={disabled}>Áp dụng</Button>
+          <Button type="primary" htmlType="submit" className="h-8 w-48 font-bold bg-black text-white border-black" disabled={disabled}>{t('apply')}</Button>
         </div>
       </Form>
       <style jsx global>{`

@@ -8,6 +8,7 @@ import { fetchProducts, deleteProduct, type ProductDataType, downloadProductsExc
 import { SearchOutlined, PlusOutlined, ExportOutlined } from '@ant-design/icons';
 import ProductDetailForm from './detail';
 import moment from 'moment';
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -27,6 +28,7 @@ interface Pagination {
 
 const ProductsPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const [products, setProducts] = useState<ProductDataType[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState<Pagination>({
@@ -102,7 +104,7 @@ const ProductsPage: React.FC = () => {
       render: (_, record, index: number) => index + 1,
     },
     {
-      title: 'Sản phẩm',
+      title: t('product'),
       dataIndex: 'name',
       key: 'name',
       ellipsis: true,
@@ -113,39 +115,39 @@ const ProductsPage: React.FC = () => {
           <Image src={record.imageUrl} alt={record.name} width={50} height={50} style={{ objectFit: 'cover' }} />
           <Space direction="vertical" size={0}>
             <Text>{record.name}</Text>
-            <Text type="secondary" style={{ color: '#52c41a' }}>ID: {record.code}</Text>
+            <Text type="secondary" style={{ color: '#52c41a' }}>{t('product_code')}: {record.code}</Text>
           </Space>
         </Space>
       ),
     },
     {
-      title: 'Số dm²',
+      title: t('product_size_dm2'),
       dataIndex: 'sizeDm2',
       key: 'sizeDm2'
     },
     {
-      title: 'Ngày tạo',
+      title: t('created_at'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (value, record) => moment(value).format('DD/MM/YYYY'),
     },
     {
-      title: 'Ngày cập nhật',
+      title: t('updated_at'),
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       render: (value, record) => moment(value).format('DD/MM/YYYY'),
     },
     {
-      title: 'Hành động',
+      title: t('action'),
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
           <a onClick={() => {
             showModal(record._id);
-          }} style={{ cursor: 'pointer', color: '#1677ff', textDecoration: "underline" }}>Xem</a>
+          }} style={{ cursor: 'pointer', color: '#1677ff', textDecoration: "underline" }}>{t('view')}</a>
           <a onClick={() => {
             showDeleteConfirm(record._id, record.name);
-          }} style={{ cursor: 'pointer', color: '#001529', textDecoration: "underline" }}>In</a>
+          }} style={{ cursor: 'pointer', color: '#001529', textDecoration: "underline" }}>{t('print')}</a>
         </Space>
       ),
     },
@@ -235,12 +237,12 @@ const ProductsPage: React.FC = () => {
   };
 
   return (
-    <div>
-      <Title level={3}>DANH SÁCH SẢN PHẨM</Title>
+    <div className="pt-0">
+      <Title level={3}>{t('product_list')}</Title>
 
       <Flex justify="space-between" style={{ marginBottom: 16 }}>
         <Search
-          placeholder="Nhập mã hoặc tên sản phẩm để tìm kiếm"
+          placeholder={t('search_product_placeholder')}
           onSearch={handleSearch}
           onChange={(e) => setSearchText(e.target.value)}
           value={searchText}
@@ -248,10 +250,10 @@ const ProductsPage: React.FC = () => {
         />
         <Space>
           <Button type="default" style={{padding:16}} icon={<ExportOutlined />} onClick={handleExportExcel}>
-            Xuất Excel
+            {t('export_excel')}
           </Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreateNew}>
-            Tạo mới
+            {t('create_new')}
           </Button>
         </Space>
       </Flex>

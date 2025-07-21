@@ -3,10 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { fetchTimerSettings, updateTimerSettings, TimerSetting, FetchTimerSettingsResponse } from '@/services/settingService';
 import { Form, InputNumber, Button, Typography, Row, Col, message, Spin, Card } from 'antd';
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title } = Typography;
 
 const TimerSettingsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [settings, setSettings] = useState<TimerSetting[]>([]);
   const [timers, setTimers] = useState<{ [_id: string]: number | null }>({});
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ const TimerSettingsPage: React.FC = () => {
       setTimers(initialTimers);
       form.setFieldsValue(initialTimers);
     } catch (err) {
-      message.error('Không thể tải dữ liệu timer');
+      message.error(t('cannot_load_timer_data'));
     } finally {
       setLoading(false);
     }
@@ -46,13 +48,13 @@ const TimerSettingsPage: React.FC = () => {
     try {
       const response = await updateTimerSettings({ list });
       if (response.success) {
-        message.success('Áp dụng thành công!');
+        message.success(t('apply_success'));
         fetchSettings();
       } else {
-        message.error(response.message || 'Có lỗi xảy ra khi áp dụng.');
+        message.error(response.message || t('apply_error'));
       }
     } catch (err) {
-      message.error('Có lỗi xảy ra khi áp dụng.');
+      message.error(t('apply_error'));
     }
   };
 
@@ -60,7 +62,7 @@ const TimerSettingsPage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">CÀI ĐẶT THÔNG SỐ TIMER</Title>
+      <Title level={3} className="mb-6">{t('timer_setting_title')}</Title>
       <Card className="bg-white p-8 rounded-lg shadow-md">
         <Form
           form={form}
@@ -92,7 +94,7 @@ const TimerSettingsPage: React.FC = () => {
               className="px-12 py-3 text-md"
               size="large"
             >
-              Áp dụng
+              {t('apply')}
             </Button>
           </div>
         </Form>

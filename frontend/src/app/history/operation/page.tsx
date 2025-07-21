@@ -153,8 +153,8 @@ const HistoryOperationPage: React.FC = () => {
   ];
 
   return (
-    <div className="p-6">
-      <Title level={2}>{t('operation_history') || 'LỊCH SỬ VẬN HÀNH'}</Title>
+    <div className="pt-0">
+      <Title level={3}>{t('operation_history') || 'LỊCH SỬ VẬN HÀNH'}</Title>
       <div className="flex flex-wrap gap-4 items-center mb-4">
         <Select
           value={selectedAction}

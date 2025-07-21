@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { fetchInformationTimerDetail, TimerTankInfo } from "@/services/informationService";
 import { Select, Spin, Typography, message } from "antd";
 import dayjs from "dayjs";
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title } = Typography;
 
@@ -36,6 +37,7 @@ const getTankColor = (name: string) => {
 };
 
 const TimerDetailPage: React.FC = () => {
+  const { t } = useLanguage();
   const params = useParams();
   const code = params?.code as string;
   const [loading, setLoading] = useState(true);
@@ -57,8 +59,8 @@ const TimerDetailPage: React.FC = () => {
   }, [code]);
 
   return (
-    <div className="px-8 py-4">
-      <Title level={2} className="mb-4">THÔNG TIN THỜI GIAN</Title>
+    <div className="pt-0">
+      <Title level={3} className="mb-4">{t('timer_information')}</Title>
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Spin size="large" />
@@ -68,7 +70,7 @@ const TimerDetailPage: React.FC = () => {
           <div className="flex flex-row gap-6 items-center mb-6">
             {/* You can add a Select for tank group filter here if needed */}
             <div>
-              <span className="font-semibold">Mã Sản Phẩm </span>
+              <span className="font-semibold">{t('product_code')} </span>
               <span className="text-green-600 font-bold text-lg">{timer.code}</span>
             </div>
           </div>
@@ -80,19 +82,19 @@ const TimerDetailPage: React.FC = () => {
                 // Remove background color style
               >
                 <div className="w-full text-center font-bold text-lg bg-slate-800 text-white rounded-t-md py-2 mb-2">
-                  {getTankDisplayName(tank)}
+                  {tank.name}
                 </div>
                 <div className="flex flex-row w-full justify-between gap-2">
                   <div className="flex-1 bg-gray-100 rounded p-2 text-center">
-                    <div className="text-xs text-gray-500">Vào</div>
+                    <div className="text-xs text-gray-500">{t('time_in')}</div>
                     <div className="text-base">{tank.timeIn ? dayjs.unix(tank.timeIn).format("HH:mm:ss") : '-'}</div>
                   </div>
                   <div className="flex-1 bg-yellow-100 rounded p-2 text-center">
-                    <div className="text-xs text-gray-500">Trong</div>
+                    <div className="text-xs text-gray-500">{t('duration')}</div>
                     <div className="text-base">{tank.timeIn && tank.timeOut ? (tank.timeOut - tank.timeIn) : '-'}</div>
                   </div>
                   <div className="flex-1 bg-blue-100 rounded p-2 text-center">
-                    <div className="text-xs text-gray-500">Ra</div>
+                    <div className="text-xs text-gray-500">{t('time_out')}</div>
                     <div className="text-base">{tank.timeOut ? dayjs.unix(tank.timeOut).format("HH:mm:ss") : '-'}</div>
                   </div>
                 </div>
@@ -101,7 +103,7 @@ const TimerDetailPage: React.FC = () => {
           </div>
         </>
       ) : (
-        <div className="text-center text-gray-500">Không có dữ liệu</div>
+        <div className="text-center text-gray-500">{t('no_data')}</div>
       )}
     </div>
   );

@@ -6,6 +6,7 @@ import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { fetchInformationTemperature, InformationTemperature, TankInfo, handleExportExcelTemperature } from "@/services/informationService";
 import { ExportOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -44,6 +45,7 @@ const colorMap: Record<string, string> = {
 };
 
 const InformationTemperaturePage: React.FC = () => {
+  const { t } = useLanguage();
   const [data, setData] = useState<InformationTemperature[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -293,15 +295,15 @@ const InformationTemperaturePage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">THÔNG TIN NHIỆT ĐIỆN</Title>
+      <Title level={3} className="mb-6">{t('temperature_information')}</Title>
       <div className="flex flex-row justify-between items-center mb-4">
         <Search
-          placeholder="Nhập mã sản phẩm hoặc tên sản phẩm để tìm kiếm"
+          placeholder={t('search_product_placeholder')}
           onSearch={handleSearch}
           allowClear
           style={{ width: 350 }}
         />
-        <Button icon={<ExportOutlined />} type="default" onClick={() => handleExportExcel(searchText)}>Xuất Excel</Button>
+        <Button icon={<ExportOutlined />} type="default" onClick={() => handleExportExcel(searchText)}>{t('export_excel')}</Button>
       </div>
       <Table
         columns={columns}
@@ -314,7 +316,7 @@ const InformationTemperaturePage: React.FC = () => {
           total: pagination.totalDocs,
           showSizeChanger: true,
           pageSizeOptions: ["10", "20", "50"],
-          showTotal: (total) => `Show result: ${total}`,
+          showTotal: (total) => `${t('show_result')}: ${total}`,
         }}
         onChange={handleTableChange}
         bordered

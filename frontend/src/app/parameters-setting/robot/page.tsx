@@ -3,20 +3,23 @@
 import React, { useEffect, useState } from 'react';
 import { fetchRobotSettings, updateRobotSettings, RobotSetting, FetchRobotSettingsResponse } from '@/services/settingService';
 import { Form, InputNumber, Button, Typography, Row, Col, message, Spin, Card } from 'antd';
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const { Title } = Typography;
 
-const dwellFields = [
-  { key: 'topDwellTime', label: 'Thời gian chờ trên' },
-  { key: 'loweringWaitingTime', label: 'Thời gian chờ dưới' },
-  { key: 'bottomDwellTime', label: 'Thời gian chờ xuống' },
-];
 
 const RobotSettingsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [robots, setRobots] = useState<RobotSetting[]>([]);
   const [loading, setLoading] = useState(true);
   const [form] = Form.useForm();
 
+  const dwellFields = [
+    { key: 'topDwellTime', label: t('robot_top_dwell_time') },
+    { key: 'loweringWaitingTime', label: t('robot_lowering_waiting_time') },
+    { key: 'bottomDwellTime', label: t('robot_bottom_dwell_time') },
+  ];
+  
   const fetchSettings = async () => {
     setLoading(true);
     try {
@@ -32,7 +35,7 @@ const RobotSettingsPage: React.FC = () => {
       });
       form.setFieldsValue(initialValues);
     } catch (err) {
-      message.error('Không thể tải dữ liệu robot');
+      message.error(t('cannot_load_robot_data'));
     } finally {
       setLoading(false);
     }
@@ -62,13 +65,13 @@ const RobotSettingsPage: React.FC = () => {
     try {
       const response = await updateRobotSettings({ list });
       if (response.success) {
-        message.success('Lưu thay đổi thành công!');
+        message.success(t('save_success'));
         fetchSettings();
       } else {
-        message.error(response.message || 'Có lỗi xảy ra khi áp dụng.');
+        message.error(response.message || t('apply_error'));
       }
     } catch (err) {
-      message.error('Có lỗi xảy ra khi áp dụng.');
+      message.error(t('apply_error'));
     }
   };
 
@@ -80,7 +83,7 @@ const RobotSettingsPage: React.FC = () => {
 
   return (
     <div className="pt-0">
-      <Title level={3} className="mb-6">CÀI ĐẶT THÔNG SỐ ROBOT</Title>
+      <Title level={3} className="mb-6">{t('robot_setting_title')}</Title>
       <Form
         form={form}
         layout="vertical"
@@ -97,7 +100,7 @@ const RobotSettingsPage: React.FC = () => {
                 <div className="text-3xl font-bold text-center mb-6">{robot.name}</div>
                 {/* Rack Mode */}
                 <div className="mb-6 w-full">
-                  <div className="text-lg font-semibold text-center mb-4 text-green-600">Chế độ chạy treo</div>
+                  <div className="text-lg font-semibold text-center mb-4 text-green-600">{t('robot_rack_mode')}</div>
                   {dwellFields.map((field) => (
                     <div className="flex flex-row items-center gap-2">
                         <span className="font-medium min-w-[140px] pb-5">{field.label}</span>
@@ -109,20 +112,18 @@ const RobotSettingsPage: React.FC = () => {
                           colon={false}
                           label={null}
                         >
-                          
-                            <InputNumber
-                              min={0}
-                              className="w-40 h-10 text-xl font-medium text-center"
-                              addonAfter={<span className="text-base">s</span>}
-                            />
-                          
+                          <InputNumber
+                            min={0}
+                            className="w-40 h-10 text-xl font-medium text-center"
+                            addonAfter={<span className="text-base">s</span>}
+                          />
                         </Form.Item>
                     </div>
                   ))}
                 </div>
                 {/* Barrel Mode */}
                 <div className="w-full">
-                  <div className="text-lg font-semibold text-center mb-4 text-green-600">Chế độ chạy quay</div>
+                  <div className="text-lg font-semibold text-center mb-4 text-green-600">{t('robot_barrel_mode')}</div>
                   {dwellFields.map((field) => (
                     <div className="flex flex-row items-center gap-2">
                         <span className="font-medium min-w-[140px] pb-5">{field.label}</span>
@@ -134,13 +135,11 @@ const RobotSettingsPage: React.FC = () => {
                           colon={false}
                           label={null}
                         >
-                          
-                            <InputNumber
-                              min={0}
-                              className="w-40 h-10 text-xl font-medium text-center"
-                              addonAfter={<span className="text-base">s</span>}
-                            />
-                          
+                          <InputNumber
+                            min={0}
+                            className="w-40 h-10 text-xl font-medium text-center"
+                            addonAfter={<span className="text-base">s</span>}
+                          />
                         </Form.Item>
                     </div>
                   ))}
@@ -150,8 +149,8 @@ const RobotSettingsPage: React.FC = () => {
           ))}
         </Row>
         <div className="flex flex-row gap-4 justify-center mt-6">
-          <Button onClick={handleReset} className="h-12 w-40 text-lg border-black">Đặt lại</Button>
-          <Button type="primary" htmlType="submit" className="h-12 w-60 text-lg font-semibold">Lưu thay đổi</Button>
+          <Button onClick={handleReset} className="h-12 w-40 text-lg border-black">{t('reset')}</Button>
+          <Button type="primary" htmlType="submit" className="h-12 w-60 text-lg font-semibold">{t('save_changes')}</Button>
         </div>
       </Form>
     </div>

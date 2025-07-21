@@ -16,9 +16,9 @@ async function faker(): Promise<void> {
 
     // await infoFaker();
     // await historyOpFaker();
-    await historyChAddFaker();
-    await historyWtAddFaker();
-    await liquidWarnFaker();
+    // await historyChAddFaker();
+    // await historyWtAddFaker();
+    // await liquidWarnFaker();
 
   } catch (error) {
     console.error('❌ Faker data error:', error);
