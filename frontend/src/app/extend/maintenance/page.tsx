@@ -101,7 +101,7 @@ export default function MaintenancePage() {
           className="rounded-xl shadow flex flex-col items-center w-[400px] cursor-pointer border hover:shadow-lg transition"
           style={{ marginLeft: 0 }}
           onClick={handleCardClick}
-          bodyStyle={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 32 }}
+          styles={{ body: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 32 } }}
         >
           <div className="text-xl font-bold mb-2">{t('maintenance_filter_clean')}</div>
           <div className="text-2xl font-bold mb-6" style={{ color }}>{display}</div>

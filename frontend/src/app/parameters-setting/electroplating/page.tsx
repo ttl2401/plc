@@ -5,9 +5,14 @@ import { fetchProducts, fetchProductById } from "@/services/productService";
 import { fetchProductSetting, updateProductSetting, fetchProductSettingChanges } from "@/services/settingService";
 import { Input, Card, Typography, Spin, Row, Col, message, Radio, Image, Descriptions, Form, Button } from "antd";
 import { useLanguage } from '@/components/layout/DashboardLayout';
+import { QrcodeOutlined } from '@ant-design/icons';
+import dynamic from 'next/dynamic';
 
 const { Title } = Typography;
 const { Search } = Input;
+
+// Dynamically import QRScanner to avoid SSR issues
+const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
 
 const ElectroplatingSettingsPage: React.FC = () => {
   const { t } = useLanguage();
@@ -19,6 +24,8 @@ const ElectroplatingSettingsPage: React.FC = () => {
   const [infoLoading, setInfoLoading] = useState(false);
   const [runMode, setRunMode] = useState<'rack' | 'barrel'>('rack');
   const [form] = Form.useForm();
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerError, setScannerError] = useState('');
 
   useEffect(() => {
     if (productSetting) {
@@ -144,6 +151,40 @@ const ElectroplatingSettingsPage: React.FC = () => {
     }
   };
 
+  const handleScanClick = () => {
+    setScannerOpen(true);
+    setScannerError('');
+  };
+
+  const handleCloseScanner = () => {
+    setScannerOpen(false);
+    setScannerError('');
+  };
+
+  const handleScan = async (result: any) => {
+    if (result && result[0] && result[0].rawValue) {
+      setSearch(result[0].rawValue);
+      // Try to search for the product
+      setLoading(true);
+      setInfoLoading(true);
+      try {
+        const res = await fetchProducts(1, 1, result[0].rawValue);
+        if (!res.data || res.data.length === 0) {
+          setScannerError(t('scanner_no_data') || (t('lang') === 'vi' ? 'Không có dữ liệu, vui lòng quét mã hợp lệ' : 'Invalid data, please try again'));
+        } else {
+          setScannerOpen(false);
+          setScannerError('');
+          handleSearch(result[0].rawValue);
+        }
+      } catch (err) {
+        setScannerError(t('scanner_no_data') || (t('lang') === 'vi' ? 'Không có dữ liệu, vui lòng quét mã hợp lệ' : 'Invalid data, please try again'));
+      } finally {
+        setLoading(false);
+        setInfoLoading(false);
+      }
+    }
+  };
+
   const getTankColor = (idx: number) => {
     // Example: 0: green, 1: yellow, 2: gray, 3: red
     const colors = [
@@ -170,6 +211,75 @@ const ElectroplatingSettingsPage: React.FC = () => {
 
   return (
     <div className="pt-0">
+      {/* QR Scanner Popup */}
+      {scannerOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.6)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            position: 'relative',
+            background: '#fff',
+            borderRadius: 16,
+            padding: 24,
+            boxShadow: '0 4px 24px #00000022',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            minWidth: 320,
+            minHeight: 320,
+          }}>
+            <button
+              onClick={handleCloseScanner}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                background: '#ff2d2d',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                fontSize: 20,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 2,
+              }}
+              aria-label="Đóng camera"
+            >
+              ×
+            </button>
+            <div style={{ width: 320, height: 240, borderRadius: 8, background: '#000', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <QRScanner
+                onScan={handleScan}
+                onError={(error) => console.error("Error:", error)}
+                constraints={{ facingMode: 'environment' }}
+                styles={{
+                  container: { width: 320, height: 240 },
+                  video: { width: 320, height: 240, objectFit: 'cover', borderRadius: 8 },
+                }}
+              />
+            </div>
+            <div style={{ marginTop: 16, fontWeight: 500 }}>Đưa thẻ vào vùng quét</div>
+            {scannerError && (
+              <div style={{ color: 'red', marginTop: 12, fontWeight: 500, textAlign: 'center' }}>
+                {scannerError}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       <Title level={3} className="mb-6">{t('electroplating_setting_title')}</Title>
       <Search
         placeholder={t('search_product_placeholder')}
@@ -179,6 +289,12 @@ const ElectroplatingSettingsPage: React.FC = () => {
         allowClear
         loading={loading}
         style={{ width: 350, marginBottom: "24px" }}
+        suffix={
+          <QrcodeOutlined
+            style={{ fontSize: 22, color: '#6b7280', cursor: 'pointer' }}
+            onClick={handleScanClick}
+          />
+        }
       />
       
       {infoLoading ? (

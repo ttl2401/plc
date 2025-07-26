@@ -95,7 +95,8 @@ const RobotSettingsPage: React.FC = () => {
             <Col key={robot._id} xs={24} sm={24} md={8}>
               <Card
                 className={`rounded-xl shadow-md h-full flex flex-col items-center ${idx === 0 ? 'border-2 border-gray-800' : 'border border-gray-300'}`}
-                bodyStyle={{ width: '100%', padding: 24 }}
+                styles={{ body: { width: '100%', padding: 24 } }}
+                
               >
                 <div className="text-3xl font-bold text-center mb-6">{robot.name}</div>
                 {/* Rack Mode */}

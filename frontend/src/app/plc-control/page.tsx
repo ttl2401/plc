@@ -75,7 +75,7 @@ const Index = () => {
             title={
               <div style={{ textAlign: "center", fontWeight: 600 }}>{t('plc_checklist_card_title')}</div>
             }
-            bordered
+            variant="outlined"
           >
             {checklistItems.map(item => (
               <div
@@ -120,7 +120,7 @@ const Index = () => {
             title={
               <div style={{ textAlign: "center", fontWeight: 600 }}>{t('plc_control_switch_title')}</div>
             }
-            bordered
+            variant="outlined"
           >
             <Row gutter={[16, 16]}>
               {machines.map(machine => (
@@ -134,7 +134,8 @@ const Index = () => {
                       cursor: "pointer",
                       transition: "all 0.3s"
                     }}
-                    bodyStyle={{ padding: 20, textAlign: "center" }}
+   
+                    styles={{ body: { padding: 20, textAlign: "center" } }}
                   >
                     <div style={{ fontWeight: 500, color: machine.color === "red" ? "#ff4d4f" : "#222", marginBottom: 12 }}>
                       {machine.name}

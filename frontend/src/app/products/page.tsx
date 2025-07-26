@@ -5,10 +5,14 @@ import { Table, Typography, message, Input, Button, Space, Flex, Modal, Image } 
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchProducts, deleteProduct, type ProductDataType, downloadProductsExcel } from '@/services/productService';
-import { SearchOutlined, PlusOutlined, ExportOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined, ExportOutlined, QrcodeOutlined } from '@ant-design/icons';
 import ProductDetailForm from './detail';
 import moment from 'moment';
 import { useLanguage } from '@/components/layout/DashboardLayout';
+import dynamic from 'next/dynamic';
+
+// Dynamically import QRScanner to avoid SSR issues
+const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -47,6 +51,8 @@ const ProductsPage: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | undefined>(undefined);
   const [sortOrder, setSortOrder] = useState<string | undefined>(undefined);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerError, setScannerError] = useState('');
 
   const loadProducts = async () => {
     if (!isAuthenticated) return;
@@ -236,8 +242,93 @@ const ProductsPage: React.FC = () => {
     }
   };
 
+  const handleScanClick = () => {
+    setScannerOpen(true);
+  };
+
+  const handleCloseScanner = () => {
+    setScannerOpen(false);
+  };
+
+  const handleScan = async (result: any) => {
+    if (result && result[0] && result[0].rawValue) {
+      setSearchText(result[0].rawValue);
+      setScannerOpen(false);
+    }
+  };
+
   return (
     <div className="pt-0">
+      {/* QR Scanner Popup */}
+      {scannerOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.6)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            position: 'relative',
+            background: '#fff',
+            borderRadius: 16,
+            padding: 24,
+            boxShadow: '0 4px 24px #00000022',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            minWidth: 320,
+            minHeight: 320,
+          }}>
+            <button
+              onClick={handleCloseScanner}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                background: '#ff2d2d',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                fontSize: 20,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 2,
+              }}
+              aria-label="Đóng camera"
+            >
+              ×
+            </button>
+            <div style={{ width: 320, height: 240, borderRadius: 8, background: '#000', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <QRScanner
+                onScan={handleScan}
+                onError={(error) => console.error("Error:", error)}
+                constraints={{ facingMode: 'environment' }}
+                styles={{
+                  container: { width: 320, height: 240 },
+                  video: { width: 320, height: 240, objectFit: 'cover', borderRadius: 8 },
+                }}
+              />
+            </div>
+            <div style={{ marginTop: 16, fontWeight: 500 }}>Đưa thẻ vào vùng quét</div>
+            {scannerError && (
+              <div style={{ color: 'red', marginTop: 12, fontWeight: 500, textAlign: 'center' }}>
+                {scannerError}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <Title level={3}>{t('product_list')}</Title>
 
       <Flex justify="space-between" style={{ marginBottom: 16 }}>
@@ -247,6 +338,12 @@ const ProductsPage: React.FC = () => {
           onChange={(e) => setSearchText(e.target.value)}
           value={searchText}
           style={{ width: 350 }}
+          suffix={
+            <QrcodeOutlined 
+              style={{ fontSize: 22, color: '#6b7280', cursor: 'pointer' }} 
+              onClick={handleScanClick}
+            />
+          }
         />
         <Space>
           <Button type="default" style={{padding:16}} icon={<ExportOutlined />} onClick={handleExportExcel}>

@@ -201,5 +201,6 @@
   "nickel_plating_timer": "Nickel Plating (600-3600)",
   "kg_per_barrel": "Số Kg/Barrel",
   "temperature_setting_title": "CÀI ĐẶT THÔNG SỐ NHIỆT ĐỘ",
-  "cannot_load_temperature_data": "Không thể tải dữ liệu nhiệt độ"
+  "cannot_load_temperature_data": "Không thể tải dữ liệu nhiệt độ",
+  "scanner_no_data" : "Không có dữ liệu, vui lòng quét mã hợp lệ"
 } 

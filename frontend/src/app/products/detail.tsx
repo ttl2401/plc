@@ -56,6 +56,7 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
 
   useEffect(() => {
     if (visible) {
+      setActiveTabKey('1');
       if (productId) {
         setLoading(true);
         setFormEditable(false);
@@ -66,6 +67,7 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
         setQrCodeValue('');
         setFormEditable(true);
         setCurrentProductImage(undefined);
+        setProductChanges([]);
       }
     }
   }, [visible, productId, form, onCancel]);

@@ -12,6 +12,7 @@
     "@ant-design/icons": "^6.0.0",
     "@ant-design/plots": "^2.4.0",
     "@types/js-cookie": "^3.0.6",
+    "@yudiel/react-qr-scanner": "^2.3.1",
     "antd": "5.25.4",
     "axios": "^1.9.0",
     "dayjs": "^1.11.13",

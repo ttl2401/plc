@@ -56,7 +56,6 @@
   "cannot_load_data": "Cannot load data",
   "feature_coming_soon": "Feature coming soon",
   "date": "Date",
-  "action": "Action",
   "times": "Times",
   "started_at": "Started At",
   "ended_at": "Ended At",
@@ -201,5 +200,6 @@
   "nickel_plating_timer": "Nickel Plating (600-3600)",
   "kg_per_barrel": "Kg/Barrel",
   "temperature_setting_title": "TEMPERATURE PARAMETER SETTINGS",
-  "cannot_load_temperature_data": "Cannot load temperature data"
+  "cannot_load_temperature_data": "Cannot load temperature data",
+  "scanner_no_data" : "No data, please try again"
 } 

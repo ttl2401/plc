@@ -1,14 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useRef } from "react";
+import dynamic from 'next/dynamic';
 import { Button, Card, Input, Avatar, Row, Col, Space } from "antd";
 import { UserOutlined, SearchOutlined, QrcodeOutlined } from "@ant-design/icons";
 import Sidebar from '@/components/extend-information/Sidebar';
 
 // Sidebar lines are handled by Sidebar component
 
+// Dynamically import QRScanner to avoid SSR issues
+const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
+
 const Index = () => {
   const [selectedLine, setSelectedLine] = useState('01');
+  const [scannerOpen, setScannerOpen] = useState(false);
 
   const productData = {
     productImage: "https://xima-api.ztechhub.net/product/2025-07-08/72a8070e-2d45-4aa1-b019-e0cecc0039df.jpg",
@@ -54,22 +59,19 @@ const Index = () => {
   ];
 
   const handleScanClick = async () => {
-    try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        });
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.play();
-        setTimeout(() => {
-          stream.getTracks().forEach(track => track.stop());
-        }, 5000);
-      } else {
-        alert('Camera access is not supported on this device/browser');
-      }
-    } catch (error) {
-      alert('Unable to access camera. Please check permissions.');
+    setScannerOpen(true);
+  };
+
+  const handleCloseScanner = () => {
+    setScannerOpen(false);
+  };
+
+  const handleScan = (result: any) => {
+    console.log('QR Result:', result)
+    if (result && result[0] && result[0].rawValue) {
+      alert(`QR Code: ${result[0].rawValue}`);
+      console.log('QR Code:', result[0].rawValue);
+      setScannerOpen(false);
     }
   };
 
@@ -82,14 +84,16 @@ const Index = () => {
     mode
   }: typeof productData) => (
     <Card
-      bordered
+      variant="outlined"
       style={{
         marginBottom: 24,
         borderRadius: 16,
         boxShadow: "0 2px 12px #00000008",
         padding: 0
       }}
-      bodyStyle={{ padding: 24 }}
+      styles={{
+        body: { padding: 24 } 
+      }}
     >
       <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 16 }}>Chi tiết sản phẩm</div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
@@ -129,7 +133,7 @@ const Index = () => {
           padding: 0,
           boxShadow: "0 2px 12px #00000008"
         }}
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <div style={{ fontWeight: 500, fontSize: 18, padding: "12px 0" }}>Số Jig/Carrier</div>
         <div style={{ fontWeight: 700, fontSize: 24, color: "#ff2d2d", paddingBottom: 12 }}>{jigCarrier}</div>
@@ -142,7 +146,7 @@ const Index = () => {
           padding: 0,
           boxShadow: "0 2px 12px #00000008"
         }}
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <div style={{ fontWeight: 500, fontSize: 18, padding: "12px 0" }}>Số Pcs/Jig</div>
         <div style={{ fontWeight: 700, fontSize: 24, color: "#ff2d2d", paddingBottom: 12 }}>{pcsJig}</div>
@@ -166,14 +170,16 @@ const Index = () => {
     index
   }: typeof processData[0] & { index: number }) => (
     <Card
-      bordered={false}
+      variant="borderless"
       className={colors[index % colors.length]}
       style={{
         marginBottom: 20,
         borderRadius: 16,
         boxShadow: "0 2px 12px #00000008"
       }}
-      bodyStyle={{ padding: 24 }}
+      styles={{
+        body: { padding: 24 }
+      }}
     >
       <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 16 }}>{title}</div>
       <div style={{ display: "flex", gap: 16 }}>
@@ -228,6 +234,70 @@ const Index = () => {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f5f5f5" }}>
+      {/* Camera Scanner Popup */}
+      {scannerOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.6)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            position: 'relative',
+            background: '#fff',
+            borderRadius: 16,
+            padding: 24,
+            boxShadow: '0 4px 24px #00000022',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            minWidth: 320,
+            minHeight: 320,
+          }}>
+            <button
+              onClick={handleCloseScanner}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                background: '#ff2d2d',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '50%',
+                width: 36,
+                height: 36,
+                fontSize: 20,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 2,
+              }}
+              aria-label="Đóng camera"
+            >
+              ×
+            </button>
+            <div style={{ width: 320, height: 240, borderRadius: 8, background: '#000', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <QRScanner
+                onScan={handleScan}
+                onError={(error) => console.error("Error:", error)}
+                constraints={{ facingMode: 'environment' }}
+                styles={{
+                  container: { width: 320, height: 240 },
+                  video: { width: 320, height: 240, objectFit: 'cover', borderRadius: 8 },
+                }}
+              />
+            </div>
+            <div style={{ marginTop: 16, fontWeight: 500 }}>Đưa thẻ vào vùng quét</div>
+          </div>
+        </div>
+      )}
       <Sidebar selectedLine={selectedLine} onLineSelect={setSelectedLine} />
 
       <div style={{ flex: 1, padding: "32px 40px 0 40px" }}>
