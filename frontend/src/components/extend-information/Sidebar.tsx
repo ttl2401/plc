@@ -27,15 +27,16 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedLine, onLineSelect }) => {
       </div>
       
       <div className="flex-1 p-2">
-        {lines.map((line) => (
+        {lines.map((line, idx) => (
           <button
             key={line}
-            onClick={() => onLineSelect(line)}
+            onClick={() => idx === 0 ? onLineSelect(line) : undefined}
+            disabled={idx !== 0}
             className={`w-full mb-2 p-3 rounded-lg transition-colors ${
               selectedLine === line
                 ? 'bg-blue-600 text-white'
                 : 'bg-slate-700 hover:bg-slate-600 text-gray-300'
-            }`}
+            } ${idx !== 0 ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
             <div className="text-xs text-gray-400">LINE</div>
             <div className="text-xl font-bold">{line}</div>

@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { Button, Card, Input, Avatar, Row, Col, Space } from "antd";
 import { UserOutlined, SearchOutlined, QrcodeOutlined } from "@ant-design/icons";
 import Sidebar from '@/components/extend-information/Sidebar';
+import { fetchProducts } from '@/services/productService';
 
 // Sidebar lines are handled by Sidebar component
 
@@ -14,6 +15,9 @@ const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => m
 const Index = () => {
   const [selectedLine, setSelectedLine] = useState('01');
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [product, setProduct] = useState<any>(null);
 
   const productData = {
     productImage: "https://xima-api.ztechhub.net/product/2025-07-08/72a8070e-2d45-4aa1-b019-e0cecc0039df.jpg",
@@ -58,6 +62,28 @@ const Index = () => {
     }
   ];
 
+  const handleSearch = async (value: string) => {
+    setSearch(value);
+    if (!value || value.length < 2) {
+      setProduct(null);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetchProducts(1, 1, value);
+      if (!res.data || res.data.length === 0) {
+        setProduct(null);
+        setLoading(false);
+        return;
+      }
+      setProduct(res.data[0]);
+    } catch (err) {
+      setProduct(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleScanClick = async () => {
     setScannerOpen(true);
   };
@@ -66,12 +92,10 @@ const Index = () => {
     setScannerOpen(false);
   };
 
-  const handleScan = (result: any) => {
-    console.log('QR Result:', result)
+  const handleScan = async (result: any) => {
     if (result && result[0] && result[0].rawValue) {
-      alert(`QR Code: ${result[0].rawValue}`);
-      console.log('QR Code:', result[0].rawValue);
       setScannerOpen(false);
+      await handleSearch(result[0].rawValue);
     }
   };
 
@@ -308,9 +332,12 @@ const Index = () => {
           </Col>
           <Col>
             <Space size="large">
-              <Input
+              <Input.Search
                 placeholder="Nhập mã hoặc quét thẻ"
+                onSearch={handleSearch}
+                onChange={e => setSearch(e.target.value)}
                 size="large"
+                value={search}
                 style={{
                   width: 400,
                   background: "#f5f5f5",
@@ -319,94 +346,107 @@ const Index = () => {
                   height: 48
                 }}
                 suffix={
-                  <Space>
-                    <Button
-                      icon={<QrcodeOutlined />}
-                      type="text"
-                      style={{
-                        background: "#181f3a",
-                        color: "#fff",
-                        borderRadius: "50%",
-                        width: 40,
-                        height: 40,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center"
-                      }}
-                      onClick={handleScanClick}
-                    />
-                    <Button
-                      icon={<SearchOutlined />}
-                      type="text"
-                      style={{
-                        background: "#fff",
-                        color: "#181f3a",
-                        borderRadius: "50%",
-                        width: 40,
-                        height: 40,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        border: "1px solid #181f3a"
-                      }}
-                    />
-                  </Space>
+                  <QrcodeOutlined 
+                    style={{ fontSize: 22, color: '#6b7280', cursor: 'pointer' }} 
+                    onClick={handleScanClick}
+                  />
                 }
               />
+
+              
               <Avatar size={48} icon={<UserOutlined />} style={{ background: "#181f3a" }} />
             </Space>
           </Col>
         </Row>
+        {product && (
+          <div className="product-detail">
+            <Row gutter={32}>
+              {/* Left Column - Product Info */}
+              <Col span={7}>
+                <Card
+                  variant="outlined"
+                  style={{
+                    marginBottom: 24,
+                    borderRadius: 16,
+                    boxShadow: "0 2px 12px #00000008",
+                    padding: 0
+                  }}
+                  styles={{
+                    body: { padding: 24 }
+                  }}
+                >
+                  <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 16 }}>Chi tiết sản phẩm</div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+                    <img
+                      alt={product.name}
+                      src={product.imageUrl}
+                      style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 8, borderRadius: 8, background: "#f5f5f5" }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Mã sản phẩm</div>
+                      <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{product.code}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Tên sản phẩm</div>
+                      <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{product.name}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Kích thước (dm2)</div>
+                      <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{product.sizeDm2}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Chế độ chạy</div>
+                      <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>Chạy treo</div>
+                    </div>
+                  </div>
+                </Card>
+                <Space direction="vertical" style={{ width: "100%" }} size={16}>
+                  <Button
+                    type="primary"
+                    size="large"
+                    style={{
+                      width: "100%",
+                      height: 56,
+                      fontSize: 20,
+                      fontWeight: 700,
+                      background: "#181f3a",
+                      borderRadius: 12,
+                      border: "none"
+                    }}
+                  >
+                    ĐỒNG Ý
+                  </Button>
+                  <Button
+                    size="large"
+                    style={{
+                      width: "100%",
+                      height: 56,
+                      fontSize: 20,
+                      fontWeight: 700,
+                      borderRadius: 12,
+                      border: "2px solid #181f3a",
+                      background: "#fff",
+                      color: "#181f3a"
+                    }}
+                  >
+                    Hủy Bỏ
+                  </Button>
+                </Space>
+              </Col>
 
-        <Row gutter={32}>
-          {/* Left Column - Product Info and Action Buttons */}
-          <Col span={7}>
-            <ProductInfoPanel {...productData} />
-            <Space direction="vertical" style={{ width: "100%" }} size={16}>
-              <Button
-                type="primary"
-                size="large"
-                style={{
-                  width: "100%",
-                  height: 56,
-                  fontSize: 20,
-                  fontWeight: 700,
-                  background: "#181f3a",
-                  borderRadius: 12,
-                  border: "none"
-                }}
-              >
-                ĐỒNG Ý
-              </Button>
-              <Button
-                size="large"
-                style={{
-                  width: "100%",
-                  height: 56,
-                  fontSize: 20,
-                  fontWeight: 700,
-                  borderRadius: 12,
-                  border: "2px solid #181f3a",
-                  background: "#fff",
-                  color: "#181f3a"
-                }}
-              >
-                Hủy Bỏ
-              </Button>
-            </Space>
-          </Col>
-
-          {/* Right Column - Process Info */}
-          <Col span={17}>
-            <div style={{ fontWeight: 700, fontSize: 24, marginBottom: 8 }}>Thông số xi mạ</div>
-            <StatusBar jigCarrier={49.6} pcsJig={30} />
-            <Space direction="vertical" style={{ width: "100%" }} size={0}>
-              {processData.map((process, index) => (
-                <ProcessCard key={index} {...process} index={index} />
-              ))}
-            </Space>
-          </Col>
-        </Row>
+              {/* Right Column - Process Info (static, as before) */}
+              <Col span={17}>
+                <div style={{ fontWeight: 700, fontSize: 24, marginBottom: 8 }}>Thông số xi mạ</div>
+                <StatusBar jigCarrier={49.6} pcsJig={30} />
+                <Space direction="vertical" style={{ width: "100%" }} size={0}>
+                  {processData.map((process, index) => (
+                    <ProcessCard key={index} {...process} index={index} />
+                  ))}
+                </Space>
+              </Col>
+            </Row>
+          </div>
+        )}
       </div>
     </div>
   );
