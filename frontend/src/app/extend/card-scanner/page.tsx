@@ -6,6 +6,7 @@ import { Button, Card, Input, Avatar, Row, Col, Space } from "antd";
 import { UserOutlined, SearchOutlined, QrcodeOutlined } from "@ant-design/icons";
 import Sidebar from '@/components/extend-information/Sidebar';
 import { fetchProducts } from '@/services/productService';
+import { fetchProductSetting } from '@/services/settingService';
 
 // Sidebar lines are handled by Sidebar component
 
@@ -18,6 +19,8 @@ const Index = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<any>(null);
+  const [runMode, setRunMode] = useState<string | null>(null);
+  const [rackPlating, setRackPlating] = useState<any>(null);
 
   const productData = {
     productImage: "https://xima-api.ztechhub.net/product/2025-07-08/72a8070e-2d45-4aa1-b019-e0cecc0039df.jpg",
@@ -62,8 +65,18 @@ const Index = () => {
     }
   ];
 
+  // Add color array for tank blocks
+  const tankColors = [
+    '#d9f7be', // green
+    '#fffbe6', // yellow
+    '#f5f5f5', // gray
+    '#ffe1e6', // red
+  ];
+
   const handleSearch = async (value: string) => {
     setSearch(value);
+    setRunMode(null);
+    setRackPlating(null);
     if (!value || value.length < 2) {
       setProduct(null);
       return;
@@ -77,8 +90,21 @@ const Index = () => {
         return;
       }
       setProduct(res.data[0]);
+      setRunMode(null);
+      // fetchProductSetting
+      const settingRes = await fetchProductSetting(res.data[0]._id, 1);
+      if (settingRes.data && settingRes.data.mode) {
+        setRunMode(settingRes.data.mode);
+        if (settingRes.data.mode === 'rack') {
+          setRackPlating(settingRes.data.rackPlating);
+        } else {
+          setRackPlating(null);
+        }
+      }
     } catch (err) {
       setProduct(null);
+      setRunMode(null);
+      setRackPlating(null);
     } finally {
       setLoading(false);
     }
@@ -178,6 +204,7 @@ const Index = () => {
     </div>
   );
 
+  // Use Tailwind class names for tank block backgrounds
   const colors = [
     'bg-green-100',
     'bg-yellow-100',
@@ -334,10 +361,7 @@ const Index = () => {
             <Space size="large">
               <Input.Search
                 placeholder="Nhập mã hoặc quét thẻ"
-                onSearch={handleSearch}
-                onChange={e => setSearch(e.target.value)}
                 size="large"
-                value={search}
                 style={{
                   width: 400,
                   background: "#f5f5f5",
@@ -345,6 +369,11 @@ const Index = () => {
                   fontSize: 18,
                   height: 48
                 }}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                onSearch={handleSearch}
+                loading={loading}
+                enterButton={<Button icon={<SearchOutlined />} />}
                 suffix={
                   <QrcodeOutlined 
                     style={{ fontSize: 22, color: '#6b7280', cursor: 'pointer' }} 
@@ -352,8 +381,6 @@ const Index = () => {
                   />
                 }
               />
-
-              
               <Avatar size={48} icon={<UserOutlined />} style={{ background: "#181f3a" }} />
             </Space>
           </Col>
@@ -396,7 +423,7 @@ const Index = () => {
                     </div>
                     <div>
                       <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Chế độ chạy</div>
-                      <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>Chạy treo</div>
+                      <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{runMode === 'rack' ? 'Chạy treo' : runMode === 'barrel' ? 'Chạy quay' : ''}</div>
                     </div>
                   </div>
                 </Card>
@@ -434,15 +461,105 @@ const Index = () => {
                 </Space>
               </Col>
 
-              {/* Right Column - Process Info (static, as before) */}
+              {/* Right Column - Process Info (dynamic for rack mode) */}
               <Col span={17}>
                 <div style={{ fontWeight: 700, fontSize: 24, marginBottom: 8 }}>Thông số xi mạ</div>
-                <StatusBar jigCarrier={49.6} pcsJig={30} />
-                <Space direction="vertical" style={{ width: "100%" }} size={0}>
-                  {processData.map((process, index) => (
-                    <ProcessCard key={index} {...process} index={index} />
-                  ))}
-                </Space>
+                {runMode === 'rack' && rackPlating && (
+                  <>
+                    <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
+                      <Card
+                        style={{
+                          flex: 1,
+                          borderRadius: 12,
+                          textAlign: "center",
+                          padding: 0,
+                          boxShadow: "0 2px 12px #00000008"
+                        }}
+                        styles={{ body: { padding: 0 } }}
+                      >
+                        <div style={{ fontWeight: 500, fontSize: 18, padding: "12px 0" }}>Số Jig/Carrier</div>
+                        <div style={{ fontWeight: 700, fontSize: 24, color: "#ff2d2d", paddingBottom: 12 }}>{rackPlating.jigCarrier ?? '-'}</div>
+                      </Card>
+                      <Card
+                        style={{
+                          flex: 1,
+                          borderRadius: 12,
+                          textAlign: "center",
+                          padding: 0,
+                          boxShadow: "0 2px 12px #00000008"
+                        }}
+                        styles={{ body: { padding: 0 } }}
+                      >
+                        <div style={{ fontWeight: 500, fontSize: 18, padding: "12px 0" }}>Số Pcs/Jig</div>
+                        <div style={{ fontWeight: 700, fontSize: 24, color: "#ff2d2d", paddingBottom: 12 }}>{rackPlating.pcsJig ?? '-'}</div>
+                      </Card>
+                    </div>
+                    <Space direction="vertical" style={{ width: "100%" }} size={0}>
+                      {(rackPlating.tankAndGroups || []).map((tank: any, idx: number) => (
+                        <Card
+                          key={idx}
+                          variant="borderless"
+                          className={colors[idx % colors.length]}
+                          style={{
+                            marginBottom: 20,
+                            borderRadius: 16,
+                            boxShadow: "0 2px 12px #00000008"
+                          }}
+                          styles={{ body: { padding: 24 } }}
+                        >
+                          <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 16 }}>{tank.modelName || `Bể ${idx + 1}`}</div>
+                          <div style={{ display: "flex", gap: 16 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Dòng điện /Jig</div>
+                              <div style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                background: "#fff",
+                                borderRadius: 8,
+                                padding: "8px 0",
+                                textAlign: "center"
+                              }}>{tank.currentJig ?? '-'}</div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Dòng điện tổng</div>
+                              <div style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                background: "#fff",
+                                borderRadius: 8,
+                                padding: "8px 0",
+                                textAlign: "center",
+                                color: "#ff2d2d"
+                              }}>{tank.currentTotal ?? '-'}</div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>T1</div>
+                              <div style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                background: "#fff",
+                                borderRadius: 8,
+                                padding: "8px 0",
+                                textAlign: "center"
+                              }}>{tank.T1 ?? '-'}</div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>T2</div>
+                              <div style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                background: "#fff",
+                                borderRadius: 8,
+                                padding: "8px 0",
+                                textAlign: "center"
+                              }}>{tank.T2 ?? '-'}</div>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </Space>
+                  </>
+                )}
               </Col>
             </Row>
           </div>
