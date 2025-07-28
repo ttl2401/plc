@@ -21,14 +21,7 @@ const Index = () => {
   const [product, setProduct] = useState<any>(null);
   const [runMode, setRunMode] = useState<string | null>(null);
   const [rackPlating, setRackPlating] = useState<any>(null);
-
-  const productData = {
-    productImage: "https://xima-api.ztechhub.net/product/2025-07-08/72a8070e-2d45-4aa1-b019-e0cecc0039df.jpg",
-    productCode: "DC63-02767AP",
-    productName: "Vòi xịt trắng",
-    size: 10,
-    mode: "Chạy treo"
-  };
+  const [barrelPlating, setBarrelPlating] = useState<any>(null);
 
   const processData = [
     {
@@ -77,6 +70,7 @@ const Index = () => {
     setSearch(value);
     setRunMode(null);
     setRackPlating(null);
+    setBarrelPlating(null);
     if (!value || value.length < 2) {
       setProduct(null);
       return;
@@ -97,14 +91,20 @@ const Index = () => {
         setRunMode(settingRes.data.mode);
         if (settingRes.data.mode === 'rack') {
           setRackPlating(settingRes.data.rackPlating);
+          setBarrelPlating(null);
+        } else if (settingRes.data.mode === 'barrel') {
+          setBarrelPlating(settingRes.data.barrelPlating);
+          setRackPlating(null);
         } else {
           setRackPlating(null);
+          setBarrelPlating(null);
         }
       }
     } catch (err) {
       setProduct(null);
       setRunMode(null);
       setRackPlating(null);
+      setBarrelPlating(null);
     } finally {
       setLoading(false);
     }
@@ -124,85 +124,6 @@ const Index = () => {
       await handleSearch(result[0].rawValue);
     }
   };
-
-  // Product Info Panel
-  const ProductInfoPanel = ({
-    productImage,
-    productCode,
-    productName,
-    size,
-    mode
-  }: typeof productData) => (
-    <Card
-      variant="outlined"
-      style={{
-        marginBottom: 24,
-        borderRadius: 16,
-        boxShadow: "0 2px 12px #00000008",
-        padding: 0
-      }}
-      styles={{
-        body: { padding: 24 } 
-      }}
-    >
-      <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 16 }}>Chi tiết sản phẩm</div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-        <img
-          alt={productName}
-          src={productImage}
-          style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 8, borderRadius: 8, background: "#f5f5f5" }}
-        />
-        <div>
-          <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Mã sản phẩm</div>
-          <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{productCode}</div>
-        </div>
-        <div>
-          <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Tên sản phẩm</div>
-          <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{productName}</div>
-        </div>
-        <div>
-          <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Kích thước (dm2)</div>
-          <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{size}</div>
-        </div>
-        <div>
-          <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Chế độ chạy</div>
-          <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{mode}</div>
-        </div>
-      </div>
-    </Card>
-  );
-
-  // Status Bar
-  const StatusBar = ({ jigCarrier, pcsJig }: { jigCarrier: number, pcsJig: number }) => (
-    <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
-      <Card
-        style={{
-          flex: 1,
-          borderRadius: 12,
-          textAlign: "center",
-          padding: 0,
-          boxShadow: "0 2px 12px #00000008"
-        }}
-        styles={{ body: { padding: 0 } }}
-      >
-        <div style={{ fontWeight: 500, fontSize: 18, padding: "12px 0" }}>Số Jig/Carrier</div>
-        <div style={{ fontWeight: 700, fontSize: 24, color: "#ff2d2d", paddingBottom: 12 }}>{jigCarrier}</div>
-      </Card>
-      <Card
-        style={{
-          flex: 1,
-          borderRadius: 12,
-          textAlign: "center",
-          padding: 0,
-          boxShadow: "0 2px 12px #00000008"
-        }}
-        styles={{ body: { padding: 0 } }}
-      >
-        <div style={{ fontWeight: 500, fontSize: 18, padding: "12px 0" }}>Số Pcs/Jig</div>
-        <div style={{ fontWeight: 700, fontSize: 24, color: "#ff2d2d", paddingBottom: 12 }}>{pcsJig}</div>
-      </Card>
-    </div>
-  );
 
   // Use Tailwind class names for tank block backgrounds
   const colors = [
@@ -381,7 +302,7 @@ const Index = () => {
                   />
                 }
               />
-              <Avatar size={48} icon={<UserOutlined />} style={{ background: "#181f3a" }} />
+              <Avatar size={38} icon={<UserOutlined />} style={{ marginBottom: 4, background: "#181f3a" }} />
             </Space>
           </Col>
         </Row>
@@ -520,6 +441,78 @@ const Index = () => {
                                 textAlign: "center"
                               }}>{tank.currentJig ?? '-'}</div>
                             </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Dòng điện tổng</div>
+                              <div style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                background: "#fff",
+                                borderRadius: 8,
+                                padding: "8px 0",
+                                textAlign: "center",
+                                color: "#ff2d2d"
+                              }}>{tank.currentTotal ?? '-'}</div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>T1</div>
+                              <div style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                background: "#fff",
+                                borderRadius: 8,
+                                padding: "8px 0",
+                                textAlign: "center"
+                              }}>{tank.T1 ?? '-'}</div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>T2</div>
+                              <div style={{
+                                fontWeight: 700,
+                                fontSize: 20,
+                                background: "#fff",
+                                borderRadius: 8,
+                                padding: "8px 0",
+                                textAlign: "center"
+                              }}>{tank.T2 ?? '-'}</div>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </Space>
+                  </>
+                )}
+                {runMode === 'barrel' && barrelPlating && (
+                  <>
+                    <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
+                      <Card
+                        style={{
+                          flex: 1,
+                          borderRadius: 12,
+                          textAlign: "center",
+                          padding: 0,
+                          boxShadow: "0 2px 12px #00000008"
+                        }}
+                        styles={{ body: { padding: 0 } }}
+                      >
+                        <div style={{ fontWeight: 500, fontSize: 18, padding: "12px 0" }}>Số kg/Barrel</div>
+                        <div style={{ fontWeight: 700, fontSize: 24, color: "#ff2d2d", paddingBottom: 12 }}>{barrelPlating.kgBarrel ?? '-'}</div>
+                      </Card>
+                    </div>
+                    <Space direction="vertical" style={{ width: "100%" }} size={0}>
+                      {(barrelPlating.tankAndGroups || []).map((tank: any, idx: number) => (
+                        <Card
+                          key={idx}
+                          variant="borderless"
+                          className={colors[idx % colors.length]}
+                          style={{
+                            marginBottom: 20,
+                            borderRadius: 16,
+                            boxShadow: "0 2px 12px #00000008"
+                          }}
+                          styles={{ body: { padding: 24 } }}
+                        >
+                          <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 16 }}>{tank.modelName || `Bể ${idx + 1}`}</div>
+                          <div style={{ display: "flex", gap: 16 }}>
                             <div style={{ flex: 1 }}>
                               <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Dòng điện tổng</div>
                               <div style={{
