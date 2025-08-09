@@ -14,7 +14,8 @@ import {
   UpOutlined,
   HistoryOutlined,
   InfoCircleOutlined,
-  BarsOutlined
+  BarsOutlined,
+  RobotOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -144,6 +145,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           label: <Link href="/parameters-setting/chemistry">{t('menu_chemistry_setting')}</Link>,
         },
       ],
+    },
+    {
+      key: '/robot-control',
+      icon: <RobotOutlined />,
+      label: <Link href="/robot-control">{t('menu_robot_control')}</Link>,
     },
     {
       key: '/information',
