@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button, Switch, Card, Row, Col, Typography } from 'antd';
 import { PoweroffOutlined } from '@ant-design/icons';
 import { useLanguage } from '@/components/layout/DashboardLayout';
@@ -15,6 +15,89 @@ const RobotControlPage = () => {
   const [emergency2Active, setEmergency2Active] = useState(true);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<number>(1);
+
+  // States for 5 buttons in "Nút nhấn nhả"
+  const [startAllActive, setStartAllActive] = useState(true);
+  const [startBranch1Active, setStartBranch1Active] = useState(true);
+  const [startBranch2Active, setStartBranch2Active] = useState(true);
+  const [deleteMemory1Active, setDeleteMemory1Active] = useState(true);
+  const [deleteMemory2Active, setDeleteMemory2Active] = useState(true);
+
+  // States for red button hold behavior
+  const [deleteMemory1Pressing, setDeleteMemory1Pressing] = useState(false);
+  const [deleteMemory2Pressing, setDeleteMemory2Pressing] = useState(false);
+  const [deleteMemory1Count, setDeleteMemory1Count] = useState(0);
+  const [deleteMemory2Count, setDeleteMemory2Count] = useState(0);
+  
+  const deleteMemory1Timer = useRef<NodeJS.Timeout | null>(null);
+  const deleteMemory2Timer = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle red button press and hold logic
+  const handleRedButtonPress = (buttonNumber: 1 | 2) => {
+    if (buttonNumber === 1) {
+      setDeleteMemory1Pressing(true);
+      setDeleteMemory1Count(1);
+      
+      deleteMemory1Timer.current = setInterval(() => {
+        setDeleteMemory1Count(prev => {
+          if (prev >= 5) {
+            // Toggle the state: active -> inactive, inactive -> active
+            setDeleteMemory1Active(prevActive => !prevActive);
+            setDeleteMemory1Pressing(false);
+            if (deleteMemory1Timer.current) {
+              clearInterval(deleteMemory1Timer.current);
+            }
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    } else {
+      setDeleteMemory2Pressing(true);
+      setDeleteMemory2Count(1);
+      
+      deleteMemory2Timer.current = setInterval(() => {
+        setDeleteMemory2Count(prev => {
+          if (prev >= 5) {
+            // Toggle the state: active -> inactive, inactive -> active
+            setDeleteMemory2Active(prevActive => !prevActive);
+            setDeleteMemory2Pressing(false);
+            if (deleteMemory2Timer.current) {
+              clearInterval(deleteMemory2Timer.current);
+            }
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+    }
+  };
+
+  const handleRedButtonRelease = (buttonNumber: 1 | 2) => {
+    if (buttonNumber === 1) {
+      setDeleteMemory1Pressing(false);
+      setDeleteMemory1Count(0);
+      if (deleteMemory1Timer.current) {
+        clearInterval(deleteMemory1Timer.current);
+        deleteMemory1Timer.current = null;
+      }
+    } else {
+      setDeleteMemory2Pressing(false);
+      setDeleteMemory2Count(0);
+      if (deleteMemory2Timer.current) {
+        clearInterval(deleteMemory2Timer.current);
+        deleteMemory2Timer.current = null;
+      }
+    }
+  };
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (deleteMemory1Timer.current) clearInterval(deleteMemory1Timer.current);
+      if (deleteMemory2Timer.current) clearInterval(deleteMemory2Timer.current);
+    };
+  }, []);
 
 
   return (
@@ -32,15 +115,15 @@ const RobotControlPage = () => {
           >
             <Row gutter={16} style={{ marginBottom: 16 }}>
               <Col xs={24} md={8}>
-                <Card className="bg-green-100" styles={{ body: { padding: 16, textAlign: 'center', minHeight: 160 } }} variant="borderless">
+                <Card className="bg-green-100" styles={{ body: { padding: 16, textAlign: 'center', minHeight: 140, position: 'relative' } }} variant="borderless">
                   <div className="mb-2 font-semibold">{t('robot_control_start_all')}</div>
                   <div
                     style={{
                       width: 60,
                       height: 60,
                       borderRadius: "50%",
-                      border: "4px solid limegreen",
-                      background: "limegreen",
+                      border: startAllActive ? "4px solid limegreen" : "4px solid #d9d9d9",
+                      background: startAllActive ? "limegreen" : "#f5f5f5",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -48,26 +131,30 @@ const RobotControlPage = () => {
                       transition: "all 0.3s",
                       margin: "0 auto"
                     }}
+                    onClick={() => setStartAllActive(!startAllActive)}
                   >
                     <PoweroffOutlined
                       style={{
                         fontSize: 26,
-                        color: "#fff"
+                        color: startAllActive ? "#fff" : "#999"
                       }}
                     />
                   </div>
+                  {/* <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-green-600 font-bold">
+                    {startAllActive ? t('robot_control_active') : t('robot_control_inactive')}
+                  </div> */}
                 </Card>
               </Col>
               <Col xs={24} md={8}>
-                <Card className="bg-green-100" styles={{ body: { padding: 16, textAlign: 'center', minHeight: 160 } }} variant="borderless">
+                <Card className="bg-green-100" styles={{ body: { padding: 16, textAlign: 'center', minHeight: 140, position: 'relative' } }} variant="borderless">
                   <div className="mb-2 font-semibold">{t('robot_control_start_branch1')}</div>
                   <div
                     style={{
                       width: 60,
                       height: 60,
                       borderRadius: "50%",
-                      border: "4px solid limegreen",
-                      background: "limegreen",
+                      border: startBranch1Active ? "4px solid limegreen" : "4px solid #d9d9d9",
+                      background: startBranch1Active ? "limegreen" : "#f5f5f5",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -75,26 +162,30 @@ const RobotControlPage = () => {
                       transition: "all 0.3s",
                       margin: "0 auto"
                     }}
+                    onClick={() => setStartBranch1Active(!startBranch1Active)}
                   >
                     <PoweroffOutlined
                       style={{
                         fontSize: 26,
-                        color: "#fff"
+                        color: startBranch1Active ? "#fff" : "#999"
                       }}
                     />
                   </div>
+                  {/* <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-green-600 font-bold">
+                    {startBranch1Active ? t('robot_control_active') : t('robot_control_inactive')}
+                  </div> */}
                 </Card>
               </Col>
               <Col xs={24} md={8}>
-                <Card className="bg-green-100" styles={{ body: { padding: 16, textAlign: 'center', minHeight: 160 } }} variant="borderless">
+                <Card className="bg-green-100" styles={{ body: { padding: 16, textAlign: 'center', minHeight: 140, position: 'relative' } }} variant="borderless">
                   <div className="mb-2 font-semibold">{t('robot_control_start_branch2')}</div>
                   <div
                     style={{
                       width: 60,
                       height: 60,
                       borderRadius: "50%",
-                      border: "4px solid limegreen",
-                      background: "limegreen",
+                      border: startBranch2Active ? "4px solid limegreen" : "4px solid #d9d9d9",
+                      background: startBranch2Active ? "limegreen" : "#f5f5f5",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -102,73 +193,180 @@ const RobotControlPage = () => {
                       transition: "all 0.3s",
                       margin: "0 auto"
                     }}
+                    onClick={() => setStartBranch2Active(!startBranch2Active)}
                   >
                     <PoweroffOutlined
                       style={{
                         fontSize: 26,
-                        color: "#fff"
+                        color: startBranch2Active ? "#fff" : "#999"
                       }}
                     />
                   </div>
+                  {/* <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-green-600 font-bold">
+                    {startBranch2Active ? t('robot_control_active') : t('robot_control_inactive')}
+                  </div> */}
                 </Card>
               </Col>
             </Row>
             <Row gutter={16} justify="end">
               <Col xs={12} md={8}>
-                <Card className="bg-red-100" styles={{ body: { padding: 16, textAlign: 'center', minHeight: 160 } }}
+                <Card className="bg-red-100" styles={{ body: { padding: 16, textAlign: 'center', minHeight: 140, position: 'relative' } }}
                  variant="borderless">
                   <div className="mb-2 font-semibold">{t('robot_control_delete_memory_branch1')}</div>
                   <div
                     style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: "50%",
-                      border: "4px solid #ff4d4f",
-                      background: "#ff4d4f",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.3s",
+                      position: 'relative',
+                      width: 68,
+                      height: 68,
                       margin: "0 auto 8px auto"
                     }}
                   >
-                    <PoweroffOutlined
+                    {/* Progress circle */}
+                    {deleteMemory1Pressing && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: 68,
+                          height: 68,
+                          borderRadius: '50%',
+                          background: `conic-gradient(#ff4d4f ${(deleteMemory1Count / 5) * 360}deg, transparent ${(deleteMemory1Count / 5) * 360}deg)`,
+                          zIndex: 1
+                        }}
+                      >
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 4,
+                            left: 4,
+                            width: 60,
+                            height: 60,
+                            borderRadius: '50%',
+                            background: '#f5f6fa'
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Button */}
+                    <div
                       style={{
-                        fontSize: 26,
-                        color: "#fff"
+                        position: 'relative',
+                        top: 4,
+                        left: 4,
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        border: deleteMemory1Active ? "4px solid #ff4d4f" : "4px solid #d9d9d9",
+                        background: deleteMemory1Active ? "#ff4d4f" : "#f5f5f5",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "all 0.3s",
+                        zIndex: 2
                       }}
-                    />
+                      onMouseDown={() => handleRedButtonPress(1)}
+                      onMouseUp={() => handleRedButtonRelease(1)}
+                      onMouseLeave={() => handleRedButtonRelease(1)}
+                      onTouchStart={() => handleRedButtonPress(1)}
+                      onTouchEnd={() => handleRedButtonRelease(1)}
+                    >
+                      <PoweroffOutlined
+                        style={{
+                          fontSize: 26,
+                          color: deleteMemory1Active ? "#fff" : "#999"
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="mt-2 text-red-600 font-bold">{t('robot_control_pressed_seconds').replace('{seconds}', '6')}</div>
+                  <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-red-600 font-bold">
+                    {deleteMemory1Pressing ? 
+                      t('robot_control_pressed_seconds').replace('{seconds}', deleteMemory1Count.toString()) : 
+                      (deleteMemory1Active ? '' : t('robot_control_inactive'))
+                    }
+                  </div>
                 </Card>
               </Col>
               <Col xs={12} md={8}>
                 <Card className="bg-red-100" 
-                styles={{ body: { padding: 16, textAlign: 'center', minHeight: 160 } }}
+                styles={{ body: { padding: 16, textAlign: 'center', minHeight: 140, position: 'relative' } }}
                 variant="borderless">
                   <div className="mb-2 font-semibold">{t('robot_control_delete_memory_branch2')}</div>
                   <div
                     style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: "50%",
-                      border: "4px solid #ff4d4f",
-                      background: "#ff4d4f",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.3s",
+                      position: 'relative',
+                      width: 68,
+                      height: 68,
                       margin: "0 auto"
                     }}
                   >
-                    <PoweroffOutlined
+                    {/* Progress circle */}
+                    {deleteMemory2Pressing && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: 68,
+                          height: 68,
+                          borderRadius: '50%',
+                          background: `conic-gradient(#ff4d4f ${(deleteMemory2Count / 5) * 360}deg, transparent ${(deleteMemory2Count / 5) * 360}deg)`,
+                          zIndex: 1
+                        }}
+                      >
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: 4,
+                            left: 4,
+                            width: 60,
+                            height: 60,
+                            borderRadius: '50%',
+                            background: '#f5f6fa'
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Button */}
+                    <div
                       style={{
-                        fontSize: 26,
-                        color: "#fff"
+                        position: 'relative',
+                        top: 4,
+                        left: 4,
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        border: deleteMemory2Active ? "4px solid #ff4d4f" : "4px solid #d9d9d9",
+                        background: deleteMemory2Active ? "#ff4d4f" : "#f5f5f5",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "all 0.3s",
+                        zIndex: 2
                       }}
-                    />
+                      onMouseDown={() => handleRedButtonPress(2)}
+                      onMouseUp={() => handleRedButtonRelease(2)}
+                      onMouseLeave={() => handleRedButtonRelease(2)}
+                      onTouchStart={() => handleRedButtonPress(2)}
+                      onTouchEnd={() => handleRedButtonRelease(2)}
+                    >
+                      <PoweroffOutlined
+                        style={{
+                          fontSize: 26,
+                          color: deleteMemory2Active ? "#fff" : "#999"
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-red-600 font-bold">
+                    {deleteMemory2Pressing ? 
+                      t('robot_control_pressed_seconds').replace('{seconds}', deleteMemory2Count.toString()) : 
+                      (deleteMemory2Active ? '' : t('robot_control_inactive'))
+                    }
                   </div>
                 </Card>
               </Col>
@@ -180,8 +378,8 @@ const RobotControlPage = () => {
           >
             <Row gutter={16} justify="end">
               <Col xs={12} md={8}>
-                <Card className="bg-red-100" 
-                styles={{ body: { padding: 16, textAlign: 'center', minHeight: 160 } }}
+                                  <Card className="bg-red-100" 
+                styles={{ body: { padding: 16, textAlign: 'center', minHeight: 140, position: 'relative' } }}
                 variant="borderless">
                   <div className="mb-2 font-semibold">{t('robot_control_emergency_branch1')}</div>
                   <div
@@ -189,20 +387,22 @@ const RobotControlPage = () => {
                       width: 60,
                       height: 60,
                       borderRadius: "50%",
-                      border: emergency1Active ? "4px solid #ff4d4f" : "4px solid #d9d9d9",
+                      border: emergency1Active ? "4px solid #ff4d4f" : "4px solid #ff4d4f",
                       background: emergency1Active ? "#ff4d4f" : "#f5f5f5",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      cursor: emergency1Active ? "pointer" : "not-allowed",
+                      cursor: "pointer",
                       transition: "all 0.3s",
                       margin: "0 auto 8px auto",
-                      opacity: emergency1Active ? 1 : 0.5
+                      opacity: 1
                     }}
                     onClick={() => {
                       if (emergency1Active) {
                         setSelectedBranch(1);
                         setShowPopup(true);
+                      } else {
+                        setEmergency1Active(true);
                       }
                     }}
                   >
@@ -213,14 +413,14 @@ const RobotControlPage = () => {
                       }}
                     />
                   </div>
-                  <div className="mt-2 text-red-600 font-bold">
-                    {emergency1Active ? t('robot_control_stopped') : t('robot_control_inactive')}
+                  <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-red-600 font-bold">
+                    {emergency1Active ? t('robot_control_stopped') : ''}
                   </div>
                 </Card>
               </Col>
               <Col xs={12} md={8}>
                 <Card className="bg-red-100"  
-                styles={{ body: { padding: 16, textAlign: 'center', minHeight: 160 } }}
+                styles={{ body: { padding: 16, textAlign: 'center', minHeight: 140, position: 'relative' } }}
                 variant="borderless">
                   <div className="mb-2 font-semibold">{t('robot_control_emergency_branch2')}</div>
                   <div
@@ -228,20 +428,22 @@ const RobotControlPage = () => {
                       width: 60,
                       height: 60,
                       borderRadius: "50%",
-                      border: emergency2Active ? "4px solid #ff4d4f" : "4px solid #d9d9d9",
+                      border: emergency2Active ? "4px solid #ff4d4f" : "4px solid #ff4d4f",
                       background: emergency2Active ? "#ff4d4f" : "#f5f5f5",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      cursor: emergency2Active ? "pointer" : "not-allowed",
+                      cursor: "pointer",
                       transition: "all 0.3s",
                       margin: "0 auto 8px auto",
-                      opacity: emergency2Active ? 1 : 0.5
+                      opacity: 1
                     }}
                     onClick={() => {
                       if (emergency2Active) {
                         setSelectedBranch(2);
                         setShowPopup(true);
+                      } else {
+                        setEmergency2Active(true);
                       }
                     }}
                   >
@@ -252,8 +454,8 @@ const RobotControlPage = () => {
                       }}
                     />
                   </div>
-                  <div className="mt-2 text-red-600 font-bold">
-                    {emergency2Active ? t('robot_control_stopped') : t('robot_control_inactive')}
+                  <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-red-600 font-bold">
+                    {emergency2Active ? t('robot_control_stopped') : ''}
                   </div>
                 </Card>
               </Col>

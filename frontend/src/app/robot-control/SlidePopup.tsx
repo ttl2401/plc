@@ -62,7 +62,8 @@ const SlidePopup: React.FC<SlidePopupProps> = ({ visible, onClose, onConfirm, br
         <div
           style={{
             position: 'relative',
-            width: '100%',
+            width: '80%',
+            marginLeft: '10%',
             height: 60,
             background: '#f0f0f0',
             borderRadius: 30,

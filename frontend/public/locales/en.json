@@ -234,6 +234,7 @@
   "robot_control_emergency_confirm_title": "BRANCH {branch} EMERGENCY STOP",
   "robot_control_slide_to_stop": "Slide to stop",
   "robot_control_inactive": "INACTIVE",
+  "robot_control_active": "ACTIVE",
   "yes": "Yes",
   "no": "No"
 } 

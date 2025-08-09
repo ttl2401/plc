@@ -234,6 +234,7 @@
   "robot_control_emergency_confirm_title": "NHÁNH {branch} ĐÃ DỪNG KHẨN CẤP",
   "robot_control_slide_to_stop": "Kéo để chạy lại",
   "robot_control_inactive": "KHÔNG HOẠT ĐỘNG",
+  "robot_control_active": "ĐANG HOẠT ĐỘNG",
   "yes": "Có",
   "no": "Không"
 } 
