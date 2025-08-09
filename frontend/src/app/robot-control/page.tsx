@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Switch, Card, Row, Col, Typography } from 'antd';
-import { PoweroffOutlined } from '@ant-design/icons';
+import { Button, Switch, Card, Row, Col, Typography, Spin } from 'antd';
+import { PoweroffOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useLanguage } from '@/components/layout/DashboardLayout';
 import GaugeButton from "@/components/GaugeButton";
 import SlidePopup from './SlidePopup';
@@ -220,43 +220,33 @@ const RobotControlPage = () => {
                       position: 'relative',
                       width: 68,
                       height: 68,
-                      margin: "0 auto 8px auto"
+                      margin: "0 auto 8px auto",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center"
                     }}
                   >
-                    {/* Progress circle */}
+                    {/* Ant Design Spinner */}
                     {deleteMemory1Pressing && (
-                      <div
+                      <Spin
+                        spinning={true}
+                        indicator={<LoadingOutlined style={{ color: '#ff4d4f', fontSize: 74 }} spin />}
                         style={{
                           position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: 68,
-                          height: 68,
-                          borderRadius: '50%',
-                          background: `conic-gradient(#ff4d4f ${(deleteMemory1Count / 5) * 360}deg, transparent ${(deleteMemory1Count / 5) * 360}deg)`,
+                          top: -3,
+                          left: -46,
+                          width: 160,
+                          height: 160,
                           zIndex: 1
                         }}
-                      >
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 4,
-                            left: 4,
-                            width: 60,
-                            height: 60,
-                            borderRadius: '50%',
-                            background: '#f5f6fa'
-                          }}
-                        />
-                      </div>
+                        size="large"
+                      />
                     )}
                     
                     {/* Button */}
                     <div
                       style={{
                         position: 'relative',
-                        top: 4,
-                        left: 4,
                         width: 60,
                         height: 60,
                         borderRadius: "50%",
@@ -300,43 +290,33 @@ const RobotControlPage = () => {
                       position: 'relative',
                       width: 68,
                       height: 68,
-                      margin: "0 auto"
+                      margin: "0 auto",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center"
                     }}
                   >
-                    {/* Progress circle */}
+                    {/* Ant Design Spinner */}
                     {deleteMemory2Pressing && (
-                      <div
+                      <Spin
+                        spinning={true}
+                        indicator={<LoadingOutlined style={{ color: '#ff4d4f', fontSize: 74 }} spin />}
                         style={{
                           position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: 68,
-                          height: 68,
-                          borderRadius: '50%',
-                          background: `conic-gradient(#ff4d4f ${(deleteMemory2Count / 5) * 360}deg, transparent ${(deleteMemory2Count / 5) * 360}deg)`,
+                          top: -3,
+                          left: -46,
+                          width: 160,
+                          height: 160,
                           zIndex: 1
                         }}
-                      >
-                        <div
-                          style={{
-                            position: 'absolute',
-                            top: 4,
-                            left: 4,
-                            width: 60,
-                            height: 60,
-                            borderRadius: '50%',
-                            background: '#f5f6fa'
-                          }}
-                        />
-                      </div>
+                        size="large"
+                      />
                     )}
                     
                     {/* Button */}
                     <div
                       style={{
                         position: 'relative',
-                        top: 4,
-                        left: 4,
                         width: 60,
                         height: 60,
                         borderRadius: "50%",
