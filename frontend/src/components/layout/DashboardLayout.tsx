@@ -113,6 +113,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       label: <Link href="/plc-control">{t('menu_plc_controller')}</Link>,
     },
     {
+      key: '/robot-control',
+      icon: <RobotOutlined />,
+      label: <Link href="/robot-control">{t('menu_robot_control')}</Link>,
+    },
+    {
       key: '/products',
       icon: <ShoppingCartOutlined />,
       label: <Link href="/products">{t('menu_product')}</Link>,
@@ -146,11 +151,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         },
       ],
     },
-    {
-      key: '/robot-control',
-      icon: <RobotOutlined />,
-      label: <Link href="/robot-control">{t('menu_robot_control')}</Link>,
-    },
+    
     {
       key: '/information',
       icon: <InfoCircleOutlined />,
