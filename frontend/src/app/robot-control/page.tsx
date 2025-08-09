@@ -20,8 +20,8 @@ const RobotControlPage = () => {
   const [startAllActive, setStartAllActive] = useState(true);
   const [startBranch1Active, setStartBranch1Active] = useState(true);
   const [startBranch2Active, setStartBranch2Active] = useState(true);
-  const [deleteMemory1Active, setDeleteMemory1Active] = useState(true);
-  const [deleteMemory2Active, setDeleteMemory2Active] = useState(true);
+  const [deleteMemory1Active, setDeleteMemory1Active] = useState(false);
+  const [deleteMemory2Active, setDeleteMemory2Active] = useState(false);
 
   // States for red button hold behavior
   const [deleteMemory1Pressing, setDeleteMemory1Pressing] = useState(false);
@@ -34,48 +34,49 @@ const RobotControlPage = () => {
 
   // Handle red button press and hold logic
   const handleRedButtonPress = (buttonNumber: 1 | 2) => {
+    console.log(`Button ${buttonNumber} pressed`); // Debug log
+    
     if (buttonNumber === 1) {
+      if (deleteMemory1Timer.current) {
+        clearInterval(deleteMemory1Timer.current);
+      }
+      
       setDeleteMemory1Pressing(true);
+      setDeleteMemory1Active(true); // Set to active when pressed
       setDeleteMemory1Count(1);
       
       deleteMemory1Timer.current = setInterval(() => {
         setDeleteMemory1Count(prev => {
-          if (prev >= 5) {
-            // Toggle the state: active -> inactive, inactive -> active
-            setDeleteMemory1Active(prevActive => !prevActive);
-            setDeleteMemory1Pressing(false);
-            if (deleteMemory1Timer.current) {
-              clearInterval(deleteMemory1Timer.current);
-            }
-            return 0;
-          }
-          return prev + 1;
+          const newCount = prev + 1;
+          console.log(`Button 1 count: ${newCount}`); // Debug log
+          return newCount;
         });
       }, 1000);
     } else {
+      if (deleteMemory2Timer.current) {
+        clearInterval(deleteMemory2Timer.current);
+      }
+      
       setDeleteMemory2Pressing(true);
+      setDeleteMemory2Active(true); // Set to active when pressed
       setDeleteMemory2Count(1);
       
       deleteMemory2Timer.current = setInterval(() => {
         setDeleteMemory2Count(prev => {
-          if (prev >= 5) {
-            // Toggle the state: active -> inactive, inactive -> active
-            setDeleteMemory2Active(prevActive => !prevActive);
-            setDeleteMemory2Pressing(false);
-            if (deleteMemory2Timer.current) {
-              clearInterval(deleteMemory2Timer.current);
-            }
-            return 0;
-          }
-          return prev + 1;
+          const newCount = prev + 1;
+          console.log(`Button 2 count: ${newCount}`); // Debug log
+          return newCount;
         });
       }, 1000);
     }
   };
 
   const handleRedButtonRelease = (buttonNumber: 1 | 2) => {
+    console.log(`Button ${buttonNumber} released`); // Debug log
+    
     if (buttonNumber === 1) {
       setDeleteMemory1Pressing(false);
+      setDeleteMemory1Active(false); // Set to inactive when released
       setDeleteMemory1Count(0);
       if (deleteMemory1Timer.current) {
         clearInterval(deleteMemory1Timer.current);
@@ -83,6 +84,7 @@ const RobotControlPage = () => {
       }
     } else {
       setDeleteMemory2Pressing(false);
+      setDeleteMemory2Active(false); // Set to inactive when released
       setDeleteMemory2Count(0);
       if (deleteMemory2Timer.current) {
         clearInterval(deleteMemory2Timer.current);
@@ -269,7 +271,6 @@ const RobotControlPage = () => {
                       }}
                       onMouseDown={() => handleRedButtonPress(1)}
                       onMouseUp={() => handleRedButtonRelease(1)}
-                      onMouseLeave={() => handleRedButtonRelease(1)}
                       onTouchStart={() => handleRedButtonPress(1)}
                       onTouchEnd={() => handleRedButtonRelease(1)}
                     >
@@ -284,7 +285,7 @@ const RobotControlPage = () => {
                   <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-red-600 font-bold">
                     {deleteMemory1Pressing ? 
                       t('robot_control_pressed_seconds').replace('{seconds}', deleteMemory1Count.toString()) : 
-                      (deleteMemory1Active ? '' : t('robot_control_inactive'))
+                      ''
                     }
                   </div>
                 </Card>
@@ -350,7 +351,6 @@ const RobotControlPage = () => {
                       }}
                       onMouseDown={() => handleRedButtonPress(2)}
                       onMouseUp={() => handleRedButtonRelease(2)}
-                      onMouseLeave={() => handleRedButtonRelease(2)}
                       onTouchStart={() => handleRedButtonPress(2)}
                       onTouchEnd={() => handleRedButtonRelease(2)}
                     >
@@ -365,7 +365,7 @@ const RobotControlPage = () => {
                   <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-red-600 font-bold">
                     {deleteMemory2Pressing ? 
                       t('robot_control_pressed_seconds').replace('{seconds}', deleteMemory2Count.toString()) : 
-                      (deleteMemory2Active ? '' : t('robot_control_inactive'))
+                      ''
                     }
                   </div>
                 </Card>
