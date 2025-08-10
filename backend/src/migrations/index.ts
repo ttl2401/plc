@@ -22,7 +22,7 @@ async function migrate(): Promise<void> {
         }
         const migration = await import(files[i]);
         const result = await migration.migrate();
-        if (result) await Migrations.create({ file: fileName });
+        if (result && !fileName?.startsWith('repeat')) await Migrations.create({ file: fileName });
       }
     } else {
       console.log('No module imported');

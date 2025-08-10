@@ -17,9 +17,9 @@ const RobotControlPage = () => {
   const [selectedBranch, setSelectedBranch] = useState<number>(1);
 
   // States for 5 buttons in "Nút nhấn nhả"
-  const [startAllActive, setStartAllActive] = useState(true);
-  const [startBranch1Active, setStartBranch1Active] = useState(true);
-  const [startBranch2Active, setStartBranch2Active] = useState(true);
+  const [startAllActive, setStartAllActive] = useState(false);
+  const [startBranch1Active, setStartBranch1Active] = useState(false);
+  const [startBranch2Active, setStartBranch2Active] = useState(false);
   const [deleteMemory1Active, setDeleteMemory1Active] = useState(false);
   const [deleteMemory2Active, setDeleteMemory2Active] = useState(false);
 
@@ -32,64 +32,122 @@ const RobotControlPage = () => {
   const deleteMemory1Timer = useRef<NodeJS.Timeout | null>(null);
   const deleteMemory2Timer = useRef<NodeJS.Timeout | null>(null);
 
+  // States for green start button hold behavior
+  const [startAllPressing, setStartAllPressing] = useState(false);
+  const [startBranch1Pressing, setStartBranch1Pressing] = useState(false);
+  const [startBranch2Pressing, setStartBranch2Pressing] = useState(false);
+  const [startAllFlashing, setStartAllFlashing] = useState(false);
+  const [startBranch1Flashing, setStartBranch1Flashing] = useState(false);
+  const [startBranch2Flashing, setStartBranch2Flashing] = useState(false);
+  
+  const startAllTimer = useRef<NodeJS.Timeout | null>(null);
+  const startBranch1Timer = useRef<NodeJS.Timeout | null>(null);
+  const startBranch2Timer = useRef<NodeJS.Timeout | null>(null);
+
   // Handle red button press and hold logic
   const handleRedButtonPress = (buttonNumber: 1 | 2) => {
-    console.log(`Button ${buttonNumber} pressed`); // Debug log
-    
     if (buttonNumber === 1) {
-      if (deleteMemory1Timer.current) {
-        clearInterval(deleteMemory1Timer.current);
-      }
-      
+      if (deleteMemory1Timer.current) clearInterval(deleteMemory1Timer.current);
       setDeleteMemory1Pressing(true);
-      setDeleteMemory1Active(true); // Set to active when pressed
+      setDeleteMemory1Active(true);
       setDeleteMemory1Count(1);
-      
       deleteMemory1Timer.current = setInterval(() => {
-        setDeleteMemory1Count(prev => {
-          const newCount = prev + 1;
-          console.log(`Button 1 count: ${newCount}`); // Debug log
-          return newCount;
-        });
+        setDeleteMemory1Count(prev => prev + 1);
       }, 1000);
     } else {
-      if (deleteMemory2Timer.current) {
-        clearInterval(deleteMemory2Timer.current);
-      }
-      
+      if (deleteMemory2Timer.current) clearInterval(deleteMemory2Timer.current);
       setDeleteMemory2Pressing(true);
-      setDeleteMemory2Active(true); // Set to active when pressed
+      setDeleteMemory2Active(true);
       setDeleteMemory2Count(1);
-      
       deleteMemory2Timer.current = setInterval(() => {
-        setDeleteMemory2Count(prev => {
-          const newCount = prev + 1;
-          console.log(`Button 2 count: ${newCount}`); // Debug log
-          return newCount;
-        });
+        setDeleteMemory2Count(prev => prev + 1);
       }, 1000);
     }
   };
 
   const handleRedButtonRelease = (buttonNumber: 1 | 2) => {
-    console.log(`Button ${buttonNumber} released`); // Debug log
-    
     if (buttonNumber === 1) {
       setDeleteMemory1Pressing(false);
-      setDeleteMemory1Active(false); // Set to inactive when released
+      setDeleteMemory1Active(false);
       setDeleteMemory1Count(0);
-      if (deleteMemory1Timer.current) {
-        clearInterval(deleteMemory1Timer.current);
-        deleteMemory1Timer.current = null;
-      }
+      if (deleteMemory1Timer.current) { clearInterval(deleteMemory1Timer.current); deleteMemory1Timer.current = null; }
     } else {
       setDeleteMemory2Pressing(false);
-      setDeleteMemory2Active(false); // Set to inactive when released
+      setDeleteMemory2Active(false);
       setDeleteMemory2Count(0);
-      if (deleteMemory2Timer.current) {
-        clearInterval(deleteMemory2Timer.current);
-        deleteMemory2Timer.current = null;
-      }
+      if (deleteMemory2Timer.current) { clearInterval(deleteMemory2Timer.current); deleteMemory2Timer.current = null; }
+    }
+  };
+
+  // Handle green start button press and hold logic
+  const handleStartButtonPress = (buttonType: 'all' | 'branch1' | 'branch2') => {
+    if (buttonType === 'all') {
+      if (startAllTimer.current) clearInterval(startAllTimer.current);
+      setStartAllPressing(true);
+      setStartAllActive(true);
+    } else if (buttonType === 'branch1') {
+      if (startBranch1Timer.current) clearInterval(startBranch1Timer.current);
+      setStartBranch1Pressing(true);
+      setStartBranch1Active(true);
+    } else if (buttonType === 'branch2') {
+      if (startBranch2Timer.current) clearInterval(startBranch2Timer.current);
+      setStartBranch2Pressing(true);
+      setStartBranch2Active(true);
+    }
+  };
+
+  const handleStartButtonRelease = (buttonType: 'all' | 'branch1' | 'branch2') => {
+    if (buttonType === 'all') {
+      setStartAllPressing(false);
+      // Start flashing animation
+      setStartAllFlashing(true);
+      let flashCount = 0;
+      startAllTimer.current = setInterval(() => {
+        flashCount++;
+        setStartAllActive(prev => !prev);
+        if (flashCount >= 6) { // 3 complete flashes (on/off = 2 counts per flash)
+          if (startAllTimer.current) {
+            clearInterval(startAllTimer.current);
+            startAllTimer.current = null;
+          }
+          setStartAllActive(false);
+          setStartAllFlashing(false);
+        }
+      }, 250); // 0.25s for each flash state = 0.5s per complete flash
+    } else if (buttonType === 'branch1') {
+      setStartBranch1Pressing(false);
+      // Start flashing animation
+      setStartBranch1Flashing(true);
+      let flashCount = 0;
+      startBranch1Timer.current = setInterval(() => {
+        flashCount++;
+        setStartBranch1Active(prev => !prev);
+        if (flashCount >= 6) { // 3 complete flashes
+          if (startBranch1Timer.current) {
+            clearInterval(startBranch1Timer.current);
+            startBranch1Timer.current = null;
+          }
+          setStartBranch1Active(false);
+          setStartBranch1Flashing(false);
+        }
+      }, 250);
+    } else if (buttonType === 'branch2') {
+      setStartBranch2Pressing(false);
+      // Start flashing animation
+      setStartBranch2Flashing(true);
+      let flashCount = 0;
+      startBranch2Timer.current = setInterval(() => {
+        flashCount++;
+        setStartBranch2Active(prev => !prev);
+        if (flashCount >= 6) { // 3 complete flashes
+          if (startBranch2Timer.current) {
+            clearInterval(startBranch2Timer.current);
+            startBranch2Timer.current = null;
+          }
+          setStartBranch2Active(false);
+          setStartBranch2Flashing(false);
+        }
+      }, 250);
     }
   };
 
@@ -98,6 +156,9 @@ const RobotControlPage = () => {
     return () => {
       if (deleteMemory1Timer.current) clearInterval(deleteMemory1Timer.current);
       if (deleteMemory2Timer.current) clearInterval(deleteMemory2Timer.current);
+      if (startAllTimer.current) clearInterval(startAllTimer.current);
+      if (startBranch1Timer.current) clearInterval(startBranch1Timer.current);
+      if (startBranch2Timer.current) clearInterval(startBranch2Timer.current);
     };
   }, []);
 
@@ -121,30 +182,64 @@ const RobotControlPage = () => {
                   <div className="mb-2 font-semibold">{t('robot_control_start_all')}</div>
                   <div
                     style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: "50%",
-                      border: startAllActive ? "4px solid limegreen" : "4px solid #d9d9d9",
-                      background: startAllActive ? "limegreen" : "#f5f5f5",
+                      position: 'relative',
+                      width: 68,
+                      height: 68,
+                      margin: "0 auto 8px auto",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.3s",
-                      margin: "0 auto"
+                      justifyContent: "center"
                     }}
-                    onClick={() => setStartAllActive(!startAllActive)}
                   >
-                    <PoweroffOutlined
+                    {/* Ant Design Spinner */}
+                    {startAllPressing && (
+                      <Spin
+                        spinning={true}
+                        indicator={<LoadingOutlined style={{ color: 'limegreen', fontSize: 74 }} spin />}
+                        style={{
+                          position: 'absolute',
+                          top: -3,
+                          left: -46,
+                          width: 160,
+                          height: 160,
+                          zIndex: 1
+                        }}
+                        size="large"
+                      />
+                    )}
+                    
+                    {/* Button */}
+                    <div
                       style={{
-                        fontSize: 26,
-                        color: startAllActive ? "#fff" : "#999"
+                        position: 'relative',
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        border: startAllActive ? "4px solid limegreen" : "4px solid #d9d9d9",
+                        background: startAllActive ? "limegreen" : "#f5f5f5",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "all 0.3s",
+                        zIndex: 2,
+                        touchAction: 'none'
                       }}
-                    />
+                      onPointerDown={(e) => {
+                        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                        handleStartButtonPress('all');
+                      }}
+                      onPointerUp={() => handleStartButtonRelease('all')}
+                      onPointerCancel={() => handleStartButtonRelease('all')}
+                    >
+                      <PoweroffOutlined
+                        style={{
+                          fontSize: 26,
+                          color: startAllActive ? "#fff" : "#999"
+                        }}
+                      />
+                    </div>
                   </div>
-                  {/* <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-green-600 font-bold">
-                    {startAllActive ? t('robot_control_active') : t('robot_control_inactive')}
-                  </div> */}
                 </Card>
               </Col>
               <Col xs={24} md={8}>
@@ -152,30 +247,64 @@ const RobotControlPage = () => {
                   <div className="mb-2 font-semibold">{t('robot_control_start_branch1')}</div>
                   <div
                     style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: "50%",
-                      border: startBranch1Active ? "4px solid limegreen" : "4px solid #d9d9d9",
-                      background: startBranch1Active ? "limegreen" : "#f5f5f5",
+                      position: 'relative',
+                      width: 68,
+                      height: 68,
+                      margin: "0 auto 8px auto",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.3s",
-                      margin: "0 auto"
+                      justifyContent: "center"
                     }}
-                    onClick={() => setStartBranch1Active(!startBranch1Active)}
                   >
-                    <PoweroffOutlined
+                    {/* Ant Design Spinner */}
+                    {startBranch1Pressing && (
+                      <Spin
+                        spinning={true}
+                        indicator={<LoadingOutlined style={{ color: 'limegreen', fontSize: 74 }} spin />}
+                        style={{
+                          position: 'absolute',
+                          top: -3,
+                          left: -46,
+                          width: 160,
+                          height: 160,
+                          zIndex: 1
+                        }}
+                        size="large"
+                      />
+                    )}
+                    
+                    {/* Button */}
+                    <div
                       style={{
-                        fontSize: 26,
-                        color: startBranch1Active ? "#fff" : "#999"
+                        position: 'relative',
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        border: startBranch1Active ? "4px solid limegreen" : "4px solid #d9d9d9",
+                        background: startBranch1Active ? "limegreen" : "#f5f5f5",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "all 0.3s",
+                        zIndex: 2,
+                        touchAction: 'none'
                       }}
-                    />
+                      onPointerDown={(e) => {
+                        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                        handleStartButtonPress('branch1');
+                      }}
+                      onPointerUp={() => handleStartButtonRelease('branch1')}
+                      onPointerCancel={() => handleStartButtonRelease('branch1')}
+                    >
+                      <PoweroffOutlined
+                        style={{
+                          fontSize: 26,
+                          color: startBranch1Active ? "#fff" : "#999"
+                        }}
+                      />
+                    </div>
                   </div>
-                  {/* <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-green-600 font-bold">
-                    {startBranch1Active ? t('robot_control_active') : t('robot_control_inactive')}
-                  </div> */}
                 </Card>
               </Col>
               <Col xs={24} md={8}>
@@ -183,30 +312,64 @@ const RobotControlPage = () => {
                   <div className="mb-2 font-semibold">{t('robot_control_start_branch2')}</div>
                   <div
                     style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: "50%",
-                      border: startBranch2Active ? "4px solid limegreen" : "4px solid #d9d9d9",
-                      background: startBranch2Active ? "limegreen" : "#f5f5f5",
+                      position: 'relative',
+                      width: 68,
+                      height: 68,
+                      margin: "0 auto 8px auto",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.3s",
-                      margin: "0 auto"
+                      justifyContent: "center"
                     }}
-                    onClick={() => setStartBranch2Active(!startBranch2Active)}
                   >
-                    <PoweroffOutlined
+                    {/* Ant Design Spinner */}
+                    {startBranch2Pressing && (
+                      <Spin
+                        spinning={true}
+                        indicator={<LoadingOutlined style={{ color: 'limegreen', fontSize: 74 }} spin />}
+                        style={{
+                          position: 'absolute',
+                          top: -3,
+                          left: -46,
+                          width: 160,
+                          height: 160,
+                          zIndex: 1
+                        }}
+                        size="large"
+                      />
+                    )}
+                    
+                    {/* Button */}
+                    <div
                       style={{
-                        fontSize: 26,
-                        color: startBranch2Active ? "#fff" : "#999"
+                        position: 'relative',
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        border: startBranch2Active ? "4px solid limegreen" : "4px solid #d9d9d9",
+                        background: startBranch2Active ? "limegreen" : "#f5f5f5",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "all 0.3s",
+                        zIndex: 2,
+                        touchAction: 'none'
                       }}
-                    />
+                      onPointerDown={(e) => {
+                        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                        handleStartButtonPress('branch2');
+                      }}
+                      onPointerUp={() => handleStartButtonRelease('branch2')}
+                      onPointerCancel={() => handleStartButtonRelease('branch2')}
+                    >
+                      <PoweroffOutlined
+                        style={{
+                          fontSize: 26,
+                          color: startBranch2Active ? "#fff" : "#999"
+                        }}
+                      />
+                    </div>
                   </div>
-                  {/* <div style={{ position: 'absolute', bottom: 6, left: 0, right: 0 }} className="text-green-600 font-bold">
-                    {startBranch2Active ? t('robot_control_active') : t('robot_control_inactive')}
-                  </div> */}
                 </Card>
               </Col>
             </Row>
@@ -257,12 +420,16 @@ const RobotControlPage = () => {
                         justifyContent: "center",
                         cursor: "pointer",
                         transition: "all 0.3s",
-                        zIndex: 2
+                        zIndex: 2,
+                        touchAction: 'none',    
                       }}
-                      onMouseDown={() => handleRedButtonPress(1)}
-                      onMouseUp={() => handleRedButtonRelease(1)}
-                      onTouchStart={() => handleRedButtonPress(1)}
-                      onTouchEnd={() => handleRedButtonRelease(1)}
+                      onPointerDown={(e) => {
+                        // capture để vẫn nhận pointerup khi kéo ra ngoài
+                        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                        handleRedButtonPress(1);
+                      }}
+                      onPointerUp={() => handleRedButtonRelease(1)}
+                      onPointerCancel={() => handleRedButtonRelease(1)}
                     >
                       <PoweroffOutlined
                         style={{
@@ -327,12 +494,16 @@ const RobotControlPage = () => {
                         justifyContent: "center",
                         cursor: "pointer",
                         transition: "all 0.3s",
-                        zIndex: 2
+                        zIndex: 2,
+                        touchAction: 'none',    
                       }}
-                      onMouseDown={() => handleRedButtonPress(2)}
-                      onMouseUp={() => handleRedButtonRelease(2)}
-                      onTouchStart={() => handleRedButtonPress(2)}
-                      onTouchEnd={() => handleRedButtonRelease(2)}
+                      onPointerDown={(e) => {
+                        // capture để vẫn nhận pointerup khi kéo ra ngoài
+                        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                        handleRedButtonPress(2);
+                      }}
+                      onPointerUp={() => handleRedButtonRelease(2)}
+                      onPointerCancel={() => handleRedButtonRelease(2)}
                     >
                       <PoweroffOutlined
                         style={{
