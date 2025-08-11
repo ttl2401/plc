@@ -7,6 +7,7 @@ interface GaugeButtonProps {
   value: string;
   leftLabel?: string;
   rightLabel?: string;
+  onChange?: (newValue: boolean) => void | Promise<void>;
 }
 
 const GaugeButton: React.FC<GaugeButtonProps> = ({
@@ -15,6 +16,7 @@ const GaugeButton: React.FC<GaugeButtonProps> = ({
   value,
   leftLabel,
   rightLabel,
+  onChange,
 }) => {
   // Gauge parameters
   const size = 100;
@@ -28,6 +30,12 @@ const GaugeButton: React.FC<GaugeButtonProps> = ({
     "#22c55e","#ef4444"
   ]
   const [checked, setChecked] = useState(!!checkedProp);
+  
+  // Sync with prop changes
+  React.useEffect(() => {
+    setChecked(!!checkedProp);
+  }, [checkedProp]);
+
   // Utility: degree to radian
   const deg2rad = (deg: number) => (Math.PI * deg) / 180;
 
@@ -69,8 +77,19 @@ const GaugeButton: React.FC<GaugeButtonProps> = ({
     textAlign: "left" as const
   };
   
-  const handleClick = () => {
-    setChecked((prev) => !prev)
+  const handleClick = async () => {
+    const newValue = !checked;
+    setChecked(newValue);
+    
+    if (onChange) {
+      try {
+        await onChange(newValue);
+      } catch (error) {
+        // Revert state if onChange fails
+        setChecked(!newValue);
+        console.error('GaugeButton onChange error:', error);
+      }
+    }
   }
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>

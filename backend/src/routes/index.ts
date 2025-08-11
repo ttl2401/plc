@@ -10,6 +10,7 @@ import testRoutes from './test.routes';
 import resourceRoutes from './resource.routes';
 import historyRoutes from './history.routes';
 import systemSettingRoutes from './system-setting.routes';
+import robotControlRoutes from './robot-control.routes';
 
 const router = express.Router();
 
@@ -25,6 +26,6 @@ router.use(testRoutes);
 router.use(productRoutes);
 router.use(resourceRoutes);
 router.use(systemSettingRoutes);
-
+router.use(robotControlRoutes);
 
 export default router; 

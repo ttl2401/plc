@@ -51,3 +51,11 @@ export const getMongoURI = () => {
   }
   return `mongodb://${HOST}:${PORT}/${DATABASE}`;
 }; 
+
+export const PLC_CONFIG = {
+  HOST: process.env.PLC_HOST || '192.168.1.100',
+  RACK: process.env.PLC_RACK || 0,
+  SLOT: process.env.PLC_SLOT || 1,
+  DB_NUMBER_ROBOT: process.env.PLC_DB_NUMBER_ROBOT || 65,
+  DB_NUMBER_CONTROL: process.env.PLC_DB_NUMBER_CONTROL || 66,
+};
