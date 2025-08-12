@@ -1,14 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
+import { RobotControlService } from '../services/robot-control.service';
 import { PLCService } from '../services/plc.service';
 import { returnMessage, returnError, returnPaginationMessage } from '@/controllers/base.controller';
 
+const robotControlService = new RobotControlService();
 const plcService = new PLCService();
-
 
 export const getPLCVariables = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const variables = await plcService.getVariables({type: 'plc_control'});
-    res.json(returnMessage(variables, `Retrieved ${variables.length} PLC variables successfully`));
+    // First get variables from MongoDB
+    // const variables = await robotControlService.getVariables({type: 'plc_control'});
+    
+    // Then read current values from PLC
+    const variablesWithPLCValues = await plcService.readVariablesFromPLC({type: 'plc_control'});
+    
+    res.json(returnMessage(variablesWithPLCValues, `Retrieved ${variablesWithPLCValues.length} PLC variables successfully`));
   } catch (err) {
     next(err);
   }
@@ -17,14 +23,23 @@ export const getPLCVariables = async (req: Request, res: Response, next: NextFun
 export const updateVariable = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { variables } = req.body;
-    for (const variable of variables) {
-        const name = variable.name;
-        const value = variable.value;
-        await plcService.updateVariable(name, value, 'plc_control');
-
+    
+    // Update variables in MongoDB
+    const updatedVariables = await robotControlService.updateMultipleVariables(variables, 'plc_control');
+    
+    // Write variables to PLC
+    const plcResults = await plcService.writeMultipleVariablesToPLC(variables);
+    
+    // Check if all PLC writes were successful
+    const allSuccessful = plcResults.every(result => result === true);
+    
+    if (allSuccessful) {
+      res.json(returnMessage(updatedVariables, `Updated ${updatedVariables.length} variables successfully in both database and PLC`));
+    } else {
+      // Some PLC writes failed, but database updates succeeded
+      const failedCount = plcResults.filter(result => result === false).length;
+      res.json(returnMessage(updatedVariables, `Updated ${updatedVariables.length} variables in database, but ${failedCount} PLC writes failed`));
     }
-
-    res.json(returnMessage(variables, `Update ${variables.length} variables successfully`));
   } catch (err) {
     next(err);
   }

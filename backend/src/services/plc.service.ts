@@ -23,20 +23,17 @@ export class PLCService {
   }
 
   /**
-   * Get all PLC variables from the database and read current values from PLC
+   * Read all PLC variables from the database and get current values from PLC
    * @param queries - Query parameters including type filter
-   * @returns Promise<IPlcVariable[]> - Array of all PLC variables with current values
+   * @returns Promise<IPlcVariable[]> - Array of all PLC variables with current values from PLC
    */
-  async getVariables(queries: any): Promise<IPlcVariable[]> {
+  async readVariablesFromPLC(queries: any): Promise<IPlcVariable[]> {
     try {
       const { type } = queries;
       // First, fetch all variables from MongoDB
       const variables = await PlcVariable.find({ type }).sort({ name: 1 });
       
-      // Create a copy of the original variables to return if PLC reading fails
-      const initialVariables = variables.map(variable => ({ ...variable.toObject() }));
-      
-      // If no snap7 client available, return initial data
+      // If no snap7 client available, return variables with stored values
       if (!this.client) {
         console.log('[SIMULATION] Returning MongoDB data without PLC read');
         return variables;
@@ -47,7 +44,7 @@ export class PLCService {
         if (!this.isConnected()) {
           const connectionResult = await this.connectWithTimeout();
           if (!connectionResult) {
-            console.warn('Failed to connect to PLC, returning initial MongoDB data');
+            console.warn('Failed to connect to PLC, returning stored values');
             return variables;
           }
         }
@@ -79,12 +76,6 @@ export class PLCService {
                 
                 if (value !== null) {
                   variable.value = value;
-                  // Save updated value to database
-                  try {
-                    await variable.save();
-                  } catch (saveError) {
-                    console.warn(`Failed to save variable ${variable.name} to database:`, saveError);
-                  }
                 }
               } catch (decodeError) {
                 console.warn(`Failed to decode variable ${variable.name}:`, decodeError);
@@ -92,19 +83,220 @@ export class PLCService {
             }
           } else {
             // Keep original values if DB read failed
-            console.warn(`Failed to read DB ${dbNumber}, keeping original values for ${dbInfo.variables.length} variables`);
+            console.warn(`Failed to read DB ${dbNumber}, keeping stored values for ${dbInfo.variables.length} variables`);
           }
         }
 
         return variables;
 
       } catch (plcError) {
-        console.warn('PLC communication error, returning initial MongoDB data:', plcError);
+        console.warn('PLC communication error, returning stored values:', plcError);
         return variables;
       }
       
     } catch (error) {
-      throw new AppError('Failed to fetch PLC variables', 500);
+      throw new AppError('Failed to read PLC variables', 500);
+    }
+  }
+
+  /**
+   * Write a value to a PLC variable
+   * @param name - Name of the variable to write to
+   * @param value - Value to write
+   * @returns Promise<boolean> - Success status
+   */
+  async writeVariableToPLC(name: string, value: any): Promise<boolean> {
+    try {
+      // Find the variable in the database to get its configuration
+      const variable = await PlcVariable.findOne({ name });
+      if (!variable) {
+        throw new AppError(`PLC variable '${name}' not found`, 404);
+      }
+
+      // Check if we have a PLC client and can connect
+      if (!this.client) {
+        console.log(`[SIMULATION] Would write ${value} to PLC variable '${name}'`);
+        return true;
+      }
+
+      const canConnectToPLC = this.isConnected() || await this.connectWithTimeout();
+      
+      if (!canConnectToPLC) {
+        throw new AppError('Failed to connect to PLC', 500);
+      }
+
+      console.log(`Writing ${value} to PLC variable '${name}' (DB${variable.dbNumber}, offset:${variable.offset})`);
+      
+      // Prepare data buffer based on data type
+      let buffer: Buffer;
+      let dataSize: number;
+
+      switch (variable.dataType.toLowerCase()) {
+        case 'bool':
+          buffer = Buffer.alloc(1);
+          buffer.writeUInt8(value ? 1 : 0, 0);
+          dataSize = 1;
+          break;
+          
+        case 'integer':
+          buffer = Buffer.alloc(2);
+          buffer.writeInt16BE(parseInt(value), 0);
+          dataSize = 2;
+          break;
+          
+        case 'real':
+          buffer = Buffer.alloc(4);
+          buffer.writeFloatBE(parseFloat(value), 0);
+          dataSize = 4;
+          break;
+          
+        default:
+          throw new AppError(`Unsupported data type: ${variable.dataType}`, 400);
+      }
+
+      // Write to PLC DB
+      const writeResult = this.client.DBWrite(
+        variable.dbNumber,
+        variable.offset,
+        dataSize,
+        buffer
+      );
+
+      if (!writeResult) {
+        const errorCode = this.client.LastError();
+        throw new AppError(`PLC write failed: ${this.client.ErrorText(errorCode)}`, 500);
+      }
+
+      console.log(`Successfully wrote ${value} to PLC variable '${name}'`);
+      return true;
+
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to write to PLC variable', 500);
+    }
+  }
+
+  /**
+   * Read a single variable value from PLC
+   * @param name - Name of the variable to read
+   * @returns Promise<any> - Current value from PLC
+   */
+  async readVariableFromPLC(name: string): Promise<any> {
+    try {
+      const variable = await PlcVariable.findOne({ name });
+      if (!variable) {
+        throw new AppError(`PLC variable '${name}' not found`, 404);
+      }
+
+      // Check if we have a PLC client
+      if (!this.client) {
+        console.log(`[SIMULATION] Would read from PLC variable '${name}', returning stored value: ${variable.value}`);
+        return variable.value || variable.startValue || 0;
+      }
+
+      // Connect to PLC if not already connected
+      if (!this.isConnected()) {
+        const connectionResult = await this.connectWithTimeout();
+        if (!connectionResult) {
+          throw new AppError('Failed to connect to PLC', 500);
+        }
+      }
+
+      // Determine data size based on type
+      let dataSize: number;
+      switch (variable.dataType.toLowerCase()) {
+        case 'bool':
+          dataSize = 1;
+          break;
+        case 'integer':
+          dataSize = 2;
+          break;
+        case 'real':
+          dataSize = 4;
+          break;
+        default:
+          throw new AppError(`Unsupported data type: ${variable.dataType}`, 400);
+      }
+
+      // Read from PLC DB
+      const readResult = this.client.DBRead(
+        variable.dbNumber,
+        variable.offset,
+        dataSize
+      );
+
+      if (!readResult) {
+        const errorCode = this.client.LastError();
+        throw new AppError(`Failed to read from PLC: ${this.client.ErrorText(errorCode)}`, 500);
+      }
+
+      const buffer = readResult;
+
+      // Parse buffer based on data type
+      let value: any;
+      switch (variable.dataType.toLowerCase()) {
+        case 'bool':
+          value = buffer.readUInt8(0) !== 0;
+          break;
+        case 'integer':
+          value = buffer.readInt16BE(0);
+          break;
+        case 'real':
+          value = buffer.readFloatBE(0);
+          break;
+      }
+
+      return value;
+
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('Failed to read PLC variable', 500);
+    }
+  }
+
+  /**
+   * Write multiple variables to PLC
+   * @param variables - Array of variables to write
+   * @returns Promise<boolean[]> - Success status for each variable
+   */
+  async writeMultipleVariablesToPLC(variables: Array<{ name: string; value: any }>): Promise<boolean[]> {
+    try {
+      const results: boolean[] = [];
+      
+      for (const variableData of variables) {
+        try {
+          const result = await this.writeVariableToPLC(variableData.name, variableData.value);
+          results.push(result);
+        } catch (error) {
+          console.warn(`Failed to write variable ${variableData.name}:`, error);
+          results.push(false);
+        }
+      }
+
+      return results;
+    } catch (error) {
+      throw new AppError('Failed to write multiple variables to PLC', 500);
+    }
+  }
+
+  /**
+   * Get PLC connection status
+   * @returns boolean - Connection status
+   */
+  isConnected(): boolean {
+    return this.client && this.client.Connected && this.client.Connected();
+  }
+
+  /**
+   * Disconnect from PLC
+   */
+  async disconnect(): Promise<void> {
+    if (this.client && this.client.Connected && this.client.Connected()) {
+      this.client.Disconnect();
     }
   }
 
@@ -242,219 +434,13 @@ export class PLCService {
   }
 
   /**
-   * Update a PLC variable by writing to the PLC using snap7 or just MongoDB
-   * @param name - Name of the variable to update
-   * @param value - New value to write
-   * @param type - Optional type override
-   * @returns Promise<IPlcVariable> - Updated variable
-   */
-  async updateVariable(name: string, value: any, type: string | null = null): Promise<IPlcVariable> {
-    try {
-      // Find the variable in the database
-      const variable = await PlcVariable.findOne({ name });
-      if (!variable) {
-        throw new AppError(`PLC variable '${name}' not found`, 404);
-      }
-
-      // Use provided type or fall back to variable's type
-      const dataType = type || variable.dataType;
-      
-      // Check if we have a PLC client and can connect
-      const canConnectToPLC = this.client && (this.isConnected() || await this.connectWithTimeout());
-      
-      if (canConnectToPLC) {
-        // PLC is available - write to PLC and then update database
-        console.log(`Writing ${value} to PLC variable '${name}' (DB${variable.dbNumber}, offset:${variable.offset})`);
-        
-        try {
-          // Prepare data buffer based on data type
-          let buffer: Buffer;
-          let dataSize: number;
-
-          switch (dataType.toLowerCase()) {
-            case 'bool':
-              buffer = Buffer.alloc(1);
-              buffer.writeUInt8(value ? 1 : 0, 0);
-              dataSize = 1;
-              break;
-              
-            case 'integer':
-              buffer = Buffer.alloc(2);
-              buffer.writeInt16BE(parseInt(value), 0);
-              dataSize = 2;
-              break;
-              
-            case 'real':
-              buffer = Buffer.alloc(4);
-              buffer.writeFloatBE(parseFloat(value), 0);
-              dataSize = 4;
-              break;
-              
-            default:
-              throw new AppError(`Unsupported data type: ${dataType}`, 400);
-          }
-
-          // Write to PLC DB
-          const writeResult = this.client.DBWrite(
-            variable.dbNumber,
-            variable.offset,
-            dataSize,
-            buffer
-          );
-
-          if (!writeResult) {
-            const errorCode = this.client.LastError();
-            console.warn(`PLC write failed for ${name}: ${this.client.ErrorText(errorCode)}, updating MongoDB only`);
-            // Fall through to MongoDB update
-          } else {
-            console.log(`Successfully wrote ${value} to PLC variable '${name}'`);
-          }
-        } catch (plcError) {
-          console.warn(`PLC write error for ${name}:`, plcError, ', updating MongoDB only');
-          // Fall through to MongoDB update
-        }
-      } else {
-        // No PLC connection - just update database
-        console.log(`[NO PLC] Updating ${name} = ${value} in MongoDB only`);
-      }
-
-      // Always update the variable in the database
-      variable.value = value;
-      if (type) {
-        variable.type = type;
-      }
-      await variable.save();
-
-      return variable;
-
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError('Failed to update PLC variable', 500);
-    }
-  }
-
-  /**
-   * Read a variable value from PLC
-   * @param name - Name of the variable to read
-   * @returns Promise<any> - Current value from PLC
-   */
-  async readVariable(name: string): Promise<any> {
-    try {
-      const variable = await PlcVariable.findOne({ name });
-      if (!variable) {
-        throw new AppError(`PLC variable '${name}' not found`, 404);
-      }
-
-      // Connect to PLC if not already connected
-      if (!this.isConnected()) {
-        if (!this.client) {
-          console.log(`[SIMULATION] Would read from PLC variable '${name}', returning stored value: ${variable.value}`);
-          return variable.value || variable.startValue || 0;
-        }
-        
-        const connectionResult = await this.connectWithTimeout();
-        if (!connectionResult) {
-          throw new AppError('Failed to connect to PLC', 500);
-        }
-      }
-
-      // Determine data size based on type
-      let dataSize: number;
-      switch (variable.dataType.toLowerCase()) {
-        case 'bool':
-          dataSize = 1;
-          break;
-        case 'integer':
-          dataSize = 2;
-          break;
-        case 'real':
-          dataSize = 4;
-          break;
-        default:
-          throw new AppError(`Unsupported data type: ${variable.dataType}`, 400);
-      }
-
-      // Read from PLC DB
-      const readResult = this.client.DBRead(
-        variable.dbNumber,
-        variable.offset,
-        dataSize
-      );
-
-      if (!readResult) {
-        const errorCode = this.client.LastError();
-        throw new AppError(`Failed to read from PLC: ${this.client.ErrorText(errorCode)}`, 500);
-      }
-
-      const buffer = readResult;
-
-      // Parse buffer based on data type
-      let value: any;
-      switch (variable.dataType.toLowerCase()) {
-        case 'bool':
-          value = buffer.readUInt8(0) !== 0;
-          break;
-        case 'integer':
-          value = buffer.readInt16BE(0);
-          break;
-        case 'real':
-          value = buffer.readFloatBE(0);
-          break;
-      }
-
-      // Update database with current value
-      variable.value = value;
-      await variable.save();
-
-      return value;
-
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError('Failed to read PLC variable', 500);
-    }
-  }
-
-  /**
-   * Get a single variable by name
-   * @param name - Name of the variable
-   * @returns Promise<IPlcVariable> - The variable
-   */
-  async getVariableByName(name: string): Promise<IPlcVariable> {
-    try {
-      const variable = await PlcVariable.findOne({ name });
-      if (!variable) {
-        throw new AppError(`PLC variable '${name}' not found`, 404);
-      }
-      return variable;
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError('Failed to fetch PLC variable', 500);
-    }
-  }
-
-  /**
-   * Disconnect from PLC
-   */
-  async disconnect(): Promise<void> {
-    if (this.client && this.client.Connected && this.client.Connected()) {
-      this.client.Disconnect();
-    }
-  }
-
-  /**
    * Connect to PLC with timeout to prevent system hanging
    * @returns Promise<boolean> - Connection success
    */
   private async connectWithTimeout(): Promise<boolean> {
     if (!this.client) return false;
 
-    // Nếu đã kết nối thì khỏi làm nữa
+    // If already connected, return true
     try { if (this.client.Connected && this.client.Connected()) return true; } catch {}
 
     const host = PLC_CONFIG.HOST;
@@ -474,7 +460,7 @@ export class PLCService {
         // Timer timeout 500ms
         const timer = setTimeout(() => {
             console.warn(`PLC connect timeout (${ms}ms)`);
-            onSettle(false); // sẽ Disconnect() ở đây
+            onSettle(false); // will Disconnect() here
         }, ms);
 
         this.client.ConnectTo(host, rack, slot, (err: number) => {
@@ -489,13 +475,5 @@ export class PLCService {
         }
         });
     });
-  }
-
-  /**
-   * Get connection status
-   * @returns boolean - Connection status
-   */
-  isConnected(): boolean {
-    return this.client && this.client.Connected && this.client.Connected();
   }
 }

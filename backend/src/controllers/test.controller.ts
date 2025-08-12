@@ -2,6 +2,9 @@ import { Point } from '@influxdata/influxdb-client'
 import { writeApi, queryApi } from '@/config/influxdb'
 import { returnMessage, returnError } from '@/controllers/base.controller'
 import { Request, Response, NextFunction } from 'express'
+import { PLCService } from '@/services/plc.service'
+
+const plcService = new PLCService();
 
 // Example data array
 const data = [
@@ -55,6 +58,55 @@ export const readInflux = async (req: Request, res: Response, next: NextFunction
       });
     });
     return res.status(200).json(returnMessage(result, 'Read successful'));
+  } catch (error: unknown) {
+    return res.status(500).json(returnError(error as Error));
+  }
+}
+
+// Test PLC read functionality
+export const testPLCRead = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { variableName } = req.params;
+    
+    if (!variableName) {
+      return res.status(400).json(returnError(new Error('Variable name is required')));
+    }
+
+    const value = await plcService.readVariableFromPLC(variableName);
+    return res.status(200).json(returnMessage({ variableName, value }, 'PLC read successful'));
+  } catch (error: unknown) {
+    return res.status(500).json(returnError(error as Error));
+  }
+}
+
+// Test PLC write functionality
+export const testPLCWrite = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { variableName } = req.params;
+    const { value } = req.body;
+    
+    if (!variableName) {
+      return res.status(400).json(returnError(new Error('Variable name is required')));
+    }
+
+    if (value === undefined) {
+      return res.status(400).json(returnError(new Error('Value is required')));
+    }
+
+    const success = await plcService.writeVariableToPLC(variableName, value);
+    return res.status(200).json(returnMessage({ variableName, value, success }, 'PLC write successful'));
+  } catch (error: unknown) {
+    return res.status(500).json(returnError(error as Error));
+  }
+}
+
+// Test reading multiple PLC variables
+export const testPLCReadMultiple = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { type = 'test' } = req.query;
+    
+    const variables = await plcService.readVariablesFromPLC({ type: type as string });
+    return res.status(200).json(returnMessage(variables, `Read ${variables.length} PLC variables successfully`));
   } catch (error: unknown) {
     return res.status(500).json(returnError(error as Error));
   }
