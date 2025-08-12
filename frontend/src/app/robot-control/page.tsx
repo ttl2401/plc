@@ -53,6 +53,7 @@ const RobotControlPage = () => {
     return variable ? Boolean(variable.value) : false;
   };
 
+  
   // Fetch PLC variables from API
   const loadPLCVariables = async () => {
     try {
@@ -289,42 +290,30 @@ const RobotControlPage = () => {
     }
   };
 
-  // Handle emergency button slide interaction (Dừng Khẩn buttons)
-  const handleEmergencyButtonPress = (buttonNumber: 1 | 2) => {
-    if (updating) return; // Prevent multiple updates
+  
 
-    // Only update local state for visual feedback during slide
-    if (buttonNumber === 1) {
-      setEmergency1Active(true);
-    } else {
-      setEmergency2Active(true);
-    }
-  };
-
-  const handleEmergencyButtonRelease = async (buttonNumber: 1 | 2) => {
-    if (updating) return; // Prevent multiple updates
-
+  const handleEmergencyButtonClick = async (buttonNumber: 1 | 2) => {
+    if (updating) return;
+  
     const variableName = buttonNumber === 1 ? 'Estop_1' : 'Estop_2';
-    const currentValue = getPLCVariableValue(variableName);
-    const newValue = !currentValue;
-
-    // Update PLC variable only after slide is complete
-    const success = await updatePLCVariableValue(variableName, newValue);
-    if (!success) {
-      // Revert state if update failed
-      if (buttonNumber === 1) {
-        setEmergency1Active(!newValue);
-      } else {
-        setEmergency2Active(!newValue);
+    const isActive = getPLCVariableValue(variableName);
+  
+    if (!isActive) {
+      // Đang inactive -> bật ngay
+      const ok = await updatePLCVariableValue(variableName, true);
+      if (ok) {
+        if (buttonNumber === 1) setEmergency1Active(true);
+        else setEmergency2Active(true);
       }
+      // nếu fail, message đã hiển thị trong updatePLCVariableValue
     } else {
-      // If successful and button is being deactivated, show popup
-      if (!newValue) {
-        setSelectedBranch(buttonNumber);
-        setShowPopup(true);
-      }
+      // Đang active -> yêu cầu xác nhận bằng slide
+      setSelectedBranch(buttonNumber);
+      setShowPopup(true);
     }
   };
+
+  
 
   // Handle gauge button toggle
   const handleGaugeButtonToggle = async (variableName: string, currentValue: boolean) => {
@@ -751,12 +740,8 @@ const RobotControlPage = () => {
                       opacity: 1,
                       touchAction: 'none'
                     }}
-                    onPointerDown={(e) => {
-                      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-                      handleEmergencyButtonPress(1);
-                    }}
-                    onPointerUp={() => handleEmergencyButtonRelease(1)}
-                    onPointerCancel={() => handleEmergencyButtonRelease(1)}
+                    
+                    onClick={() => handleEmergencyButtonClick(1)}
                   >
                     <PoweroffOutlined
                       style={{
@@ -791,12 +776,8 @@ const RobotControlPage = () => {
                       opacity: 1,
                       touchAction: 'none'
                     }}
-                    onPointerDown={(e) => {
-                      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-                      handleEmergencyButtonPress(2);
-                    }}
-                    onPointerUp={() => handleEmergencyButtonRelease(2)}
-                    onPointerCancel={() => handleEmergencyButtonRelease(2)}
+                    
+                    onClick={() => handleEmergencyButtonClick(2)}
                   >
                     <PoweroffOutlined
                       style={{
@@ -888,13 +869,20 @@ const RobotControlPage = () => {
       <SlidePopup
         visible={showPopup}
         onClose={() => setShowPopup(false)}
-        onConfirm={() => {
-          if (selectedBranch === 1) {
-            setEmergency1Active(false);
+        onConfirm={async () => {
+          const variableName = selectedBranch === 1 ? 'Estop_1' : 'Estop_2';
+          const ok = await updatePLCVariableValue(variableName, false);
+          if (ok) {
+            if (selectedBranch === 1) {
+              setEmergency1Active(false);
+            } else {
+              setEmergency2Active(false);
+            }
+            setShowPopup(false);
           } else {
-            setEmergency2Active(false);
+            // giữ nguyên popup hoặc tự đóng tuỳ bạn
+            message.error('Tắt khẩn thất bại, vui lòng thử lại');
           }
-          setShowPopup(false);
         }}
         branchNumber={selectedBranch}
       />
