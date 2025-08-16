@@ -10,7 +10,8 @@ import testRoutes from './test.routes';
 import resourceRoutes from './resource.routes';
 import historyRoutes from './history.routes';
 import systemSettingRoutes from './system-setting.routes';
-import robotControlRoutes from './robot-control.routes';
+import plcRobotControlRoutes from './plc-robot-control.routes';
+import plcParameterMonitorRoutes from './plc-parameter-monitor.routes';
 
 const router = express.Router();
 
@@ -26,6 +27,7 @@ router.use(testRoutes);
 router.use(productRoutes);
 router.use(resourceRoutes);
 router.use(systemSettingRoutes);
-router.use(robotControlRoutes);
+router.use(plcRobotControlRoutes);
+router.use(plcParameterMonitorRoutes);
 
 export default router; 

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { auth } from '@/middlewares/auth.middleware';
 import { restrictTo } from '@/middlewares/role.middleware';
 import { ROLES } from '@/config';
-import { updateVariable, getPLCVariables } from '../controllers/robot-control.controller';
+import { updateVariable, getPLCVariables } from '../controllers/plc-robot-control.controller';
 import validate from '@/middlewares/validate.middleware';
 import { updatePLCVariablesRules } from '@/validators/plc';
 
