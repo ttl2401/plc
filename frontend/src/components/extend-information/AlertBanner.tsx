@@ -6,7 +6,8 @@ interface AlertBannerProps {
   alerts: Array<{
     type: string;
     value: number;
-    message: string;
+    message: string; // tank name
+    level: 'high' | 'low';
   }>;
 }
 
@@ -22,10 +23,10 @@ const AlertBanner: React.FC<AlertBannerProps> = ({ alerts }) => {
           </div>
           <div>
             <div className="text-sm font-medium text-red-800">
-              {alert.type} bốn <span className="font-bold">{alert.message}</span>
+              <b>{alert.type}</b> bồn <span className="font-bold">{alert.message}</span>
             </div>
             <div className="text-sm text-red-600">
-              là <span className="font-bold">{alert.value}</span> đang quá {alert.value > 50 ? 'cao' : 'thấp'}
+              là <span className="font-bold">{alert.value}</span> đang quá {alert.level === 'high' ? 'cao' : 'thấp'}
             </div>
           </div>
         </div>

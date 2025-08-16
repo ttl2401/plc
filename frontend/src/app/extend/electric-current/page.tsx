@@ -7,11 +7,13 @@ import ProcessCard from '@/components/extend-information/ProcessCard';
 import AlertBanner from '@/components/extend-information/AlertBanner';
 import StatusIndicator from '@/components/extend-information/StatusIndicator';
 import { Thermometer, Zap } from 'lucide-react';
+import { fetchPLCTemperatureVariables, fetchPLCElectricityVariables, PLCVariable } from '@/services/parameterMonitorService';
 
 const Index = () => {
   const [selectedLine, setSelectedLine] = useState('01');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
+  const [processData, setProcessData] = useState<{ temperature: { title: string; value?: number; target: number }[]; electrical: { title: string; value?: number; target: number }[] }>({ temperature: [], electrical: [] });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,45 +29,171 @@ const Index = () => {
   }, []);
 
 
-  // Mock data for different lines
-  const getProcessData = (line: string) => {
-    const baseData = {
-      '01': {
-        temperature: [
-          { title: 'Washing', value: 49.6, target: 50, status: 'normal' as const },
-          { title: 'Boiling degreasing', value: 39.6, target: 50, status: 'low' as const },
-          { title: 'Electro degreasing 1', value: 52.6, target: 50, status: 'high' as const },
-          { title: 'Electro degreasing 2', value: 49.6, target: 50, status: 'normal' as const },
-          { title: 'Pre-nickel plating', value: 49.6, target: 50, status: 'normal' as const },
-          { title: 'Nickel plating 1', value: 39.6, target: 50, status: 'low' as const },
-          { title: 'Nickel plating 2', value: 52.6, target: 50, status: 'high' as const },
-          { title: 'Nickel plating 3', value: 49.6, target: 50, status: 'normal' as const },
-          { title: 'Ultrasonic hot rinse', value: 49.6, target: 50, status: 'normal' as const },
-          { title: 'Hot Rinse', value: 39.6, target: 50, status: 'low' as const },
-          { title: 'Dryer 1', value: 52.6, target: 50, status: 'high' as const },
-          { title: 'Dryer 2', value: 49.6, target: 50, status: 'normal' as const },
-        ],
-        electrical: [
-          { title: 'Electro degreasing 1', value: 49.6, target: 50, status: 'normal' as const },
-          { title: 'Electro degreasing 2', value: 39.6, target: 50, status: 'low' as const },
-          { title: 'Pre-nickel plating', value: 49.6, target: 50, status: 'normal' as const },
-          { title: 'Nickel plating 1', value: 39.6, target: 50, status: 'low' as const },
-          { title: 'Nickel plating 2', value: 49.6, target: 50, status: 'normal' as const },
-          { title: 'Nickel plating 3', value: 49.6, target: 50, status: 'normal' as const },
-        ]
+  const titleMap: Record<string, string> = {
+    Washing: 'Washing',
+    Boiling_Degreasing: 'Boiling degreasing',
+    Electro_Degreasing_1: 'Electro degreasing 1',
+    Electro_Degreasing_2: 'Electro degreasing 2',
+    Pre_Nickel_Plating: 'Pre-nickel plating',
+    Nickel_Plating_1: 'Nickel plating 1',
+    Nickel_Plating_2: 'Nickel plating 2',
+    Nickel_Plating_3: 'Nickel plating 3',
+    Ultrasonic_Hot_Rinse: 'Ultrasonic hot rinse',
+    Hot_Rinse: 'Hot Rinse',
+    Dryer_1: 'Dryer 1'
+  };
+
+  const temperatureOrder = [
+    'Washing',
+    'Boiling_Degreasing',
+    'Electro_Degreasing_1',
+    'Electro_Degreasing_2',
+    'Pre_Nickel_Plating',
+    'Nickel_Plating_1',
+    'Nickel_Plating_2',
+    'Nickel_Plating_3',
+    'Ultrasonic_Hot_Rinse',
+    'Hot_Rinse',
+    'Dryer_1'
+  ];
+
+  const electricityOrder = [
+    'Electro_Degreasing_1',
+    'Electro_Degreasing_2',
+    'Pre_Nickel_Plating',
+    'Nickel_Plating_1',
+    'Nickel_Plating_2',
+    'Nickel_Plating_3'
+  ];
+
+  const toNumber = (v: unknown): number | undefined =>
+    typeof v === 'number' && !Number.isNaN(v) ? v : undefined;
+
+  const mapTemperatureVariables = (vars: PLCVariable[]) => {
+    const measured = new Map<string, number | undefined>();
+    const setting = new Map<string, number | undefined>();
+
+    vars.forEach((it) => {
+      if (it.name.startsWith('Nhiet_do_cai_')) {
+        const key = it.name.replace('Nhiet_do_cai_', '');
+        setting.set(key, toNumber(it.value));
+      } else if (it.name.startsWith('Nhiet_do_')) {
+        const key = it.name.replace('Nhiet_do_', '');
+        measured.set(key, toNumber(it.value));
+      }
+    });
+
+    const items: { title: string; value?: number; target: number }[] = [];
+    temperatureOrder.forEach((key) => {
+      if (measured.has(key)) {
+        const title = titleMap[key] || key.replace(/_/g, ' ');
+        const value = measured.get(key);
+        const target = setting.get(key);
+        items.push({ title, value, target: typeof target === 'number' ? target : 0 });
+      }
+    });
+    return items;
+  };
+
+  const mapElectricityVariables = (vars: PLCVariable[]) => {
+    const measured = new Map<string, number | undefined>();
+    const setting = new Map<string, number | undefined>();
+
+    vars.forEach((it) => {
+      if (it.name.startsWith('Cai_chinh_luu_')) {
+        const key = it.name.replace('Cai_chinh_luu_', '');
+        setting.set(key, toNumber(it.value));
+      } else if (it.name.startsWith('Vi_tri_')) {
+        const key = it.name.replace('Vi_tri_', '');
+        measured.set(key, toNumber(it.value));
+      }
+    });
+
+    const items: { title: string; value?: number; target: number }[] = [];
+    electricityOrder.forEach((key) => {
+      if (measured.has(key)) {
+        const title = titleMap[key] || key.replace(/_/g, ' ');
+        const value = measured.get(key);
+        const target = setting.get(key);
+        items.push({ title, value, target: typeof target === 'number' ? target : 0 });
+      }
+    });
+    return items;
+  };
+
+  const getProcessData = async (line: string) => {
+    try {
+      const [tempRes, elecRes] = await Promise.all([
+        fetchPLCTemperatureVariables(),
+        fetchPLCElectricityVariables()
+      ]);
+
+      const temperature = tempRes?.data ? mapTemperatureVariables(tempRes.data) : [];
+      const electrical = elecRes?.data ? mapElectricityVariables(elecRes.data) : [];
+      setProcessData({ temperature, electrical });
+    } catch (e) {
+      setProcessData({ temperature: [], electrical: [] });
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchAndSet = async () => {
+      if (!cancelled) {
+        await getProcessData(selectedLine);
+      }
+    };
+    // initial fetch
+    fetchAndSet();
+    // poll every 2s
+    const intervalId = setInterval(fetchAndSet, 2000);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLine]);
+  
+  // Generate alerts: pick the highest absolute deviation per type
+  const computeAlerts = () => {
+    const alerts: Array<{ type: string; value: number; message: string; level: 'high' | 'low' }> = [];
+
+    const buildAlertFor = (
+      items: { title: string; value?: number; target: number }[],
+      typeLabel: string
+    ) => {
+      let maxAbsDiff = -1;
+      let alertTitle = '';
+      let alertValue: number | null = null;
+      let alertLevel: 'high' | 'low' | null = null;
+
+      items.forEach((it) => {
+        if (typeof it.value === 'number' && typeof it.target === 'number') {
+          const diff = it.value - it.target;
+          const level: 'high' | 'low' | null = diff > 2 ? 'high' : diff < -2 ? 'low' : null;
+          if (level) {
+            const diffAbs = Math.abs(diff);
+            if (diffAbs > maxAbsDiff) {
+              maxAbsDiff = diffAbs;
+              alertTitle = it.title;
+              alertValue = it.value;
+              alertLevel = level;
+            }
+          }
+        }
+      });
+
+      if (alertLevel && alertValue !== null) {
+        alerts.push({ type: typeLabel, value: alertValue, message: alertTitle, level: alertLevel });
       }
     };
 
-    return baseData[line as keyof typeof baseData] || baseData['01'];
-  };
+    buildAlertFor(processData.electrical, 'Dòng điện');
+    buildAlertFor(processData.temperature, 'Nhiệt độ');
 
-  const processData = getProcessData(selectedLine);
-  
-  // Generate alerts based on out-of-range values
-  const alerts = [
-    { type: 'Dòng điện', value: 39.6, message: 'Boiling Degreasing' },
-    { type: 'Nhiệt độ', value: 39.6, message: 'Boiling Degreasing' }
-  ];
+    return alerts;
+  };
+  const alerts = computeAlerts();
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -103,7 +231,6 @@ const Index = () => {
                   value={process.value}
                   target={process.target}
                   unit="°C"
-                  status={process.status}
                   type="temperature"
                 />
               ))}
@@ -126,7 +253,6 @@ const Index = () => {
                     value={process.value}
                     target={process.target}
                     unit="A"
-                    status={process.status}
                     type="electrical"
                   />
                 ))}

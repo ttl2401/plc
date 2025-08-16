@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
+    "cron": "ts-node src/cronjob/index.ts",
     "migrate": "ts-node src/migrations/index.ts",
     "faker": "ts-node src/faker/index.ts",
     "start": "node -r module-alias/register dist/index.js",
@@ -42,6 +43,7 @@
     "mongoose": "^8.15.1",
     "mongoose-paginate-v2": "^1.9.1",
     "multer": "^2.0.1",
+    "node-cron": "^4.2.1",
     "node-snap7": "^1.0.8",
     "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",

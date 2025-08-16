@@ -1,6 +1,6 @@
 import React from 'react';
 import { Thermometer, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 interface ProcessCardProps {
   title: string;
@@ -11,32 +11,22 @@ interface ProcessCardProps {
   type: 'temperature' | 'electrical';
 }
 
-const ProcessCard: React.FC<ProcessCardProps> = ({ 
-  title, 
-  value: propValue, 
-  target, 
-  unit, 
-  status: propStatus, 
-  type 
+const ProcessCard: React.FC<ProcessCardProps> = ({
+  title,
+  value: propValue,
+  target,
+  unit,
+  status: _propStatus,
+  type
 }) => {
-  const [value, setValue] = useState<number>(
-    typeof propValue === 'number' ? propValue : randomValue()
-  );
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setValue(randomValue());
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  function randomValue() {
-    return Math.round((Math.random() * (55 - 38) + 38) * 10) / 10;
-  }
+  const value = useMemo(() => (typeof propValue === 'number' ? propValue : 0), [propValue]);
 
   let status: 'normal' | 'low' | 'high' = 'normal';
-  if (value > 51) status = 'high';
-  else if (value < 47) status = 'low';
+  if (typeof value === 'number' && typeof target === 'number') {
+    const diff = value - target;
+    if (diff > 2) status = 'high';
+    else if (diff < -2) status = 'low';
+  }
 
   const getStatusColor = () => {
     switch (status) {
