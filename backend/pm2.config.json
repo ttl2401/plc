@@ -8,6 +8,15 @@
         "env": {
           "NODE_ENV": "development"
         }
+      },
+      {
+        "name": "xima-cron",
+        "script": "node_modules/.bin/nodemon",
+        "args": "-r ts-node/register/transpile-only -r module-alias/register src/cron/index.ts",
+        "watch": false,
+        "env": {
+          "NODE_ENV": "development"
+        }
       }
     ]
   }
