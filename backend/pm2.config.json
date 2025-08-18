@@ -12,7 +12,7 @@
       {
         "name": "xima-cron",
         "script": "node_modules/.bin/nodemon",
-        "args": "-r ts-node/register/transpile-only -r module-alias/register src/cron/index.ts",
+        "args": "-r ts-node/register/transpile-only -r module-alias/register src/cronjob/index.ts",
         "watch": false,
         "env": {
           "NODE_ENV": "development"
