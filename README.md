@@ -1,6 +1,6 @@
 git clone source code
 
-Install dependencies :
+### INSTALL DEPENDENCIES
 ```bash
 sudo apt update
 sudo apt install nodejs
@@ -21,7 +21,7 @@ nvm use 22
 npm install -g pm2
 ```
 
-Install MongoDB 7.0 for Ubuntu 22.04
+### INSTALL MONGODB 7.0 for Ubuntu 22.04
 ```bash
 curl -fsSL https://pgp.mongodb.com/server-7.0.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg
 
@@ -47,7 +47,7 @@ mongosh
 )
 ```
 
-Install InfluxDB
+### INSTALL INFLUXDB
 ```bash
 curl -sL https://repos.influxdata.com/influxdata-archive.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
 
