@@ -4,9 +4,13 @@ import { returnMessage, returnError } from '@/controllers/base.controller';
 import { TankGroupService } from '@/services/tank-group.service';
 import { TankService } from '@/services/tank.service';
 import { RobotService } from '@/services/robot.service';
+import { PLCService } from '@/services/plc.service';
+import { PlcVariableService } from '@/services/plc-variable.service';
 const tankGroupService = new TankGroupService();
 const tankService = new TankService();
 const robotService = new RobotService();
+const plcService = new PLCService();
+const plcVariableService = new PlcVariableService();
 
 import { getListSettingTimer } from '@/transforms/tank-group.transform'
 import { getListSettingTemperature, getListSettingChemistry } from '@/transforms/tank.transform'
@@ -72,7 +76,17 @@ export const updateSettingTemperature = async (
       _id: e._id,
       temp: e.temp
     }));
+    
     const updatedTanks = await tankService.batchUpdateTempSettings(arraySettings);
+    
+    const plcVariables = list.map((e: { _id: string; temp: number; plcVariableName: string }) => ({
+      name: e.plcVariableName,
+      value: e.temp
+    }))
+    const updatePLCVariable = await plcVariableService.updateMultipleVariables(plcVariables);
+    
+    const updatedPLC = await plcService.writeMultipleVariablesToPLC(updatePLCVariable);
+    
     return res.status(200).json(returnMessage(updatedTanks, 'Temperature settings updated successfully'));
   } catch (error) {
     next(error);

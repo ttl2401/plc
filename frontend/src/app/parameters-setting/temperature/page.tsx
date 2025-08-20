@@ -43,6 +43,7 @@ const TemperatureSettingsPage: React.FC = () => {
       _id: setting._id,
       name: setting.name,
       temp: values[setting._id] ?? null,
+      plcVariableName: setting.plcVariableName ?? null
     }));
     try {
       const response = await updateTemperatureSettings({ list });

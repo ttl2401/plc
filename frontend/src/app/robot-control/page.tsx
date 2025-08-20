@@ -6,7 +6,7 @@ import { PoweroffOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useLanguage } from '@/components/layout/DashboardLayout';
 import GaugeButton from "@/components/GaugeButton";
 import SlidePopup from './SlidePopup';
-import { fetchPLCVariables, updatePLCVariable, PLCVariable } from '@/services/robotControlService';
+import { fetchPLCVariables, updatePLCVariable, PLCVariable } from '@/services/plcVariableService';
 
 const { Title } = Typography;
 

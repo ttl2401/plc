@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import { RobotControlService } from '../services/robot-control.service';
+import { PlcVariableService } from '../services/plc-variable.service';
 import { PLCService } from '../services/plc.service';
 import { returnMessage, returnError, returnPaginationMessage } from '@/controllers/base.controller';
 
-const robotControlService = new RobotControlService();
+const plcVariableService = new PlcVariableService();
 const plcService = new PLCService();
 
 export const getPLCVariables = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // First get variables from MongoDB
-    // const variables = await robotControlService.getVariables({type: 'plc_control'});
+    // const variables = await plcVariableService.getVariables({type: 'plc_control'});
     
     // Then read current values from PLC
     const variablesWithPLCValues = await plcService.readVariablesFromPLC({type: 'plc_control'});
@@ -25,7 +25,7 @@ export const updateVariable = async (req: Request, res: Response, next: NextFunc
     const { variables } = req.body;
     
     // Update variables in MongoDB
-    const updatedVariables = await robotControlService.updateMultipleVariables(variables, 'plc_control');
+    const updatedVariables = await plcVariableService.updateMultipleVariables(variables, 'plc_control');
     
     // Write variables to PLC
     const plcResults = await plcService.writeMultipleVariablesToPLC(variables);

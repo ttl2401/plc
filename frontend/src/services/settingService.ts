@@ -25,6 +25,7 @@ export interface TempSetting {
   _id: string;
   name: string;
   temp: number | null;
+  plcVariableName?: string | null;
 }
 
 export interface FetchTempSettingsResponse {

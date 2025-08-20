@@ -288,3 +288,96 @@ export const electricityVariableControl = [
   { "name": "Thoi_gian_tang_Nickel_Plating_2",    "dbNumber": 155, "dataType": "Int", "offset": 72.0, "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0 },
   { "name": "Thoi_gian_tang_Nickel_Plating_3",    "dbNumber": 155, "dataType": "Int", "offset": 74.0, "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0 }
 ]
+
+export const settingTemperatureControl = [
+  {
+    "name": "Cai_nhiet_do_Washing",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 0.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Boiling_Degreasing",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 2.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Electro_Degreasing_1",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 4.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Electro_Degreasing_2",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 6.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Nickel_Plating_1",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 8.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Nickel_Plating_2",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 10.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Nickel_Plating_3",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 12.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Ultrasonic_Hot_Rinse",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 14.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Hot_Rinse",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 16.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Cai_nhiet_do_Dryer_1",
+    "dbNumber": 82,
+    "dataType": "Int",
+    "offset": 18.0,
+    "type": "May_tinh_Cai_Nhiet",
+    "startValue": 0,
+    "value": 0
+  }
+]
