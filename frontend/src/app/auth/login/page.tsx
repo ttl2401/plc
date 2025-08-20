@@ -15,7 +15,7 @@ const LoginPage = () => {
   const { message } = App.useApp();
 
   useEffect(() => {
-    // If user is already logged in, redirect to PLC Control
+    // If user is already logged in, redirect to PLC Control Checklist
     if (user) {
       router.replace('/plc-control');
     }

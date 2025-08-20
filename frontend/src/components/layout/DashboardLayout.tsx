@@ -98,6 +98,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (pathname.startsWith('/parameters-setting/')) {
       keys.push('/parameters-setting');
     }
+    if (pathname.startsWith('/plc-control') || pathname.startsWith('/robot-control')) {
+      keys.push('/plc-control');
+    }
     return keys;
   };
 
@@ -109,13 +112,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     },*/
     {
       key: '/plc-control',
-      icon: <SettingOutlined />, // You can change to another icon if preferred
-      label: <Link href="/plc-control">{t('menu_plc_controller')}</Link>,
-    },
-    {
-      key: '/robot-control',
-      icon: <RobotOutlined />,
-      label: <Link href="/robot-control">{t('menu_robot_control')}</Link>,
+      icon: <SettingOutlined />,
+      label: t('menu_plc_control'),
+      children: [
+        {
+          key: '/plc-control/checklist',
+          label: <Link href="/plc-control">{t('menu_checklist_table')}</Link>,
+        },
+        {
+          key: '/robot-control',
+          label: <Link href="/robot-control">{t('menu_robot_control')}</Link>,
+        },
+      ],
     },
     {
       key: '/products',

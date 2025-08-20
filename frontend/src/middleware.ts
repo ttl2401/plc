@@ -16,9 +16,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
 
-  // Redirect to dashboard if accessing auth pages while authenticated
+  // Redirect to PLC Control if accessing auth pages while authenticated
   if (sessionToken && isPublicPath) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/plc-control', request.url));
   }
 
   return NextResponse.next();
