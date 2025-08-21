@@ -11,8 +11,17 @@ async function migrate(): Promise<void> {
     const migratedFile = await Migrations.find();
     const migratedFileArray = migratedFile.map(e => e.file);
     
-    const pattern = path.resolve(__dirname, '../migrations/*.migration.ts');
-    const files = (await glob(pattern)).sort();
+    //const pattern = path.resolve(__dirname, '../migrations/*.migration.ts');
+    //const files = (await glob(pattern)).sort();
+
+    const migrationsDir = path.resolve(__dirname, '../migrations');
+
+    // Dùng pattern có forward slash để glob luôn match trên mọi OS
+    // windowsPathsNoEscape giúp xử lý backslash trên Win tốt hơn
+    const pattern = `${migrationsDir.replace(/\\/g, '/')}/*.migration.@(ts|js)`;
+
+    const files = (await glob(pattern, { nodir: true, windowsPathsNoEscape: true }))
+      .sort();
    
     if (files.length) {
       for (let i = 0; i < files.length; i++) {
