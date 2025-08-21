@@ -2,8 +2,8 @@
     "apps": [
       {
         "name": "xima",
-        "script": "npm.cmd",
-        "args": "run start",
+        "script": "node",
+        "args": "./node_modules/next/dist/bin/next start",
         "watch": false,
         "env": {
           "PORT": 3009,
