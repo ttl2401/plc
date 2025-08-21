@@ -4,12 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { Table, Typography, message, Input, Button, Space, Flex, Modal, Image } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchProducts, deleteProduct, type ProductDataType, downloadProductsExcel } from '@/services/productService';
+import { fetchProducts, deleteProduct, type ProductDataType, downloadProductsExcel, fetchProductById } from '@/services/productService';
 import { SearchOutlined, PlusOutlined, ExportOutlined, QrcodeOutlined } from '@ant-design/icons';
 import ProductDetailForm from './detail';
 import moment from 'moment';
 import { useLanguage } from '@/components/layout/DashboardLayout';
 import dynamic from 'next/dynamic';
+import { QRCodeSVG } from 'qrcode.react';
+import { renderToString } from 'react-dom/server';
 
 // Dynamically import QRScanner to avoid SSR issues
 const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
@@ -152,7 +154,7 @@ const ProductsPage: React.FC = () => {
             showModal(record._id);
           }} style={{ cursor: 'pointer', color: '#1677ff', textDecoration: "underline" }}>{t('view')}</a>
           <a onClick={() => {
-            showDeleteConfirm(record._id, record.name);
+            showPrintConfirm(record._id, record.name);
           }} style={{ cursor: 'pointer', color: '#001529', textDecoration: "underline" }}>{t('print')}</a>
         </Space>
       ),
@@ -197,7 +199,34 @@ const ProductsPage: React.FC = () => {
     loadProducts();
   };
 
-  const showDeleteConfirm = (productId: string, productName: string) => {
+  const showPrintConfirm = (productId: string, productName: string) => {
+
+    confirm({
+      title: `Are you sure print product ${productName}?`,
+      content: 'This action cannot be undone.',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      async onOk() {
+        try {
+          const result = await printProduct(productId);
+          if (result.success) {
+            message.success(result.message || 'Product printed successfully');
+          } else {
+            message.error(result.message || 'Failed to print product');
+          }
+        } catch (error) {
+          console.error('Error printing product:', error);
+          message.error('An error occurred while printing the product.');
+        }
+      },
+      onCancel() {
+        console.log('Print cancelled');
+      },
+      });
+  };
+
+    const showDeleteConfirm = (productId: string, productName: string) => {
     confirm({
       title: `Are you sure delete product ${productName}?`,
       content: 'This action cannot be undone.',
@@ -241,6 +270,64 @@ const ProductsPage: React.FC = () => {
       message.error('Đã xảy ra lỗi khi tải xuống Excel.');
     }
   };
+
+  async function printProduct(productId: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await fetchProductById(productId);
+      if (!response.success || !response.data) {
+        return { success: false, message: response.message || 'Failed to fetch product' };
+      }
+
+      const product = response.data;
+      const qrSvgString = renderToString(
+        <QRCodeSVG value={product.code} size={192} level="H" includeMargin={true} />
+      );
+
+      const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+      if (!printWindow) {
+        return { success: false, message: 'Popup blocked. Allow popups to print.' };
+      }
+
+      const styles = `
+        <style>
+          * { box-sizing: border-box; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 24px; }
+          .card { width: 320px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; }
+          .title { font-size: 18px; font-weight: 600; margin: 0 0 8px; }
+          .code { font-size: 14px; color: #374151; margin: 0 0 12px; }
+          .qr { display: flex; align-items: center; justify-content: center; }
+          @media print { body { padding: 0; } .card { box-shadow: none; border: none; } }
+        </style>
+      `;
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charSet="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Print Product</title>
+            ${styles}
+          </head>
+          <body onload="window.print(); setTimeout(() => window.close(), 300);">
+            <div class="card">
+              <h1 class="title">${product.name || ''}</h1>
+              <p class="code">Code: <strong>${product.code || ''}</strong></p>
+              <div class="qr">${qrSvgString}</div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+
+      return { success: true, message: 'Opened print dialog' };
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Failed to print product' };
+    }
+  }
 
   const handleScanClick = () => {
     setScannerOpen(true);

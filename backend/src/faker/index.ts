@@ -14,11 +14,11 @@ async function faker(): Promise<void> {
     await connectMongoDB();
     await checkInfluxDB();
 
-     await infoFaker();
-     await historyOpFaker();
-     await historyChAddFaker();
-     await historyWtAddFaker();
-     await liquidWarnFaker();
+    // await infoFaker();
+    // await historyOpFaker();
+    // await historyChAddFaker();
+    // await historyWtAddFaker();
+    // await liquidWarnFaker();
 
   } catch (error) {
     console.error('❌ Faker data error:', error);
