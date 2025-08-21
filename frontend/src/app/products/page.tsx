@@ -400,6 +400,12 @@ const ProductsPage: React.FC = () => {
                 onScan={handleScan}
                 onError={(error) => console.error("Error:", error)}
                 constraints={{ facingMode: 'environment' }}
+                formats={[
+                  'qr_code',
+                  'code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e',
+                  'code_39', 'itf',
+                  'pdf417', 'data_matrix'
+                ]}
                 styles={{
                   container: { width: 320, height: 240 },
                   video: { width: 320, height: 240, objectFit: 'cover', borderRadius: 8 },
