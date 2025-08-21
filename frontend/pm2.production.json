@@ -1,0 +1,14 @@
+{
+    "apps": [
+      {
+        "name": "xima",
+        "script": "npm.cmd",
+        "args": "run start",
+        "watch": false,
+        "env": {
+          "PORT": 3009,
+          "NODE_ENV": "production"
+        }
+      }
+    ]
+  }
