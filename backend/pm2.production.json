@@ -1,0 +1,14 @@
+{
+    "apps": [
+      {
+        "name": "xima-api",
+        "script": "dist/index.js",
+        "env": { "NODE_ENV": "production" }
+      },
+      {
+        "name": "xima-cron",
+        "script": "dist/cronjob/index.js",
+        "env": { "NODE_ENV": "production" }
+      }
+    ]
+  }
