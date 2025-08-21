@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "cron": "ts-node src/cronjob/index.ts",
-    "migrate": "ts-node src/migrations/index.ts",
-    "faker": "ts-node src/faker/index.ts",
+    "cron": "ts-node -r ts-node/register/transpile-only -r tsconfig-paths/register src/cronjob/index.ts",
+    "migrate": "ts-node -r ts-node/register/transpile-only -r tsconfig-paths/register src/migrations/index.ts",
+    "faker": "ts-node -r ts-node/register/transpile-only -r tsconfig-paths/register src/faker/index.ts",
     "start": "node dist/index.js",
     "dev": "nodemon -r ts-node/register/transpile-only -r tsconfig-paths/register  src/index.ts",
     "build": "tsc",
