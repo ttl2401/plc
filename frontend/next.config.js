@@ -1,26 +1,47 @@
 /** @type {import('next').NextConfig} */
 const isDev = process.env.NODE_ENV !== 'production';
 
-// CSP an toàn-vừa-đủ cho ZXing / BarcodeDetector polyfill chạy trong Worker + WASM
+// ====== TÙY CHỈNH: các origin API ngoài 'self' mà FE được phép kết nối ======
+const ALLOWED_CONNECT_ORIGINS = [
+  "'self'",
+  // Thêm các origin bạn cần gọi ra ngoài tại đây:
+  process.env.NEXT_PUBLIC_API_URL,
+  // "http://192.168.1.10:3010", // nếu có gọi HTTP, giữ dòng này; nếu không, có thể xóa
+  // Ví dụ: "https://api.example.com"
+];
+// Cách nhanh: cho phép mọi ảnh HTTPS bằng "https:". Nếu cần cả HTTP, thêm "http:".
+const ALLOWED_IMG_SRC = [
+  "'self'",
+  "blob:",
+  "data:",
+  "https:",   // cho phép mọi ảnh HTTPS (CDN, avatar, S3, v.v.)
+  // "http:",  // chỉ bật nếu bạn thực sự cần load ảnh HTTP
+  // Hoặc liệt kê cụ thể: "https://cdn.jsdelivr.net", "https://images.example.com", ...
+];
+
+// (tuỳ) nếu bạn phát video/audio/stream ngoài origin, cấu hình tương tự:
+const ALLOWED_MEDIA_SRC = [
+  "'self'",
+  "blob:",
+  "data:",
+  "https:",
+  // "http:",
+];
+
 const csp = [
   "default-src 'self'",
-  // WASM + (tuỳ chọn) eval cho dev/iOS cũ
-  `script-src 'self' ${isDev ? "'unsafe-eval' " : ""}'wasm-unsafe-eval'`,
-  // nếu bạn có inline style (thường Tailwind JIT), cần 'unsafe-inline'
+  // Cho phép inline script (Next cần), và eval chỉ ở dev
+  `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval' " : ""}'wasm-unsafe-eval'`,
   "style-src 'self' 'unsafe-inline'",
-  // Cho Web Worker/Blob (nhiều scanner spawn worker bằng blob:)
   "worker-src 'self' blob:",
-  // Safari cũ chưa hiểu worker-src => dự phòng
   "child-src 'self' blob:",
-  // Cho video/ảnh/QR preview từ blob/data
-  "img-src 'self' blob: data:",
-  "media-src 'self' blob:",
-  // Hạn kết nối chỉ về cùng origin; nếu gọi API domain khác, thêm domain vào đây
-  "connect-src 'self'",
-  // Khoá object tag
+  // Áp dụng whitelist ảnh & media
+  `img-src ${ALLOWED_IMG_SRC.join(' ')}`,
+  `media-src ${ALLOWED_MEDIA_SRC.join(' ')}`,
+  // Kết nối (fetch/XHR/WebSocket…)
+  `connect-src ${ALLOWED_CONNECT_ORIGINS.join(' ')}`,
   "object-src 'none'",
-  // Tuỳ chọn: ngăn bị embed trong iframe trái phép
-  "frame-ancestors 'self'"
+  "frame-ancestors 'self'",
 ].join('; ');
 
 const nextConfig = {
@@ -37,23 +58,17 @@ const nextConfig = {
     return config;
   },
 
-  // Disable Next.js on-demand entries cache (giữ nguyên theo cấu hình của bạn)
   onDemandEntries: {
     maxInactiveAge: 0,
     pagesBufferLength: 0,
   },
 
-  // Thêm CSP headers cho mọi route
   async headers() {
     return [
       {
         source: '/(.*)',
         headers: [
           { key: 'Content-Security-Policy', value: csp },
-          // Nếu bạn cần dùng WASM multi-thread/OffscreenCanvas, bỏ comment 2 dòng dưới
-          // { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-          // { key: 'Cross-Origin-Opener-Policy',  value: 'same-origin' },
-          // Một số header bảo mật hữu ích khác (tuỳ chọn):
           { key: 'Referrer-Policy', value: 'no-referrer' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
