@@ -27,7 +27,7 @@ export class PLCService {
       s.connect(102, host);
     });
   }
-  
+
   constructor() {
     if (snap7) {
       this.client = new snap7.S7Client();
@@ -487,9 +487,15 @@ export class PLCService {
     }
   
     try {
+      if (!hostOK || !rackOK || !slotOK) {
+        console.warn('[PLC] Bad params:', { host, rack, slot });
+        // Nếu muốn bỏ qua ConnectTo khi rack/slot invalid:
+        // return false; // hoặc chỉ thử TSAP bên dưới
+      }
       // 2) Nhánh 1: Dùng ConnectTo nếu tham số hợp lệ (dành cho S7-300/400, hoặc 1200/1500 vẫn OK)
       if (hostOK && rackOK && slotOK) {
         // ⚠️ Windows: bắt buộc 3 tham số, tất cả là số nguyên
+        console.log('[ConnectTo] host=%s rack=%d slot=%d types=', host, rack, slot, typeof host, typeof rack, typeof slot);
         const ret = this.client.ConnectTo(host, rack, slot);
         const ok = (ret === true) || (ret === 0);
         if (ok) return true;
