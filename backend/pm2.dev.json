@@ -2,8 +2,8 @@
     "apps": [
       {
         "name": "xima-api",
-        "script": "node_modules/.bin/nodemon",
-        "args": "-r ts-node/register/transpile-only -r module-alias/register src/index.ts",
+        "script": "npm",
+        "args": "run dev",
         "watch": false,
         "env": {
           "NODE_ENV": "development"
@@ -11,8 +11,8 @@
       },
       {
         "name": "xima-cron",
-        "script": "node_modules/.bin/nodemon",
-        "args": "-r ts-node/register/transpile-only -r module-alias/register src/cronjob/index.ts",
+        "script": "npm",
+        "args": "run cron",
         "watch": false,
         "env": {
           "NODE_ENV": "development"
