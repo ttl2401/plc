@@ -1,6 +1,7 @@
 import { PlcVariable, IPlcVariable } from '@/models/plc-variable.model';
 import { AppError } from '@/middlewares/error.middleware';
 import { PLC_CONFIG } from '@/config';
+import net from 'net';
 
 // Import node-snap7 with error handling
 let snap7: any;
@@ -21,6 +22,25 @@ export class PLCService {
       this.client = null;
     }
   }
+
+  private tcpProbe102(host: string, timeoutMs = 500): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+
+    const onDone = (ok: boolean) => {
+      try { socket.destroy(); } catch {}
+      resolve(ok);
+    };
+
+    socket.setTimeout(timeoutMs);
+    socket.once('connect', () => onDone(true));
+    socket.once('timeout', () => onDone(false));
+    socket.once('error', () => onDone(false));
+
+    // Snap7 dùng TCP/102
+    socket.connect(102, host);
+  });
+}
 
   /**
    * Read all PLC variables from the database and get current values from PLC
@@ -439,42 +459,43 @@ export class PLCService {
    */
   private async connectWithTimeout(): Promise<boolean> {
     if (!this.client) return false;
-
-    // If already connected, return true
-    try { if (this.client.Connected && this.client.Connected()) return true; } catch {}
-
+  
+    try {
+      if (this.client.Connected && this.client.Connected()) return true;
+    } catch {}
+  
     const host = PLC_CONFIG.HOST;
-    const rack = PLC_CONFIG.RACK;   
-    const slot = PLC_CONFIG.SLOT;  
+    const rack = PLC_CONFIG.RACK;
+    const slot = PLC_CONFIG.SLOT;
     const ms = 500;
-    return new Promise<boolean>((resolve) => {
-        let settled = false;
-
-        const onSettle = (ok: boolean) => {
-        if (settled) return;
-        settled = true;
-        try { this.client.Disconnect(); } catch {}
-        resolve(ok);
-        };
-
-        // Timer timeout 500ms
-        const timer = setTimeout(() => {
-            console.warn(`PLC connect timeout (${ms}ms)`);
-            onSettle(false); // will Disconnect() here
-        }, ms);
-
-        this.client.ConnectTo(host, rack, slot, (err: number) => {
-        if (settled) return;         
-        clearTimeout(timer);
-        if (err) {
-            console.warn('Connect failed:', this.client.ErrorText?.(err) ?? err);
-            onSettle(false);
-        } else {
-            settled = true;
-            resolve(true);            
-        }
-        });
-    });
+  
+    // Gate bằng TCP probe để tránh treo do ConnectTo block
+    const reachable = await this.tcpProbe102(host, ms);
+    if (!reachable) {
+      console.warn(`PLC ${host}:102 not reachable within ${ms}ms`);
+      return false;
+    }
+  
+    // Trên Windows: ConnectTo là sync và chỉ nhận 3 tham số
+    try {
+      const ret = this.client.ConnectTo(host, rack, slot); // ✅ KHÔNG truyền callback
+  
+      // node-snap7 có bản trả boolean true/false, có bản trả 0/!=0
+      const ok = (ret === true) || (ret === 0);
+      if (!ok) {
+        const errCode = this.client.LastError ? this.client.LastError() : -1;
+        const errText = this.client.ErrorText ? this.client.ErrorText(errCode) : `code=${errCode}`;
+        console.warn(`ConnectTo failed: ${errText}`);
+        try { this.client.Disconnect?.(); } catch {}
+        return false;
+      }
+  
+      return true;
+    } catch (e) {
+      console.warn('ConnectTo threw error:', e);
+      try { this.client.Disconnect?.(); } catch {}
+      return false;
+    }
   }
 
 
@@ -484,32 +505,16 @@ export class PLCService {
    */
   async checkConnected(): Promise<boolean> {
     if (!this.client) {
-      console.warn('[SIMULATION] PLC client Snap7 not initialized');
+      console.warn('[SIMULATION] PLC client not initialized');
       return false;
     }
-
-    try {
-      // Nếu đã kết nối thì return true
-      if (this.isConnected()) {
-        console.log('PLC already connected');
-        return true;
-      }
-
-      // Thử kết nối trong 500ms
-      const connected = await this.connectWithTimeout();
-      if (connected) {
-        console.log(`PLC connection successful (${PLC_CONFIG.HOST}, Rack ${PLC_CONFIG.RACK}, Slot ${PLC_CONFIG.SLOT})`);
-        return true;
-      } else {
-        console.warn('PLC connection failed or timed out');
-        return false;
-      }
-    } catch (error) {
-      console.error('Error while checking PLC connection:', error);
-      return false;
-    } finally {
-      // Sau khi test thì ngắt kết nối để tránh giữ session mở
-      try { await this.disconnect(); } catch {}
+    if (this.isConnected()) return true;
+    const ok = await this.connectWithTimeout();
+    if (ok) {
+      console.log(`PLC OK (${PLC_CONFIG.HOST}, Rack ${PLC_CONFIG.RACK}, Slot ${PLC_CONFIG.SLOT})`);
+      return true;
     }
+    console.warn('PLC not reachable at startup');
+    return false;
   }
 }
