@@ -15,6 +15,19 @@ try {
 export class PLCService {
   private client: any;
 
+  private tcpProbe102(host: string, timeoutMs = 500): Promise<boolean> {
+    const net = require('net');
+    return new Promise((resolve) => {
+      const s = new net.Socket();
+      const done = (ok: boolean) => { try { s.destroy(); } catch {} ; resolve(ok); };
+      s.setTimeout(timeoutMs);
+      s.once('connect', () => done(true));
+      s.once('timeout', () => done(false));
+      s.once('error', () => done(false));
+      s.connect(102, host);
+    });
+  }
+  
   constructor() {
     if (snap7) {
       this.client = new snap7.S7Client();
@@ -23,24 +36,19 @@ export class PLCService {
     }
   }
 
-  private tcpProbe102(host: string, timeoutMs = 500): Promise<boolean> {
-  return new Promise((resolve) => {
-    const socket = new net.Socket();
+  private normalizePlcParams() {
+    const host = String(PLC_CONFIG.HOST ?? '').trim();
+    const rack = Number(PLC_CONFIG.RACK);
+    const slot = Number(PLC_CONFIG.SLOT);
+  
+    const rackOK = Number.isFinite(rack) && Number.isInteger(rack) && rack >= 0;
+    const slotOK = Number.isFinite(slot) && Number.isInteger(slot) && slot >= 0;
+    const hostOK = !!host;
+  
+    return { host, rack, slot, hostOK, rackOK, slotOK };
+  }
 
-    const onDone = (ok: boolean) => {
-      try { socket.destroy(); } catch {}
-      resolve(ok);
-    };
-
-    socket.setTimeout(timeoutMs);
-    socket.once('connect', () => onDone(true));
-    socket.once('timeout', () => onDone(false));
-    socket.once('error', () => onDone(false));
-
-    // Snap7 dùng TCP/102
-    socket.connect(102, host);
-  });
-}
+  
 
   /**
    * Read all PLC variables from the database and get current values from PLC
@@ -459,39 +467,61 @@ export class PLCService {
    */
   private async connectWithTimeout(): Promise<boolean> {
     if (!this.client) return false;
+    try { if (this.client.Connected && this.client.Connected()) return true; } catch {}
   
-    try {
-      if (this.client.Connected && this.client.Connected()) return true;
-    } catch {}
+    const { host, rack, slot, hostOK, rackOK, slotOK } = this.normalizePlcParams();
   
-    const host = PLC_CONFIG.HOST;
-    const rack = PLC_CONFIG.RACK;
-    const slot = PLC_CONFIG.SLOT;
+    // Log chẩn đoán – giúp bắt lỗi cấu hình nhầm
+    if (!hostOK || !rackOK || !slotOK) {
+      console.warn('[PLC] Bad params:',
+        { host, rack, slot, hostOK, rackOK, slotOK, TYPE_host: typeof host, TYPE_rack: typeof rack, TYPE_slot: typeof slot }
+      );
+    }
+  
+    // 1) Gate: probe TCP/102 để tránh gọi ConnectTo khi đích chết (timeout tự mình kiểm soát)
     const ms = 500;
-  
-    // Gate bằng TCP probe để tránh treo do ConnectTo block
-    const reachable = await this.tcpProbe102(host, ms);
-    if (!reachable) {
-      console.warn(`PLC ${host}:102 not reachable within ${ms}ms`);
+    const portOk = await this.tcpProbe102(host, ms);
+    if (!portOk) {
+      console.warn(`TCP 102 to ${host} not reachable within ${ms}ms`);
       return false;
     }
   
-    // Trên Windows: ConnectTo là sync và chỉ nhận 3 tham số
     try {
-      const ret = this.client.ConnectTo(host, rack, slot); // ✅ KHÔNG truyền callback
+      // 2) Nhánh 1: Dùng ConnectTo nếu tham số hợp lệ (dành cho S7-300/400, hoặc 1200/1500 vẫn OK)
+      if (hostOK && rackOK && slotOK) {
+        // ⚠️ Windows: bắt buộc 3 tham số, tất cả là số nguyên
+        const ret = this.client.ConnectTo(host, rack, slot);
+        const ok = (ret === true) || (ret === 0);
+        if (ok) return true;
   
-      // node-snap7 có bản trả boolean true/false, có bản trả 0/!=0
-      const ok = (ret === true) || (ret === 0);
-      if (!ok) {
-        const errCode = this.client.LastError ? this.client.LastError() : -1;
-        const errText = this.client.ErrorText ? this.client.ErrorText(errCode) : `code=${errCode}`;
-        console.warn(`ConnectTo failed: ${errText}`);
+        const code = this.client.LastError?.() ?? -1;
+        const text = this.client.ErrorText?.(code) ?? `code=${code}`;
+        console.warn(`ConnectTo failed: ${text}`);
+        try { this.client.Disconnect?.(); } catch {}
+        // rơi xuống thử TSAP
+      } else {
+        console.warn('Skip ConnectTo because rack/slot are invalid; trying TSAP…');
+      }
+  
+      // 3) Nhánh 2: Fallback TSAP (ổn cho S7-1200/1500, yêu cầu bật PUT/GET)
+      try {
+        this.client.SetConnectionParams(host, 0x0100, 0x0100); // PG/PG
+        const ret2 = this.client.Connect();
+        const ok2 = (ret2 === true) || (ret2 === 0);
+        if (ok2) return true;
+  
+        const code2 = this.client.LastError?.() ?? -1;
+        const text2 = this.client.ErrorText?.(code2) ?? `code=${code2}`;
+        console.warn(`TSAP Connect failed: ${text2}`);
+        try { this.client.Disconnect?.(); } catch {}
+        return false;
+      } catch (e2) {
+        console.warn('TSAP Connect threw:', e2);
         try { this.client.Disconnect?.(); } catch {}
         return false;
       }
-  
-      return true;
     } catch (e) {
+      // Nếu bạn vẫn thấy “Wrong arguments” ở đây, 100% tham số vào ConnectTo không đúng kiểu/số lượng
       console.warn('ConnectTo threw error:', e);
       try { this.client.Disconnect?.(); } catch {}
       return false;
