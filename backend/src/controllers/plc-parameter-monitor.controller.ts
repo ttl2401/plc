@@ -10,7 +10,9 @@ export const getPLCTemperature = async (req: Request, res: Response, next: NextF
   
     // Then read current values from PLC
     const variablesWithPLCValues = await plcService.readVariablesFromPLC({type: 'May_tinh_Nhiet_Muc'});
-    
+    for (let variable of variablesWithPLCValues ){
+      variable.value = variable.value ? Math.round(variable.value * 100) / 100 : 0;
+    }
     res.json(returnMessage(variablesWithPLCValues, `Retrieved ${variablesWithPLCValues.length} PLC variables successfully`));
   } catch (err) {
     next(err);
