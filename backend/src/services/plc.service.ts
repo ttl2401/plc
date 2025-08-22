@@ -479,7 +479,7 @@ export class PLCService {
     }
   
     // 1) Gate: probe TCP/102 để tránh gọi ConnectTo khi đích chết (timeout tự mình kiểm soát)
-    const ms = 500;
+    const ms = 2000;
     const portOk = await this.tcpProbe102(host, ms);
     if (!portOk) {
       console.warn(`TCP 102 to ${host} not reachable within ${ms}ms`);
