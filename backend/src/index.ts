@@ -20,7 +20,8 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "development") {
+  console.log(".NODE_ENV", process.env.NODE_ENV)
   const options = {
     key: fs.readFileSync("./cert/cert-key.pem"),
     cert: fs.readFileSync("./cert/cert.pem"),
