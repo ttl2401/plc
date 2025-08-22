@@ -167,6 +167,7 @@ export class PLCService {
           break;
           
         case 'int':
+        case 'integer':
           buffer = Buffer.alloc(2);
           buffer.writeInt16BE(parseInt(value), 0);
           dataSize = 2;
