@@ -10,6 +10,17 @@
           "HOST": "0.0.0.0",
           "NODE_ENV": "production"
         }
+      },
+
+      {
+        "name": "xima-https",
+        "script": "server.mjs",
+        "watch": false,
+        "env": {
+          "PORT": 3008,
+          "HOST": "0.0.0.0",
+          "NODE_ENV": "production"
+        }
       }
     ]
   }
