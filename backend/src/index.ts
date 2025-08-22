@@ -20,18 +20,18 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "development") {
   const options = {
     key: fs.readFileSync("./cert/cert-key.pem"),
     cert: fs.readFileSync("./cert/cert.pem"),
   };
 
   https.createServer(options, app).listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`${process.env.NODE_ENV } Server https is running on port ${PORT}`);
   });
 }
 else {
   app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`${process.env.NODE_ENV } Server http is running on port ${PORT}`);
   });
 }

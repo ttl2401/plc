@@ -1,3 +1,4 @@
+import 'barcode-detector/polyfill';
 import type { Metadata } from "next";
 import "../styles/globals.css";
 import { ConfigProvider, App as AntdApp } from "antd";

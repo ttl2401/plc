@@ -399,7 +399,15 @@ const ProductsPage: React.FC = () => {
               <QRScanner
                 onScan={handleScan}
                 onError={(error) => console.error("Error:", error)}
-                constraints={{ facingMode: 'environment' }}
+
+                constraints={{
+                  facingMode: 'environment',
+                  width: { ideal: 1920 },
+                  height: { ideal: 1080 },
+                  aspectRatio: { ideal: 1.7777 },
+                }}
+                components={{ torch: true, finder: true }}
+                
                 formats={[
                   'qr_code',
                   'code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e',
