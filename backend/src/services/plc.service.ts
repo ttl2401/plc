@@ -476,4 +476,40 @@ export class PLCService {
         });
     });
   }
+
+
+  /**
+   * Check PLC connectivity at app startup
+   * @returns Promise<boolean> - true if connected, false otherwise
+   */
+  async checkConnected(): Promise<boolean> {
+    if (!this.client) {
+      console.warn('[SIMULATION] PLC client Snap7 not initialized');
+      return false;
+    }
+
+    try {
+      // Nếu đã kết nối thì return true
+      if (this.isConnected()) {
+        console.log('PLC already connected');
+        return true;
+      }
+
+      // Thử kết nối trong 500ms
+      const connected = await this.connectWithTimeout();
+      if (connected) {
+        console.log(`PLC connection successful (${PLC_CONFIG.HOST}, Rack ${PLC_CONFIG.RACK}, Slot ${PLC_CONFIG.SLOT})`);
+        return true;
+      } else {
+        console.warn('PLC connection failed or timed out');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error while checking PLC connection:', error);
+      return false;
+    } finally {
+      // Sau khi test thì ngắt kết nối để tránh giữ session mở
+      try { await this.disconnect(); } catch {}
+    }
+  }
 }

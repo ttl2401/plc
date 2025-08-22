@@ -4,6 +4,7 @@ import https from "https";
 import app from './app';
 import { connectMongoDB, disconnectMongoDB } from '@/config/mongodb';
 import { closeInfluxDB, checkInfluxDB } from '@/config/influxdb';
+import { checkPlcConnection } from '@/config/plc';
 import { PORT } from '@/config';
 
 dotenv.config();
@@ -11,6 +12,7 @@ dotenv.config();
 // Connect to databases
 connectMongoDB();
 checkInfluxDB();
+checkPlcConnection();
 // Handle graceful shutdown
 process.on('SIGINT', async () => {
   await disconnectMongoDB();
