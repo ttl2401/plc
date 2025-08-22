@@ -203,7 +203,7 @@ export class PLCService {
       if (error instanceof AppError) {
         throw error;
       }
-      throw new AppError('Failed to write to PLC variable', 500);
+      throw new AppError('Failed to write to PLC variable with error: ' + error, 500);
     }
   }
 
