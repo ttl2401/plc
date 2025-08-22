@@ -160,11 +160,28 @@ export class PLCService {
       let dataSize: number;
 
       switch (variable.dataType.toLowerCase()) {
-        case 'bool':
-          buffer = Buffer.alloc(1);
-          buffer.writeUInt8(value ? 1 : 0, 0);
-          dataSize = 1;
-          break;
+        case 'bool': {
+          const { byte, bit } = this.parseBitAddress(variable.offset);
+        
+          // Đọc 1 byte tại byte offset trước, để không ảnh hưởng các bit lân cận
+          const read1 = this.client.DBRead(variable.dbNumber, byte, 1);
+          if (!read1) {
+            const e = this.client.LastError?.();
+            throw new AppError(`PLC read-before-write failed: ${this.client.ErrorText?.(e) ?? e}`, 500);
+          }
+        
+          const cur = (read1 as Buffer).readUInt8(0);
+          // Nếu offset là số nguyên (bit === null), mặc định điều khiển bit 0
+          const next = this.setBitInByte(cur, (bit ?? 0), !!value);
+          const buf = Buffer.from([next]);
+        
+          const ok = this.client.DBWrite(variable.dbNumber, byte, 1, buf);
+          if (!ok) {
+            const e = this.client.LastError?.();
+            throw new AppError(`PLC write failed: ${this.client.ErrorText?.(e) ?? e}`, 500);
+          }
+          return true;
+        }
           
         case 'int':
         case 'integer':
@@ -218,71 +235,55 @@ export class PLCService {
       if (!variable) {
         throw new AppError(`PLC variable '${name}' not found`, 404);
       }
-
-      // Check if we have a PLC client
+  
       if (!this.client) {
         console.log(`[SIMULATION] Would read from PLC variable '${name}', returning stored value: ${variable.value}`);
         return variable.value || variable.startValue || 0;
       }
-
-      // Connect to PLC if not already connected
+  
       if (!this.isConnected()) {
         const connectionResult = await this.connectWithTimeout();
         if (!connectionResult) {
           throw new AppError('Failed to connect to PLC', 500);
         }
       }
-
-      // Determine data size based on type
-      let dataSize: number;
+  
+      // BOOL xử lý riêng theo byte/bit, các type khác vẫn giữ nguyên
       switch (variable.dataType.toLowerCase()) {
-        case 'bool':
-          dataSize = 1;
-          break;
-        case 'integer':
-          dataSize = 2;
-          break;
-        case 'real':
-          dataSize = 4;
-          break;
+        case 'bool': {
+          const { byte, bit } = this.parseBitAddress(variable.offset);
+          const read1 = this.client.DBRead(variable.dbNumber, byte, 1);
+          if (!read1) {
+            const e = this.client.LastError?.();
+            throw new AppError(`Failed to read from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
+          }
+          const cur = (read1 as Buffer).readUInt8(0);
+          return this.getBitFromByte(cur, (bit ?? 0));
+        }
+  
+        case 'integer': {
+          const read2 = this.client.DBRead(variable.dbNumber, variable.offset, 2);
+          if (!read2) {
+            const e = this.client.LastError?.();
+            throw new AppError(`Failed to read from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
+          }
+          return (read2 as Buffer).readInt16BE(0);
+        }
+  
+        case 'real': {
+          const read4 = this.client.DBRead(variable.dbNumber, variable.offset, 4);
+          if (!read4) {
+            const e = this.client.LastError?.();
+            throw new AppError(`Failed to read from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
+          }
+          return (read4 as Buffer).readFloatBE(0);
+        }
+  
         default:
           throw new AppError(`Unsupported data type: ${variable.dataType}`, 400);
       }
-
-      // Read from PLC DB
-      const readResult = this.client.DBRead(
-        variable.dbNumber,
-        variable.offset,
-        dataSize
-      );
-
-      if (!readResult) {
-        const errorCode = this.client.LastError();
-        throw new AppError(`Failed to read from PLC: ${this.client.ErrorText(errorCode)}`, 500);
-      }
-
-      const buffer = readResult;
-
-      // Parse buffer based on data type
-      let value: any;
-      switch (variable.dataType.toLowerCase()) {
-        case 'bool':
-          value = buffer.readUInt8(0) !== 0;
-          break;
-        case 'integer':
-          value = buffer.readInt16BE(0);
-          break;
-        case 'real':
-          value = buffer.readFloatBE(0);
-          break;
-      }
-
-      return value;
-
     } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
+      if (error instanceof AppError) throw error;
       throw new AppError('Failed to read PLC variable', 500);
     }
   }
@@ -447,8 +448,16 @@ export class PLCService {
 
       // Parse buffer based on data type
       switch (variable.dataType.toLowerCase()) {
-        case 'bool':
-          return buffer.readUInt8(relativeOffset) !== 0;
+        case 'bool': {
+          const { byte, bit } = this.parseBitAddress(variable.offset);
+          const byteIndex = byte - bufferStartOffset;
+          if (byteIndex < 0 || byteIndex >= buffer.length) {
+            console.warn(`Buffer overflow for variable ${variable.name}`);
+            return null;
+          }
+          const cur = buffer.readUInt8(byteIndex);
+          return this.getBitFromByte(cur, (bit ?? 0));
+        }
         case 'integer':
           return buffer.readInt16BE(relativeOffset);
         case 'real':
@@ -535,7 +544,29 @@ export class PLCService {
     }
   }
 
+  /** Parse số offset kiểu 0.1 → { byte:0, bit:1 }. Nếu là số nguyên → { byte:offset, bit:null } */
+  private parseBitAddress(rawOffset: number | string): { byte: number; bit: number | null } {
+    const n = typeof rawOffset === 'string' ? Number(rawOffset) : rawOffset;
+    if (!Number.isFinite(n)) throw new AppError(`Invalid offset: ${rawOffset}`, 400);
+    const byte = Math.floor(n);
+    const frac = n - byte;
+    if (Math.abs(frac) < 1e-9) return { byte, bit: null }; // nguyên byte
+    // quy ước 0.1..0.7 → bit 1..7
+    const bit = Math.round(frac * 10);
+    if (bit < 0 || bit > 7) throw new AppError(`Invalid bit index from offset ${rawOffset}`, 400);
+    return { byte, bit };
+  }
 
+  /** Set/Clear 1 bit trong 1 byte buffer */
+  private setBitInByte(byteVal: number, bitIndex: number, value: boolean): number {
+    if (value) return (byteVal | (1 << bitIndex)) & 0xFF;
+    return (byteVal & ~(1 << bitIndex)) & 0xFF;
+  }
+
+  /** Get 1 bit từ 1 byte */
+  private getBitFromByte(byteVal: number, bitIndex: number): boolean {
+    return ((byteVal >> bitIndex) & 1) === 1;
+  }
   /**
    * Check PLC connectivity at app startup
    * @returns Promise<boolean> - true if connected, false otherwise
