@@ -18,15 +18,18 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-const options = {
-  key: fs.readFileSync("./cert/cert-key.pem"),
-  cert: fs.readFileSync("./cert/cert.pem"),
-};
+if (process.env.NODE_ENV === "production") {
+  const options = {
+    key: fs.readFileSync("./cert/cert-key.pem"),
+    cert: fs.readFileSync("./cert/cert.pem"),
+  };
 
-https.createServer(options, app).listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// }); 
+  https.createServer(options, app).listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+else {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
