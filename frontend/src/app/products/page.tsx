@@ -12,9 +12,9 @@ import { useLanguage } from '@/components/layout/DashboardLayout';
 import dynamic from 'next/dynamic';
 import { QRCodeSVG } from 'qrcode.react';
 import { renderToString } from 'react-dom/server';
-
+import BarcodeQRScanner from '@/components/BarcodeQRScanner'
 // Dynamically import QRScanner to avoid SSR issues
-const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
+ const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -338,8 +338,8 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleScan = async (result: any) => {
-    if (result && result[0] && result[0].rawValue) {
-      setSearchText(result[0].rawValue);
+    if (result ) {
+      setSearchText(result);
       setScannerOpen(false);
     }
   };
@@ -396,7 +396,21 @@ const ProductsPage: React.FC = () => {
               ×
             </button>
             <div style={{ width: 320, height: 240, borderRadius: 8, background: '#000', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <QRScanner
+            <BarcodeQRScanner
+              onResult={handleScan}
+              //onScan={handleScan}
+              onError={(e) => console.error(e)}
+                          
+              preferredFacingMode="environment" // ưu tiên camera sau
+              width={360}
+              height={270}
+              // Nếu muốn giới hạn định dạng (QR + Code128 chẳng hạn):
+              // formats={[BarcodeFormat.QR_CODE, BarcodeFormat.CODE_128]}
+              showControls
+            />
+             {/**
+              * 
+              * <QRScanner
                 onScan={handleScan}
                 onError={(error) => console.error("Error:", error)}
 
@@ -419,6 +433,7 @@ const ProductsPage: React.FC = () => {
                   video: { width: 320, height: 240, objectFit: 'cover', borderRadius: 8 },
                 }}
               />
+              */} 
             </div>
             <div style={{ marginTop: 16, fontWeight: 500 }}>Đưa thẻ vào vùng quét</div>
             {scannerError && (
