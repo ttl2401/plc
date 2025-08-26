@@ -6,6 +6,12 @@ import fs from 'fs';
 import { returnMessage, returnError } from '@/controllers/base.controller';
 import { PORT, API_URL } from '@/config'; // Import PORT from config
 import moment from 'moment'; // Import moment
+import mongoose from 'mongoose';
+import { ProductService } from '@/services/product.service';
+import { UserActivityService } from '@/services/user-activity.service';
+import { ActivityAction, ActivityResource } from '@/models/user-activity.model';
+const productService = new ProductService();
+const userActivityService = new UserActivityService();
 
 // Define allowed targets and their corresponding directories
 const allowedTargets = ['user', 'product', 'category']; // Add more targets as needed
@@ -175,12 +181,52 @@ export const massUploadProduct = async (req: Request, res: Response, next: NextF
     const file = req.file;
     const filePath = file.path;
 
-    const data = require(filePath);
-    //
+    // Read the file content
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const lines = fileContent.split('\n').filter(line => line.trim() !== '');
+    
+    const arrayElements: any[] = [];
 
+    // Process each line
+    lines.forEach((line, index) => {
+      const values = line.split(';').map(value => value.trim());
+      
+      if (values.length >= 4) {
+        const element = {
+          code: values[0] || '',           // value1 = code
+          value2: values[1] || '',         // value2
+          name: values[3] || '',           // value3 = name
+          value4: values[4] || '',         // value4
+          value5: values[5] || '',         // value5
+          value6: values[6] || '',         // value6
+          value7: values[7] || '',         // value7
+          value8: values[8] || '',         // value8
+          value9: values[9] || ''          // value9
+        };
+        
+        arrayElements.push(element);
+      }
+    });
+    const result:any = [];
+    for (let element of arrayElements){
+      let code = element.code?.toUpperCase();
+      if(!code) continue;
+      const check = await productService.getProductByCode(code);
+      if(check) continue;
+      const payload = { code, name: element.name || code}
+      const product = await productService.createProduct(payload);
+      // Log activity
+      await userActivityService.logActivity(
+        new mongoose.Types.ObjectId(String(req.user._id)),
+        ActivityAction.CREATE,
+        ActivityResource.PRODUCT,
+        new mongoose.Types.ObjectId(String(product._id)),
+        { after: product },
+        req
+      );
+      result.push(code);
 
-
-
+    }
     // Construct the relative file path (from 'public' directory)
     // The path will be like target/YYYY-MM-DD/uuid.extension
     const relativeFilePath = path.relative(path.join(__dirname, '../../public'), file.path);
@@ -189,9 +235,8 @@ export const massUploadProduct = async (req: Request, res: Response, next: NextF
     const absoluteUrl = `${API_URL}/${relativeFilePath.replace(/\\/g, '/')}`;
 
     return res.status(200).json(returnMessage({
-      filePath: filePath,
-      fileUrl: absoluteUrl,
-    }, 'File uploaded successfully'));
+      result: result
+    }, 'File uploaded and processed successfully'));
   } catch (error) {
     next(error);
   }

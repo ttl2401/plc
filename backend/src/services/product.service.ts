@@ -72,6 +72,14 @@ export class ProductService {
   }
 
   /**
+   * Get a single product by Code
+   */
+  async getProductByCode(code: string): Promise<IProduct | null> {
+    const product = await Product.findOne({code});
+    return product;
+  }
+
+  /**
    * Update a product
    */
   async updateProduct(id: string, productData: Partial<IProduct>): Promise<IProduct> {
