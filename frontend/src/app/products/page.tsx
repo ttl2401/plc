@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Table, Typography, message, Input, Button, Space, Flex, Modal, Image } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchProducts, deleteProduct, type ProductDataType, downloadProductsExcel, fetchProductById } from '@/services/productService';
-import { SearchOutlined, PlusOutlined, ExportOutlined, QrcodeOutlined } from '@ant-design/icons';
+import { fetchProducts, deleteProduct, type ProductDataType, downloadProductsExcel, fetchProductById, massUploadProduct } from '@/services/productService';
+import { SearchOutlined, PlusOutlined, ExportOutlined, QrcodeOutlined, UploadOutlined } from '@ant-design/icons';
 import ProductDetailForm from './detail';
 import moment from 'moment';
 import { useLanguage } from '@/components/layout/DashboardLayout';
@@ -271,6 +271,52 @@ const ProductsPage: React.FC = () => {
     }
   };
 
+  const handleUploadTxt = async () => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.txt';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = async (event) => {
+      const target = event.target as HTMLInputElement;
+      const file = target.files?.[0];
+      
+      if (!file) return;
+      
+      // Check file type
+      if (!file.name.toLowerCase().endsWith('.txt')) {
+        message.error('Chỉ chấp nhận file .txt');
+        return;
+      }
+      
+      try {
+        message.loading('Đang tải lên file...', 0);
+        const response = await massUploadProduct(file);
+        message.destroy();
+        
+        if (response.success) {
+          const result = response.data?.result || [];
+          message.success(`Tải lên thành công! Đã tạo ${result.length} sản phẩm mới.`);
+          loadProducts(); // Reload the product list
+        } else {
+          message.error(response.message || 'Không thể tải lên file.');
+        }
+      } catch (error) {
+        message.destroy();
+        console.error('Lỗi khi tải lên file:', error);
+        message.error('Đã xảy ra lỗi khi tải lên file.');
+      }
+      
+      // Clean up
+      document.body.removeChild(fileInput);
+    };
+    
+    // Add to DOM and trigger click
+    document.body.appendChild(fileInput);
+    fileInput.click();
+  };
+
   async function printProduct(productId: string): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetchProductById(productId);
@@ -462,6 +508,9 @@ const ProductsPage: React.FC = () => {
           }
         />
         <Space>
+          <Button type="default" style={{padding:16}} icon={<UploadOutlined />} onClick={handleUploadTxt}>
+            Upload Txt
+          </Button>
           <Button type="default" style={{padding:16}} icon={<ExportOutlined />} onClick={handleExportExcel}>
             {t('export_excel')}
           </Button>
