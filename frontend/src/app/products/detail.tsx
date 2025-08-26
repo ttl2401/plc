@@ -185,7 +185,6 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
             <Form.Item
               name="image"
               label="Hình ảnh"
-              rules={[{ required: true, message: 'Vui lòng tải lên hình ảnh' }]}
             >
               <ImageUpload 
                 src={currentProductImage}
@@ -207,7 +206,6 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
             <Form.Item
               name="name"
               label="Tên sản phẩm"
-              rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}
             >
               <Input placeholder="Nhập tên sản phẩm" disabled={!formEditable} />
             </Form.Item>
@@ -215,7 +213,6 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
             <Form.Item
               name="sizeDm2"
               label="Kích thước (dm²)"
-              rules={[{ required: true, message: 'Vui lòng nhập kích thước' }]}
             >
               <InputNumber
                 min={0}

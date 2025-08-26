@@ -102,3 +102,102 @@ export const uploadFile = async (req: Request, res: Response, next: NextFunction
     next(error);
   }
 }; 
+
+
+
+
+
+const storageProduct = multer.diskStorage({
+  destination: async (req: Request, file, cb) => { // Make destination function async
+    const target = 'product'
+
+    const uploadPath = path.join(__dirname, '../../public', target);
+
+    try {
+      // Create directory asynchronously
+      await fs.promises.mkdir(uploadPath, { recursive: true });
+      cb(null, uploadPath);
+    } catch (error: any) {
+      cb(error, '');
+    }
+  },
+  filename: (req: Request, file, cb) => {
+    const filename = `product.txt`;
+    cb(null, filename);
+  },
+});
+
+// Check file type
+const checkFileTypeUploadProduct = (file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  // Allowed extensions
+  const filetypes = /txt|csv|text\/plain/;
+  // Check extension
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  // Check mime type
+  const mimetype = filetypes.test(file.mimetype);
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Error: Txt File Only!'));
+  }
+};
+
+// Init upload
+export const uploadProduct = multer({
+  storage: storageProduct,
+  limits: { fileSize: 1024 * 1024 * 20 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    checkFileTypeUploadProduct(file, cb);
+  },
+}).single('file'); // ' is the field name for the file input
+
+// Wrap multer upload in an async function
+const uploadProductAsync = (req: Request, res: Response): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    uploadProduct(req, res, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    });
+  });
+};
+
+// Upload API function
+export const massUploadProduct = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await uploadProductAsync(req, res);
+
+    if (!req.file) {
+      return res.status(400).json(returnError('No file uploaded'));
+    }
+
+    const file = req.file;
+    const filePath = file.path;
+
+    const data = require(filePath);
+    //
+
+
+
+
+    // Construct the relative file path (from 'public' directory)
+    // The path will be like target/YYYY-MM-DD/uuid.extension
+    const relativeFilePath = path.relative(path.join(__dirname, '../../public'), file.path);
+
+    // Construct the absolute URL
+    const absoluteUrl = `${API_URL}/${relativeFilePath.replace(/\\/g, '/')}`;
+
+    return res.status(200).json(returnMessage({
+      filePath: filePath,
+      fileUrl: absoluteUrl,
+    }, 'File uploaded successfully'));
+  } catch (error) {
+    next(error);
+  }
+}; 
+
+
+
+
+

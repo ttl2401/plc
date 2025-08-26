@@ -12,8 +12,11 @@ import {
   downloadProducts,
   getProductSetting,
   updateProductSetting,
-  getProductSettingChanges
+  getProductSettingChanges,
 } from '@/controllers/product.controller';
+
+import { massUploadProduct } from '@/controllers/upload.controller';
+
 import { updateSettingPlatingRules } from '@/validators/product';
 
 const router = express.Router();
@@ -45,5 +48,5 @@ router.route('/products/:id/settings')
 // Routes Setting changes
 router.get('/products/:id/settings/changes',restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProductSettingChanges); // Get info changelog of prduct
 
-
+router.post('/products/upload', restrictTo(ROLES.ADMIN, ROLES.MANAGER), massUploadProduct)
 export default router; 

@@ -2,5 +2,7 @@ node_modules/
 dist/
 .env
 *.log 
-public
+public/*
+!public/assets/
+!public/assets/**
 cert/*

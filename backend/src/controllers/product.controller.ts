@@ -21,7 +21,7 @@ export const createProduct = async (
   try {
     // Transform code to uppercase
     const { code, name, sizeDm2, image } = req.body;
-    const payload = { code : code?.toUpperCase(), name, sizeDm2, image }
+    const payload = { code : code?.toUpperCase(), name: name || code, sizeDm2 : sizeDm2 , image }
     const product = await productService.createProduct(payload);
     // Log activity
     if (req.user) {
@@ -82,7 +82,7 @@ export const updateProduct = async (
     const id = req.params.id;
     const { name, sizeDm2, image } = req.body;
     
-    const payload = { name, sizeDm2, image };
+    const payload = { name , sizeDm2 : sizeDm2 || 0, image };
     const beforeProduct = await productService.getProductById(id);
     const product = await productService.updateProduct(id, payload);
 

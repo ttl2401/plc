@@ -3,8 +3,8 @@ import mongoosePaginate from 'mongoose-paginate-v2';
 
 export interface IProduct extends Document {
   code: string;
-  name: string;
-  sizeDm2: number; // Assuming size is a number in dm2
+  name?: string;
+  sizeDm2?: number; // Assuming size is a number in dm2
   image?: string; // URL or path to the image
   imageUrl?: string; // Derived from image path, optional
   createdAt: Date;
@@ -109,14 +109,15 @@ const productSchema = new Schema<IProduct>(
     name: {
       type: String,
       required: true,
-      trim: true,
+      trim: false,
     },
     sizeDm2: {
       type: Number,
-      required: true,
+      required: false,
     },
     image: {
       type: String,
+      required: false,
     },
     settings: {
       type: [productSettingSchemaEntry],
