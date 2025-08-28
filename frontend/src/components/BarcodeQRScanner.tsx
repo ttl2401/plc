@@ -10,6 +10,7 @@ import {
 import {
   BarcodeFormat,
   DecodeHintType,
+  ChecksumException, FormatException, NotFoundException
 } from "@zxing/library";
 
 type Props = {
@@ -51,6 +52,15 @@ function pickDeviceId(
     if (front) return front.deviceId;
   }
   return devices[devices.length - 1]?.deviceId;
+}
+
+function isBenignZXingError(err: unknown) {
+  const name = (err as any)?.name as string | undefined;
+  const msg = ((err as any)?.message as string | undefined)?.toLowerCase() || "";
+  // nhiều build minify không giữ nguyên name, nên check cả message
+  if (name === "NotFoundException" || name === "ChecksumException" || name === "FormatException") return true;
+  if (msg.includes("no multiformat") || msg.includes("not found") || msg.includes("checksum") || msg.includes("format")) return true;
+  return false;
 }
 
 export default function Scanner({
@@ -121,9 +131,12 @@ export default function Scanner({
               onResult(result.getText());
               if (!continuous) controlsRef.current?.stop();
             } else if (err) {
-              const name = (err as any)?.name;
+              if (err && !isBenignZXingError(err)) {
+                onError?.(err);
+              }
+              // const name = (err as any)?.name;
               // NotFoundException xảy ra liên tục khi chưa thấy mã — bỏ qua cho đỡ ồn
-              if (name && name !== "NotFoundException") onError?.(err);
+              // if (name && name !== "NotFoundException") onError?.(err);
             }
           }
         );
@@ -172,8 +185,8 @@ export default function Scanner({
             onChange={(e) => setSelectedDeviceId(e.target.value || undefined)}
             style={{ padding: 6 }}
           >
-            {devices.map((d) => (
-              <option key={d.deviceId} value={d.deviceId}>
+            {devices.map((d, idx) => (
+              <option key={`${d.deviceId || 'dev'}-${idx}`} value={d.deviceId}>
                 {d.label || `Camera ${d.deviceId.slice(0, 6)}…`}
               </option>
             ))}

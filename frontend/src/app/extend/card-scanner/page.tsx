@@ -370,6 +370,13 @@ const Index = () => {
                       background: "#fff",
                       color: "#181f3a"
                     }}
+                    onClick={() => {
+                      setProduct(null);
+                      setRunMode(null);
+                      setRackPlating(null);
+                      setBarrelPlating(null);
+                      setSearch("");
+                    }}
                   >
                     Hủy Bỏ
                   </Button>

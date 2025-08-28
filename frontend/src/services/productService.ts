@@ -67,6 +67,24 @@ interface UploadResponse {
   };
 }
 
+export const uploadImage = async (file: File): Promise<UploadResponse> => {
+  const formData = new FormData();
+  formData.append('target', 'product');
+  formData.append('image', file);
+
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/upload`,
+    {
+      method: 'POST',
+      body: formData,
+    }
+  );
+
+  const data = await response.json();
+  return data as UploadResponse;
+};
+
+
 interface MassUploadResponse {
   success: boolean;
   message: string;

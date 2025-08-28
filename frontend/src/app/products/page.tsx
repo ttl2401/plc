@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Table, Typography, message, Input, Button, Space, Flex, Modal, Image } from 'antd';
+import { Table, Typography, Input, Button, Space, Flex, Modal, Image, App as AntdApp } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchProducts, deleteProduct, type ProductDataType, downloadProductsExcel, fetchProductById, massUploadProduct } from '@/services/productService';
@@ -55,6 +55,8 @@ const ProductsPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<string | undefined>(undefined);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scannerError, setScannerError] = useState('');
+
+  const { message } = AntdApp.useApp();
 
   const loadProducts = async () => {
     if (!isAuthenticated) return;

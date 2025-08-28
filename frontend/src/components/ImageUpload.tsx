@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, message } from 'antd';
+import { Upload, App as AntdApp } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import type { UploadChangeParam } from 'antd/es/upload';
 import type { RcFile, UploadFile, UploadProps } from 'antd/es/upload/interface';
@@ -15,6 +15,7 @@ interface ImageUploadProps {
 const ImageUpload: React.FC<ImageUploadProps> = ({ src, value, onChange, style }) => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>(src || '');
+  const { message } = AntdApp.useApp();
 
   useEffect(() => {
     setImageUrl(src || '');

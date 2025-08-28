@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Form, Input, InputNumber, Button, message, Modal, Spin, Space, Tabs, Row, Col, Table } from 'antd';
+import { Form, Input, InputNumber, Button, Modal, Spin, Space, Tabs, Row, Col, Table, App as AntdApp } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchProductById, createProduct, updateProduct, fetchProductChanges, ProductChange } from '@/services/productService';
@@ -32,7 +32,8 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
   const [productChanges, setProductChanges] = useState<ProductChange[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [activeTabKey, setActiveTabKey] = useState('1');
-
+  const { message } = AntdApp.useApp();
+  
   const fetchProductData = async (productId:string) => {
     try {
       const data = await fetchProductById(productId);
