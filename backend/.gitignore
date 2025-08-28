@@ -6,3 +6,4 @@ public/*
 !public/assets/
 !public/assets/**
 cert/*
+*/*/.DS_Store

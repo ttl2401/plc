@@ -9,12 +9,12 @@ import { SearchOutlined, PlusOutlined, ExportOutlined, QrcodeOutlined, UploadOut
 import ProductDetailForm from './detail';
 import moment from 'moment';
 import { useLanguage } from '@/components/layout/DashboardLayout';
-import dynamic from 'next/dynamic';
+// import dynamic from 'next/dynamic';
 import { QRCodeSVG } from 'qrcode.react';
 import { renderToString } from 'react-dom/server';
 import BarcodeQRScanner from '@/components/BarcodeQRScanner'
 // Dynamically import QRScanner to avoid SSR issues
- const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
+// const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
 
 const { Title, Text } = Typography;
 const { Search } = Input;

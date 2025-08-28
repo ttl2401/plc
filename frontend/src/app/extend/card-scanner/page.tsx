@@ -1,17 +1,12 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import dynamic from 'next/dynamic';
 import { Button, Card, Input, Avatar, Row, Col, Space } from "antd";
 import { UserOutlined, SearchOutlined, QrcodeOutlined } from "@ant-design/icons";
 import Sidebar from '@/components/extend-information/Sidebar';
 import { fetchProducts } from '@/services/productService';
 import { fetchProductSetting } from '@/services/settingService';
-
-// Sidebar lines are handled by Sidebar component
-
-// Dynamically import QRScanner to avoid SSR issues
-const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
+import BarcodeQRScanner from '@/components/BarcodeQRScanner';
 
 const Index = () => {
   const [selectedLine, setSelectedLine] = useState('01');
@@ -119,9 +114,9 @@ const Index = () => {
   };
 
   const handleScan = async (result: any) => {
-    if (result && result[0] && result[0].rawValue) {
+    if (result) {
       setScannerOpen(false);
-      await handleSearch(result[0].rawValue);
+      await handleSearch(result);
     }
   };
 
@@ -256,20 +251,13 @@ const Index = () => {
               ×
             </button>
             <div style={{ width: 320, height: 240, borderRadius: 8, background: '#000', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <QRScanner
-                onScan={handleScan}
-                onError={(error) => console.error("Error:", error)}
-                constraints={{ facingMode: 'environment' }}
-                formats={[
-                  'qr_code',
-                  'code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e',
-                  'code_39', 'itf',
-                  'pdf417', 'data_matrix'
-                ]}
-                styles={{
-                  container: { width: 320, height: 240 },
-                  video: { width: 320, height: 240, objectFit: 'cover', borderRadius: 8 },
-                }}
+              <BarcodeQRScanner
+                onResult={handleScan}
+                onError={(e) => console.error(e)}
+                preferredFacingMode="environment"
+                width={360}
+                height={270}
+                showControls
               />
             </div>
             <div style={{ marginTop: 16, fontWeight: 500 }}>Đưa thẻ vào vùng quét</div>

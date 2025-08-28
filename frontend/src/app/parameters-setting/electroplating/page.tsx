@@ -6,13 +6,10 @@ import { fetchProductSetting, updateProductSetting, fetchProductSettingChanges }
 import { Input, Card, Typography, Spin, Row, Col, message, Radio, Image, Descriptions, Form, Button } from "antd";
 import { useLanguage } from '@/components/layout/DashboardLayout';
 import { QrcodeOutlined } from '@ant-design/icons';
-import dynamic from 'next/dynamic';
+import BarcodeQRScanner from '@/components/BarcodeQRScanner';
 
 const { Title } = Typography;
 const { Search } = Input;
-
-// Dynamically import QRScanner to avoid SSR issues
-const QRScanner = dynamic(() => import('@yudiel/react-qr-scanner').then(mod => mod.Scanner), { ssr: false });
 
 const ElectroplatingSettingsPage: React.FC = () => {
   const { t } = useLanguage();
@@ -162,19 +159,19 @@ const ElectroplatingSettingsPage: React.FC = () => {
   };
 
   const handleScan = async (result: any) => {
-    if (result && result[0] && result[0].rawValue) {
-      setSearch(result[0].rawValue);
+    if (result) {
+      setSearch(result);
       // Try to search for the product
       setLoading(true);
       setInfoLoading(true);
       try {
-        const res = await fetchProducts(1, 1, result[0].rawValue);
+        const res = await fetchProducts(1, 1, result);
         if (!res.data || res.data.length === 0) {
           setScannerError(t('scanner_no_data') || (t('lang') === 'vi' ? 'Không có dữ liệu, vui lòng quét mã hợp lệ' : 'Invalid data, please try again'));
         } else {
           setScannerOpen(false);
           setScannerError('');
-          handleSearch(result[0].rawValue);
+          handleSearch(result);
         }
       } catch (err) {
         setScannerError(t('scanner_no_data') || (t('lang') === 'vi' ? 'Không có dữ liệu, vui lòng quét mã hợp lệ' : 'Invalid data, please try again'));
@@ -261,20 +258,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
               ×
             </button>
             <div style={{ width: 320, height: 240, borderRadius: 8, background: '#000', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <QRScanner
-                onScan={handleScan}
-                onError={(error) => console.error("Error:", error)}
-                constraints={{ facingMode: 'environment' }}
-                formats={[
-                  'qr_code',
-                  'code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e',
-                  'code_39', 'itf',
-                  'pdf417', 'data_matrix'
-                ]}
-                styles={{
-                  container: { width: 320, height: 240 },
-                  video: { width: 320, height: 240, objectFit: 'cover', borderRadius: 8 },
-                }}
+              <BarcodeQRScanner
+                onResult={handleScan}
+                onError={(e) => console.error(e)}
+                preferredFacingMode="environment"
+                width={360}
+                height={270}
+                showControls
               />
             </div>
             <div style={{ marginTop: 16, fontWeight: 500 }}>Đưa thẻ vào vùng quét</div>
