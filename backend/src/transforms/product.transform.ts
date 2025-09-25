@@ -5,6 +5,12 @@ import { ProductSettingDefaultTanks } from '@/config/constant';
 import { Tank } from '@/models/tank.model';
 import { TankGroup } from '@/models/tank-group.model';
 
+const mappedPLCVariableName : Record<string, string> = {
+  "timer" : "May_tinh_Ghi_CPU_Thoi_gian_Ma",
+ 
+}
+
+
 export const getList = (data: PaginateResult<IProduct>) => {
   const products = data.docs.map(product => ({
     ...product.toObject(),
@@ -38,6 +44,7 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
           modelId: tank._id,
           modelKey: tank.key,
           modelName: tank.name,
+      //    plcVariableName : mappedPLCVariableName[tank.key],
           currentJig: 0,
           currentTotal: 0,
           T1: 0,
@@ -49,6 +56,7 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
           modelId: tank._id,
           modelKey: tank.key,
           modelName: tank.name,
+       //   plcVariableName : mappedPLCVariableName[tank.key],
           currentTotal: 0,
           T1: 0,
           T2: 0
@@ -63,6 +71,7 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
           modelId: group._id,
           modelKey: group.key,
           modelName: group.name,
+        //  plcVariableName : mappedPLCVariableName[group.key],
           currentJig: 0,
           currentTotal: 0,
           T1: 0,
@@ -74,6 +83,7 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
           modelId: group._id,
           modelKey: group.key,
           modelName: group.name,
+        //  plcVariableName : mappedPLCVariableName[group.key],
           currentTotal: 0,
           T1: 0,
           T2: 0
@@ -133,6 +143,8 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
 
   }
   
+  settingForLine.barrelPlating.plcVariableTimer = mappedPLCVariableName['timer'];
+  settingForLine.rackPlating.plcVariableTimer = mappedPLCVariableName['timer'];
   // Return the base product details along with the specific setting for the line
   return settingForLine;
 };
@@ -141,7 +153,7 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
 export const getSettingList = (data: PaginateResult<IProduct>) => {
   const products = data.docs.map(product => ({
     ...product.toObject(),
-    imageUrl: product.image ? `${API_URL}/${product.image}` : '',
+    imageUrl: product.image ? `${API_URL}/${product.image}` : `${API_URL}/assets/product_default.png`,
   }));
   return { ...data, docs: products };
 };
