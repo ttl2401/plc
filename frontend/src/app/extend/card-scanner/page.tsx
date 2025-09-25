@@ -4,7 +4,7 @@ import React, { useState, useRef } from "react";
 import { Button, Card, Input, Avatar, Row, Col, Space } from "antd";
 import { UserOutlined, SearchOutlined, QrcodeOutlined } from "@ant-design/icons";
 import Sidebar from '@/components/extend-information/Sidebar';
-import { fetchProducts } from '@/services/productService';
+import { fetchProductByCode } from '@/services/productService';
 import { fetchProductSetting } from '@/services/settingService';
 import BarcodeQRScanner from '@/components/BarcodeQRScanner';
 
@@ -18,48 +18,7 @@ const Index = () => {
   const [rackPlating, setRackPlating] = useState<any>(null);
   const [barrelPlating, setBarrelPlating] = useState<any>(null);
 
-  const processData = [
-    {
-      title: "Hồ Electro degreasing 1",
-      currentPerJig: 5,
-      totalCurrent: 60,
-      t1: 5,
-      t2: 5,
-      backgroundColor: "#d9f7be"
-    },
-    {
-      title: "Hồ Electro degreasing 2",
-      currentPerJig: 5,
-      totalCurrent: 60,
-      t1: 5,
-      t2: 5,
-      backgroundColor: "#fffbe6"
-    },
-    {
-      title: "Hồ Pre-Nickel Plating",
-      currentPerJig: 5,
-      totalCurrent: 60,
-      t1: 5,
-      t2: 5,
-      backgroundColor: "#f5f5f5"
-    },
-    {
-      title: "Hồ Nickel Plating",
-      currentPerJig: 5,
-      totalCurrent: 60,
-      t1: 5,
-      t2: 5,
-      backgroundColor: "#ffe1e6"
-    }
-  ];
 
-  // Add color array for tank blocks
-  const tankColors = [
-    '#d9f7be', // green
-    '#fffbe6', // yellow
-    '#f5f5f5', // gray
-    '#ffe1e6', // red
-  ];
 
   const handleSearch = async (value: string) => {
     setSearch(value);
@@ -72,16 +31,16 @@ const Index = () => {
     }
     setLoading(true);
     try {
-      const res = await fetchProducts(1, 1, value);
-      if (!res.data || res.data.length === 0) {
+      const res = await fetchProductByCode(value);
+      if (!res.data) {
         setProduct(null);
         setLoading(false);
         return;
       }
-      setProduct(res.data[0]);
+      setProduct(res.data);
       setRunMode(null);
       // fetchProductSetting
-      const settingRes = await fetchProductSetting(res.data[0]._id, 1);
+      const settingRes = await fetchProductSetting(res.data._id, 1);
       if (settingRes.data && settingRes.data.mode) {
         setRunMode(settingRes.data.mode);
         if (settingRes.data.mode === 'rack') {
@@ -128,76 +87,6 @@ const Index = () => {
     'bg-red-100',
   ];
 
-  const ProcessCard = ({
-    title,
-    currentPerJig,
-    totalCurrent,
-    t1,
-    t2,
-    index
-  }: typeof processData[0] & { index: number }) => (
-    <Card
-      variant="borderless"
-      className={colors[index % colors.length]}
-      style={{
-        marginBottom: 20,
-        borderRadius: 16,
-        boxShadow: "0 2px 12px #00000008"
-      }}
-      styles={{
-        body: { padding: 24 }
-      }}
-    >
-      <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 16 }}>{title}</div>
-      <div style={{ display: "flex", gap: 16 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Dòng điện /Jig</div>
-          <div style={{
-            fontWeight: 700,
-            fontSize: 20,
-            background: "#fff",
-            borderRadius: 8,
-            padding: "8px 0",
-            textAlign: "center"
-          }}>{currentPerJig}</div>
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Dòng điện tổng</div>
-          <div style={{
-            fontWeight: 700,
-            fontSize: 20,
-            background: "#fff",
-            borderRadius: 8,
-            padding: "8px 0",
-            textAlign: "center",
-            color: "#ff2d2d"
-          }}>{totalCurrent}</div>
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>T1</div>
-          <div style={{
-            fontWeight: 700,
-            fontSize: 20,
-            background: "#fff",
-            borderRadius: 8,
-            padding: "8px 0",
-            textAlign: "center"
-          }}>{t1}</div>
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>T2</div>
-          <div style={{
-            fontWeight: 700,
-            fontSize: 20,
-            background: "#fff",
-            borderRadius: 8,
-            padding: "8px 0",
-            textAlign: "center"
-          }}>{t2}</div>
-        </div>
-      </div>
-    </Card>
-  );
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#f5f5f5" }}>
