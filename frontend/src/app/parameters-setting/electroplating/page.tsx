@@ -431,9 +431,16 @@ const ElectroplatingSettingsPage: React.FC = () => {
               <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
                 <span className="text-xl font-bold">{t('load_timer')}</span>
                 <span className="ml-8 font-semibold">{t('nickel_plating_timer')}</span>
-                <Form.Item name="rack_timer" className="mb-0 ml-2">
-                  <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" />
+                {
+                  runMode == 'rack' ? 
+                  <Form.Item name="rack_timer" className="mb-0 ml-2">
+                    <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" />
+                  </Form.Item> :
+                  <Form.Item name="rack_timer" className="mb-0 ml-2">
+                  <Input type="number" min={0} className="w-32 h-10 text-center" />
                 </Form.Item>
+                }
+                
                 <div className="flex-1 flex justify-end">
                   <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">{t('apply')}</Button>
                 </div>
@@ -488,9 +495,16 @@ const ElectroplatingSettingsPage: React.FC = () => {
               <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
                 <span className="text-xl font-bold">{t('load_timer')}</span>
                 <span className="ml-8 font-semibold">{t('nickel_plating_timer')}</span>
-                <Form.Item name="barrel_timer" className="mb-0 ml-2">
+                {
+                  runMode == 'barrel' ? 
+                  <Form.Item name="barrel_timer" className="mb-0 ml-2">
+                    <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" />
+                  </Form.Item> :
+                  <Form.Item name="barrel_timer" className="mb-0 ml-2">
                   <Input type="number" min={0} className="w-32 h-10 text-center" />
                 </Form.Item>
+                }
+                
                 <div className="flex-1 flex justify-end">
                   <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">{t('apply')}</Button>
                 </div>
