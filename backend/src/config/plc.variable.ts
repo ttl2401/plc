@@ -381,3 +381,230 @@ export const settingTemperatureControl = [
     "value": 0
   }
 ]
+
+
+
+export const carrierVariableInformation = [
+  {
+    "name": "Carrier_Ma_vao_1",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 108.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Carrier_Ma_ra_1",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 112.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Carrier_Ma_vao_2",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 116.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Carrier_Ma_ra_2",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 120.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Carrier_Ma_vao_3",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 124.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Carrier_Ma_ra_3",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 128.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Carrier_Ma_1",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 132.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Carrier_Ma_2",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 136.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Carrier_Ma_3",
+    "dbNumber": 109,
+    "dataType": "Real",
+    "offset": 140.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Ho_Ma_1",
+    "dbNumber": 109,
+    "dataType": "Int",
+    "offset": 144.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Ho_Ma_2",
+    "dbNumber": 109,
+    "dataType": "Int",
+    "offset": 146.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "Ho_Ma_3",
+    "dbNumber": 109,
+    "dataType": "Int",
+    "offset": 148.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0.0,
+    "value": 0.0
+  }
+
+]
+/** 
+export const cardScannerCPUWriterControl = [
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 0.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Thoi_gian_Ma",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 2.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 4.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 6.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 8.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 10.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 12.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 14.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 16.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 18.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 20.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 22.0,
+    "type": "May_tinh_Ghi_CPU",
+    "startValue": 0,
+    "value": 0
+  }
+]
+
+*/

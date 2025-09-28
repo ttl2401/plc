@@ -4,7 +4,8 @@ import React, { useState, useRef } from "react";
 import { Button, Card, Input, Avatar, Row, Col, Space } from "antd";
 import { UserOutlined, SearchOutlined, QrcodeOutlined } from "@ant-design/icons";
 import Sidebar from '@/components/extend-information/Sidebar';
-import { fetchProductByCode } from '@/services/productService';
+import { fetchProductByCode, applyScannedProduct } from '@/services/productService';
+import { message } from 'antd';
 import { fetchProductSetting } from '@/services/settingService';
 import BarcodeQRScanner from '@/components/BarcodeQRScanner';
 
@@ -61,6 +62,20 @@ const Index = () => {
       setBarrelPlating(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApply = async () => {
+    if (!product) return;
+    try {
+      const res = await applyScannedProduct(product.code, selectedLine);
+      if (!res.success) {
+        message.error(res.message || 'Failed to apply scanned product');
+        return;
+      }
+      message.success(res.message || 'Applied successfully');
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to apply scanned product');
     }
   };
 
@@ -244,6 +259,7 @@ const Index = () => {
                       borderRadius: 12,
                       border: "none"
                     }}
+                  onClick={handleApply}
                   >
                     ĐỒNG Ý
                   </Button>

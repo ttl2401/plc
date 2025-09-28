@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ProductService } from '@/services/product.service';
 import { UserActivityService } from '@/services/user-activity.service';
+import { PlcVariableConfigService } from '@/services/plc-variable-config.service';
 import { returnMessage, returnError, returnPaginationMessage } from '@/controllers/base.controller';
 import { ActivityAction, ActivityResource } from '@/models/user-activity.model';
 import mongoose from 'mongoose';
@@ -11,6 +12,7 @@ import exceljs from 'exceljs';
 
 const productService = new ProductService();
 const userActivityService = new UserActivityService();
+const plcVariableConfigService = new PlcVariableConfigService();
 
 // Create a new product
 export const createProduct = async (
@@ -65,6 +67,23 @@ export const getProduct = async (
 ) => {
   try {
     const product = await productService.getProductById(req.params.id);
+
+    return res.status(200).json(returnMessage(getDetail(product), 'Product retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// Get a single product
+export const getProductByCode = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const code = req.params.code?.toUpperCase();
+    const product = await productService.getProductByCode(code);
 
     return res.status(200).json(returnMessage(getDetail(product), 'Product retrieved successfully'));
   } catch (error) {
@@ -279,6 +298,28 @@ export const getProductSettingChanges = async (
     );
     
     return res.status(200).json(returnMessage(activities.docs, 'Product changes retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+//Apply Product After Scanner, then JOIN in plating phase with PLC
+export const applyProductToPlating = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { code } = req.body;
+
+    const product = await productService.getProductByCode(code);
+    if(!product){
+      return res.status(404).json(returnError('Product not found'));
+    }
+    await plcVariableConfigService.updateValueByKey('current_plating_product_code', code);
+
+    return res.status(200).json(returnMessage(true, 'Product applied. Waiting for plating!'));
   } catch (error) {
     next(error);
   }

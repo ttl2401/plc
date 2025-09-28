@@ -190,7 +190,7 @@
   "run_mode": "Run Mode",
   "run_suspended": "Suspended Run",
   "run_rotating": "Rotating Run",
-  "load_parameters": "Load Parameters",
+  "load_parameters": "Load Rectifier",
   "number_of_jigs_per_carrier": "Jigs/Carrier",
   "number_of_pcs_per_jig": "Pcs/Jig",
   "current_current_per_jig": "Current / Jig",

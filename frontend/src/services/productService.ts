@@ -147,6 +147,20 @@ export const fetchProductById = async (id: string): Promise<FetchProductResponse
   return data as FetchProductResponse;
 };
 
+export const fetchProductByCode = async (code: string): Promise<FetchProductResponse> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/code/${encodeURIComponent(code)}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  const data = await response.json();
+  return data as FetchProductResponse;
+};
+
 export const createProduct = async (productData: ProductPayload): Promise<CreateProductResponse> => {
 
   const response = await authenticatedFetch(
@@ -278,3 +292,31 @@ export const fetchProductChanges = async (productId: string): Promise<FetchProdu
   const data = await response.json();
   return data as FetchProductChangesResponse;
 };
+
+export interface ApplyScannedProductResponse {
+  success: boolean;
+  message: string;
+}
+
+export const applyScannedProduct = async (
+  code: string,
+  line: string
+): Promise<ApplyScannedProductResponse> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/apply-scanned`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code, line }),
+    }
+  );
+
+  const data = await response.json();
+  return data as ApplyScannedProductResponse;
+};
+
+
+
+// removed legacy applyScannedProduct(code) in favor of applyScannedProduct(productId, line)

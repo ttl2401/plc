@@ -74,8 +74,11 @@ export class ProductService {
   /**
    * Get a single product by Code
    */
-  async getProductByCode(code: string): Promise<IProduct | null> {
+  async getProductByCode(code: string): Promise<IProduct> {
     const product = await Product.findOne({code});
+    if (!product) {
+      throw new AppError(`No product found with code ${code}`, 404);
+    }
     return product;
   }
 

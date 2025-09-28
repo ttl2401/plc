@@ -89,7 +89,7 @@ export class PlcVariableService {
       if (error instanceof AppError) {
         throw error;
       }
-      throw new AppError('Failed to fetch PLC variable', 500);
+      throw new AppError(`Failed to fetch PLC variable ${name} from database`, 500);
     }
   }
 
@@ -117,7 +117,7 @@ export class PlcVariableService {
     try {
       const result = await PlcVariable.deleteOne({ name });
       if (result.deletedCount === 0) {
-        throw new AppError(`PLC variable '${name}' not found`, 404);
+        throw new AppError(`PLC variable '${name}' not found in database`, 404);
       }
       return true;
     } catch (error) {

@@ -55,11 +55,12 @@ export class PLCService {
    * @param queries - Query parameters including type filter
    * @returns Promise<IPlcVariable[]> - Array of all PLC variables with current values from PLC
    */
-  async readVariablesFromPLC(queries: any): Promise<IPlcVariable[]> {
+  async readVariablesFromPLC(queries: any, listVariables?: any | null): Promise<IPlcVariable[]> {
     try {
       const { type } = queries;
+      
       // First, fetch all variables from MongoDB
-      const variables = await PlcVariable.find({ type }).sort({ name: 1 });
+      const variables = listVariables ? listVariables : (await PlcVariable.find({ type }).sort({ name: 1 }));
       
       // If no snap7 client available, return variables with stored values
       if (!this.client) {
@@ -229,11 +230,17 @@ export class PLCService {
    * @param name - Name of the variable to read
    * @returns Promise<any> - Current value from PLC
    */
-  async readVariableFromPLC(name: string): Promise<any> {
+  async readVariableFromPLC(name: string, ignoreThrowError: boolean = false): Promise<any> {
     try {
       const variable = await PlcVariable.findOne({ name });
       if (!variable) {
-        throw new AppError(`PLC variable '${name}' not found`, 404);
+        if(ignoreThrowError){
+          console.log(`PLC variable '${name}' not found in database, return 0`)
+          return 0;
+        }else{
+          throw new AppError(`PLC variable '${name}' not found in database`, 404);
+        }
+        
       }
   
       if (!this.client) {
@@ -255,7 +262,7 @@ export class PLCService {
           const read1 = this.client.DBRead(variable.dbNumber, byte, 1);
           if (!read1) {
             const e = this.client.LastError?.();
-            throw new AppError(`Failed to read from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
+            throw new AppError(`Failed to read ${name} from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
           }
           const cur = (read1 as Buffer).readUInt8(0);
           return this.getBitFromByte(cur, (bit ?? 0));
@@ -265,7 +272,7 @@ export class PLCService {
           const read2 = this.client.DBRead(variable.dbNumber, variable.offset, 2);
           if (!read2) {
             const e = this.client.LastError?.();
-            throw new AppError(`Failed to read from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
+            throw new AppError(`Failed to read ${name} from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
           }
           return (read2 as Buffer).readInt16BE(0);
         }
@@ -274,7 +281,7 @@ export class PLCService {
           const read4 = this.client.DBRead(variable.dbNumber, variable.offset, 4);
           if (!read4) {
             const e = this.client.LastError?.();
-            throw new AppError(`Failed to read from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
+            throw new AppError(`Failed to read ${name} from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
           }
           return (read4 as Buffer).readFloatBE(0);
         }
@@ -284,7 +291,7 @@ export class PLCService {
       }
     } catch (error) {
       if (error instanceof AppError) throw error;
-      throw new AppError('Failed to read PLC variable', 500);
+      throw new AppError(`Failed to read PLC variable ${name}`, 500);
     }
   }
 
@@ -567,6 +574,21 @@ export class PLCService {
   private getBitFromByte(byteVal: number, bitIndex: number): boolean {
     return ((byteVal >> bitIndex) & 1) === 1;
   }
+  /**
+   * Convert array of PLC variables to object format
+   * @param variables - Array of PLC variables from readVariablesFromPLC
+   * @returns Object with variable names as keys and values as values
+   */
+  toVariablesObject(variables: IPlcVariable[]): { [key: string]: any } {
+    const result: { [key: string]: any } = {};
+    
+    for (const variable of variables) {
+      result[variable.name] = variable.value;
+    }
+    
+    return result;
+  }
+
   /**
    * Check PLC connectivity at app startup
    * @returns Promise<boolean> - true if connected, false otherwise

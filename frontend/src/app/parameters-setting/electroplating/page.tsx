@@ -206,6 +206,14 @@ const ElectroplatingSettingsPage: React.FC = () => {
     });
   };
 
+  // Clear zero value when focusing an input to avoid confusion for users
+  const handleFocusClearZero = (fieldName: string) => {
+    const currentValue = form.getFieldValue(fieldName);
+    if (currentValue === 0 || currentValue === '0') {
+      form.setFieldsValue({ [fieldName]: undefined });
+    }
+  };
+
   return (
     <div className="pt-0">
       {/* QR Scanner Popup */}
@@ -381,13 +389,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
                     <div className="flex flex-col items-center">
                       <span className="font-bold mb-1">{t('number_of_jigs_per_carrier')}</span>
                       <Form.Item name="rack_jigCarrier" className="mb-0">
-                        <Input type="number" min={0} className="w-24 h-10 text-center" />
+                        <Input type="number" min={0} className="w-24 h-10 text-center" onFocus={() => handleFocusClearZero('rack_jigCarrier')} />
                       </Form.Item>
                     </div>
                     <div className="flex flex-col items-center">
                       <span className="font-bold mb-1">{t('number_of_pcs_per_jig')}</span>
                       <Form.Item name="rack_pcsJig" className="mb-0">
-                        <Input type="number" min={0} className="w-24 h-10 text-center" />
+                        <Input type="number" min={0} className="w-24 h-10 text-center" onFocus={() => handleFocusClearZero('rack_pcsJig')} />
                       </Form.Item>
                     </div>
                   </div>
@@ -400,7 +408,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
                         <div className="flex flex-col items-center flex-1">
                           <span className="font-bold">{t('current_current_per_jig')}</span>
                           <Form.Item name={`rack_tank_${idx}_currentJig`} className="mb-0">
-                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                            <Input type="number" min={0} className="w-28 h-10 text-center" onFocus={() => handleFocusClearZero(`rack_tank_${idx}_currentJig`)} />
                           </Form.Item>
                         </div>
                         <div className="flex flex-col items-center flex-1">
@@ -414,13 +422,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
                         <div className="flex flex-col items-center flex-1">
                           <span className="font-bold">{t('t1')}</span>
                           <Form.Item name={`rack_tank_${idx}_T1`} className="mb-0">
-                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                            <Input type="number" min={0} className="w-28 h-10 text-center" onFocus={() => handleFocusClearZero(`rack_tank_${idx}_T1`)} />
                           </Form.Item>
                         </div>
                         <div className="flex flex-col items-center flex-1">
                           <span className="font-bold">{t('t2')}</span>
                           <Form.Item name={`rack_tank_${idx}_T2`} className="mb-0">
-                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                            <Input type="number" min={0} className="w-28 h-10 text-center" onFocus={() => handleFocusClearZero(`rack_tank_${idx}_T2`)} />
                           </Form.Item>
                         </div>
                       </div>
@@ -434,10 +442,10 @@ const ElectroplatingSettingsPage: React.FC = () => {
                 {
                   runMode == 'rack' ? 
                   <Form.Item name="rack_timer" className="mb-0 ml-2">
-                    <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" />
+                    <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" onFocus={() => handleFocusClearZero('rack_timer')} />
                   </Form.Item> :
                   <Form.Item name="rack_timer" className="mb-0 ml-2">
-                  <Input type="number" min={0} className="w-32 h-10 text-center" />
+                  <Input type="number" min={0} className="w-32 h-10 text-center" onFocus={() => handleFocusClearZero('rack_timer')} />
                 </Form.Item>
                 }
                 
@@ -456,7 +464,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
                   <div className="flex flex-col items-center">
                     <span className="font-bold mb-1">{t('kg_per_barrel')}</span>
                     <Form.Item name="barrel_kgBarrel" className="mb-0">
-                      <Input type="number" min={0} className="w-24 h-10 text-center" />
+                      <Input type="number" min={0} className="w-24 h-10 text-center" onFocus={() => handleFocusClearZero('barrel_kgBarrel')} />
                     </Form.Item>
                   </div>
                 </div>
@@ -468,7 +476,7 @@ const ElectroplatingSettingsPage: React.FC = () => {
                         <div className="flex flex-col items-center flex-1">
                           <span className="font-bold">{t('total_current')}</span>
                           <Form.Item name={`barrel_tank_${idx}_currentTotal`} className="mb-0">
-                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                            <Input type="number" min={0} className="w-28 h-10 text-center" onFocus={() => handleFocusClearZero(`barrel_tank_${idx}_currentTotal`)} />
                           </Form.Item>
                         </div>
                         
@@ -478,13 +486,13 @@ const ElectroplatingSettingsPage: React.FC = () => {
                         <div className="flex flex-col items-center flex-1">
                           <span className="font-bold">{t('t1')}</span>
                           <Form.Item name={`barrel_tank_${idx}_T1`} className="mb-0">
-                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                            <Input type="number" min={0} className="w-28 h-10 text-center" onFocus={() => handleFocusClearZero(`barrel_tank_${idx}_T1`)} />
                           </Form.Item>
                         </div>
                         <div className="flex flex-col items-center flex-1">
                           <span className="font-bold">{t('t2')}</span>
                           <Form.Item name={`barrel_tank_${idx}_T2`} className="mb-0">
-                            <Input type="number" min={0} className="w-28 h-10 text-center" />
+                            <Input type="number" min={0} className="w-28 h-10 text-center" onFocus={() => handleFocusClearZero(`barrel_tank_${idx}_T2`)} />
                           </Form.Item>
                         </div>
                       </div>
@@ -498,10 +506,10 @@ const ElectroplatingSettingsPage: React.FC = () => {
                 {
                   runMode == 'barrel' ? 
                   <Form.Item name="barrel_timer" className="mb-0 ml-2">
-                    <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" />
+                    <Input type="number" min={600} max={3600} className="w-32 h-10 text-center" onFocus={() => handleFocusClearZero('barrel_timer')} />
                   </Form.Item> :
                   <Form.Item name="barrel_timer" className="mb-0 ml-2">
-                  <Input type="number" min={0} className="w-32 h-10 text-center" />
+                  <Input type="number" min={0} className="w-32 h-10 text-center" onFocus={() => handleFocusClearZero('barrel_timer')} />
                 </Form.Item>
                 }
                 

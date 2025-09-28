@@ -3,21 +3,39 @@ import { connectMongoDB, disconnectMongoDB } from '@/config/mongodb';
 import { checkInfluxDB, closeInfluxDB} from '@/config/influxdb';
 
 import { cronjob as randomDataCronjob } from './random-data.cronjob';
+import { cronjob as robotDataCronjob } from './robot-data.cronjob';
+import { cronjob as syncCarrierIndexCronjob } from './sync-carrier-index.cronjob';
+import { cronjob as mappingCarrierWithProductCodeCronjob } from './mapping-carrier-with-product-code.cronjob';
+import { cronjob as syncPlcParameterMonitor } from './sync-plc-parameter-monitor.cronjob';
 
 
 async function cronjob(): Promise<void> {
   try {
     await connectMongoDB();
     await checkInfluxDB();
-
-
-    const task = randomDataCronjob();
-    console.log('✅ Cron scheduled and DBs connected');
     
+    let task1:any;  
+    if(process.env.NODE_ENV === 'development'){
+      task1 = randomDataCronjob();
+    }
+    
+    const task4 = mappingCarrierWithProductCodeCronjob();
+    const task2 = await robotDataCronjob();
+    // const task3 = syncCarrierIndexCronjob();
+    const task5 = await syncPlcParameterMonitor();
 
+    console.log('✅ Cron scheduled and DBs connected');
     const shutdown = async (signal: string) => {
         console.log(`\n${signal} received. Shutting down...`);
-        try { task.stop(); } catch {}
+        try { 
+          if(task1){
+            task1.stop();
+          }
+          task2.stop();
+          // task3.stop();
+          task4.stop();
+          task5.stop();
+        } catch {}
         await closeInfluxDB();
         await disconnectMongoDB();
         process.exit(0);

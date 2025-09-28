@@ -18,9 +18,9 @@ const randomElectricity = async function(){
 }
 
 export const cronjob = function(){
-
+    console.log("running random data cronjob")
     const task = cron.schedule('*/4 * * * * *', async function () {
-        console.log("running cronjob")
+        
         await randomTemperature();
         await randomElectricity();
         

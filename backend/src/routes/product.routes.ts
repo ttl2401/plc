@@ -6,6 +6,7 @@ import {
   createProduct,
   getProducts,
   getProduct,
+  getProductByCode,
   updateProduct,
   deleteProduct,
   getProductChanges,
@@ -13,6 +14,7 @@ import {
   getProductSetting,
   updateProductSetting,
   getProductSettingChanges,
+  applyProductToPlating
 } from '@/controllers/product.controller';
 
 import { massUploadProduct } from '@/controllers/upload.controller';
@@ -40,6 +42,7 @@ router.route('/products/:id')
   .get(restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProduct) // Get a single product
   .patch(restrictTo(ROLES.ADMIN), updateProduct) // Update a product (only Admin)
   .delete(restrictTo(ROLES.ADMIN), deleteProduct); // Delete a product (only Admin)
+router.get('/products/code/:code', restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProductByCode);
 
 router.route('/products/:id/settings')
   .get(restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProductSetting) // Get a product settings
@@ -48,5 +51,14 @@ router.route('/products/:id/settings')
 // Routes Setting changes
 router.get('/products/:id/settings/changes',restrictTo(ROLES.ADMIN, ROLES.MANAGER), getProductSettingChanges); // Get info changelog of prduct
 
-router.post('/products/upload', restrictTo(ROLES.ADMIN, ROLES.MANAGER), massUploadProduct)
+router.post('/products/upload', restrictTo(ROLES.ADMIN, ROLES.MANAGER), massUploadProduct);
+
+
+
+/**
+ * ACTING WITH PLC
+ */
+router.post('/products/apply-scanned', restrictTo(ROLES.ADMIN, ROLES.MANAGER), applyProductToPlating);
+
+
 export default router; 
