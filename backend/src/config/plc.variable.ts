@@ -467,33 +467,62 @@ export const carrierVariableInformation = [
     "value": 0.0
   },
   {
-    "name": "Ho_Ma_1",
+    "name": "Ho_Ma_vao_1",
+    "oldName": "Ho_Ma_1",
     "dbNumber": 109,
     "dataType": "Int",
     "offset": 144.0,
     "type": "May_tinh_PLC_Send_Carrier",
-    "startValue": 0.0,
-    "value": 0.0
+    "startValue": 0,
+    "value": 0
   },
   {
-    "name": "Ho_Ma_2",
+    "name": "Ho_Ma_vao_2",
+    "oldName": "Ho_Ma_2",
     "dbNumber": 109,
     "dataType": "Int",
     "offset": 146.0,
     "type": "May_tinh_PLC_Send_Carrier",
-    "startValue": 0.0,
-    "value": 0.0
+    "startValue": 0,
+    "value": 0
   },
   {
-    "name": "Ho_Ma_3",
+    "name": "Ho_Ma_vao_3",
+    "oldName": "Ho_Ma_3",
     "dbNumber": 109,
     "dataType": "Int",
     "offset": 148.0,
     "type": "May_tinh_PLC_Send_Carrier",
-    "startValue": 0.0,
-    "value": 0.0
-  }
-
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Ho_Ma_ra_1",
+    "dbNumber": 109,
+    "dataType": "Int",
+    "offset": 150.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Ho_Ma_ra_2",
+    "dbNumber": 109,
+    "dataType": "Int",
+    "offset": 152.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "Ho_Ma_ra_3",
+    "dbNumber": 109,
+    "dataType": "Int",
+    "offset": 154.0,
+    "type": "May_tinh_PLC_Send_Carrier",
+    "startValue": 0,
+    "value": 0
+  } 
 ]
 /** 
 export const cardScannerCPUWriterControl = [

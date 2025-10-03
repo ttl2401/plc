@@ -23,11 +23,15 @@ export const cronjob = async function(){
             variable.value = variable.value ? Math.round(variable.value * 100) / 100 : 0;
         }
         const objVariables = plcService.toVariablesObject(variablesCarrierWithPLCValues);
-        const Ho_Ma_1: number = objVariables.Ho_Ma_1 ? parseInt(objVariables.Ho_Ma_1) : 0;
-        const Ho_Ma_2: number = objVariables.Ho_Ma_2 ? parseInt(objVariables.Ho_Ma_2) : 0;
-        const Ho_Ma_3: number = objVariables.Ho_Ma_3 ? parseInt(objVariables.Ho_Ma_3) : 0;
-
-        
+        const Ho_Ma_vao_1: number = objVariables.Ho_Ma_vao_1 || 0;
+        const Ho_Ma_vao_2: number = objVariables.Ho_Ma_vao2 || 0;
+        const Ho_Ma_vao_3: number = objVariables.Ho_Ma_vao_3 || 0;
+        const Ho_Ma_ra_1: number = objVariables.Ho_Ma_ra_1 || 0;
+        const Ho_Ma_ra_2: number = objVariables.Ho_Ma_ra_2 || 0;
+        const Ho_Ma_ra_3: number = objVariables.Ho_Ma_ra_3 || 0;
+        const Ho_Ma_1 = Ho_Ma_vao_1 || Ho_Ma_ra_1;
+        const Ho_Ma_2 = Ho_Ma_vao_2 || Ho_Ma_ra_2;
+        const Ho_Ma_3 = Ho_Ma_vao_3 || Ho_Ma_ra_3;
         /**
          * ROBOT 1
          */

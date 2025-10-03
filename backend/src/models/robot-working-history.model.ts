@@ -38,7 +38,7 @@ const robotWorkingHistorySchema = new Schema<IRobotWorkingHistory>(
     },
     productCode: {
       type: String,
-      required: false,
+      required: true,
     }
   },
   {

@@ -8,6 +8,7 @@ import { faker as historyOpFaker } from './history-operation.faker';
 import { faker as historyChAddFaker } from './history-chemical-addition.faker';
 import { faker as historyWtAddFaker } from './history-water-addition.faker';
 import { faker as liquidWarnFaker } from './liquid-warning.faker';
+import { faker as robotWorkingHistoryFaker } from './robot-working-history.faker';
 
 async function faker(): Promise<void> {
   try {
@@ -19,6 +20,11 @@ async function faker(): Promise<void> {
     // await historyChAddFaker();
     // await historyWtAddFaker();
     // await liquidWarnFaker();
+
+    if(process.env.NODE_ENV === 'development'){
+      await robotWorkingHistoryFaker();
+    }
+    
 
   } catch (error) {
     console.error('❌ Faker data error:', error);

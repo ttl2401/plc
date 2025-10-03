@@ -9,7 +9,8 @@ import {
     downloadInformationTemperature,
     getInformationTimer,
     downloadInformationTimer,
-    getInformationTimerDetail
+    getInformationTimerDetail,
+    getInformationTimerMongo
 } from '@/controllers/information.controller';
 
 
@@ -30,7 +31,7 @@ router.get('/information/temperature/download', auth, restrictTo(ROLES.ADMIN, RO
 
 // timer information 
 router.route('/information/timer')
-.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTimer);
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTimerMongo);
 // Route for downloading temperature information as Excel 
 router.get('/information/timer/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadInformationTimer);
 // timer information detail for each code

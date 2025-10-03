@@ -1,15 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { ProductService } from '@/services/product.service';
 import { TemperatureService } from '@/services/temperature.service';
+import { RobotWorkingHistoryService } from '@/services/robot-working-history.service';
 import { TimerService } from '@/services/timer.service';
 import { returnMessage, returnError, returnPaginationMessage } from '@/controllers/base.controller';
-import { getSettingList } from '@/transforms/product.transform';
+import { getSettingList, mappingTankToList  } from '@/transforms/product.transform';
 import exceljs from 'exceljs';
 import dayjs from 'dayjs';
 
 const productService = new ProductService();
 const temperatureService = new TemperatureService();
 const timerService = new TimerService();
+const robotHistoryService = new RobotWorkingHistoryService();
 
 export const getInformationPlating = async (
   req: Request,
@@ -290,6 +292,35 @@ export const downloadInformationTemperature = async (
   }
 };
 
+export const getInformationTimerMongo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { page = '1', limit = '10', search = '', from, to, tank } = req.query;
+
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+
+    const result = await robotHistoryService.listByFilters({
+      page: pageNum,
+      limit: limitNum,
+      search: typeof search === 'string' ? search : undefined,
+      tank: typeof tank === 'string' ? tank : undefined,
+      from: typeof from === 'string' ? Number(from) : (typeof from === 'number' ? from : undefined),
+      to:   typeof to   === 'string' ? Number(to)   : (typeof to   === 'number' ? to   : undefined),
+    });
+
+    result.docs = mappingTankToList(result.docs);
+    return res.status(200).json(returnPaginationMessage(result, 'Fetched information timer successfully'));
+  } catch (e: any) {
+    return res.status(500).json({
+      success: false,
+      message: e?.message || 'Internal Server Error',
+    });
+  }
+}
 
 
 export const getInformationTimer = async (

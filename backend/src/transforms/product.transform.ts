@@ -4,6 +4,7 @@ import { PaginateResult } from '@/controllers/base.controller';
 import { ProductSettingDefaultTanks } from '@/config/constant';
 import { Tank } from '@/models/tank.model';
 import { TankGroup } from '@/models/tank-group.model';
+import { mappingTankNumberInLine } from '@/config/constant';
 
 const mappedPLCVariableName : Record<string, string> = {
   "timer" : "May_tinh_Ghi_CPU_Thoi_gian_Ma",
@@ -157,3 +158,14 @@ export const getSettingList = (data: PaginateResult<IProduct>) => {
   }));
   return { ...data, docs: products };
 };
+
+export const mappingTankToList = (data : any) => {
+  return data.map((record : any )=> {
+    const tanks = record.tanks || [];
+    const mappingTanks = tanks.map((tank: any) => {
+      tank.tank = mappingTankNumberInLine[tank.tankId] || {}
+      return tank;
+    })
+    return {...record, tanks : mappingTanks}
+  })
+}

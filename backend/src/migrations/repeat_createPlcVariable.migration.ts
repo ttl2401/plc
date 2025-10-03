@@ -67,10 +67,18 @@ const migrate = async (): Promise<Boolean> => {
 
   for (const variable of carrierVariableInformation){
     try {
-      let exist = await PlcVariable.findOne({name: variable.name});  
-      if(!exist){
-        await PlcVariable.create(variable);
+      if(variable.oldName){
+        let exist = await PlcVariable.findOne({name: variable.oldName});  
+        if(exist){
+          await PlcVariable.updateOne({name: variable.oldName}, variable);
+        }
+      }else {
+        let exist = await PlcVariable.findOne({name: variable.name});  
+        if(!exist){
+          await PlcVariable.create(variable);
+        }
       }
+      
     }
     catch(e){
       console.error(e);

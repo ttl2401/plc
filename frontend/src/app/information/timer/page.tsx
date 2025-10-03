@@ -19,7 +19,8 @@ const { Option } = Select;
 const tankOrder = [
   "washing",
   "boiling_degreasing",
-  "electro_degreasing",
+  "electro_degreasing_tank_1",
+  "electro_degreasing_tank_2",
   "pre_nickel_plating",
   "nickel_plating",
   "ultrasonic_hot_rinse",
@@ -43,6 +44,7 @@ const InformationTimerPage: React.FC = () => {
   });
   const [searchText, setSearchText] = useState("");
   const [tankGroups, setTankGroups] = useState<TankGroup[]>([]);
+  const [headerNames, setHeaderNames] = useState<Record<string, string>>({});
   const [selectedTank, setSelectedTank] = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<[moment.Moment | null, moment.Moment | null] | null>(null);
   const router = useRouter();
@@ -60,9 +62,11 @@ const InformationTimerPage: React.FC = () => {
   };
 
   const colorMap: Record<string, string> = {
-    washing: "#F5F7FA",
+    washing: "#E8E8E8",
     boiling_degreasing: "#F5F7FA",
     electro_degreasing: "#D1F2EB",
+    electro_degreasing_tank_1: "#D1F2EB",
+    electro_degreasing_tank_2: "#D1F2EB",
     pre_nickel_plating: "#FCF3CF",
     nickel_plating: "#D6EAF8",
     ultrasonic_hot_rinse: "#FDEDEC",
@@ -81,7 +85,24 @@ const InformationTimerPage: React.FC = () => {
       const to = range && range[1] ? range[1].endOf('day').unix().toString() : '';
       const res = await fetchInformationTimer({ page, limit, search, tank: tank || '', from, to });
       if (res.success) {
-        setData(res.data);
+        const list = res.data as any[];
+        setData(list as any);
+        // Build header names from data
+        const names: Record<string, string> = {};
+        for (const item of list) {
+          for (const t of item?.tanks || []) {
+            const key = t?.tank?.key;
+            const group = t?.tank?.groupKey;
+            const name = t?.tank?.name;
+            if (!name) continue;
+            if (key === 'electro_degreasing_tank_1') names['electro_degreasing_tank_1'] = names['electro_degreasing_tank_1'] || name;
+            if (key === 'electro_degreasing_tank_2') names['electro_degreasing_tank_2'] = names['electro_degreasing_tank_2'] || name;
+            if (group && !names[group]) names[group] = name;
+            if (key && key.startsWith('nickel_plating_tank_')) names['nickel_plating'] = names['nickel_plating'] || name;
+            if (key && key.startsWith('dryer_tank_')) names['dryer'] = names['dryer'] || name;
+          }
+        }
+        setHeaderNames(names);
         setPagination({
           ...res.pagination,
           page: res.pagination.page ?? 1,
@@ -140,6 +161,58 @@ const InformationTimerPage: React.FC = () => {
     }
   };
 
+  // Helpers for new API shape
+  const findTankForColumn = (record: any, columnKey: string) => {
+    if (!record?.tanks) return undefined;
+    if (columnKey === 'electro_degreasing_tank_1' || columnKey === 'electro_degreasing_tank_2') {
+      return record.tanks.find((t: any) => t?.tank?.key === columnKey);
+    }
+    if (columnKey === 'nickel_plating') {
+      const keys = ['nickel_plating_tank_1', 'nickel_plating_tank_2', 'nickel_plating_tank_3'];
+      return record.tanks.find((t: any) => keys.includes(t?.tank?.key));
+    }
+    if (columnKey === 'dryer') {
+      const keys = ['dryer_tank_1', 'dryer_tank_2'];
+      return record.tanks.find((t: any) => keys.includes(t?.tank?.key));
+    }
+    // default: first tank in this groupKey
+    const groupKey = columnKey;
+    return record.tanks.find((t: any) => t?.tank?.groupKey === groupKey);
+  };
+
+  const formatTime = (iso?: string | null) => {
+    if (!iso) return '-';
+    const d = dayjs(iso);
+    if (!d.isValid()) return '-';
+    return d.format('HH:mm:ss');
+  };
+
+  const calcDurationSeconds = (enterIso?: string | null, exitIso?: string | null) => {
+    if (!enterIso || !exitIso) return '-';
+    const a = dayjs(exitIso);
+    const b = dayjs(enterIso);
+    if (!a.isValid() || !b.isValid()) return '-';
+    return a.unix() - b.unix();
+  };
+
+  const pad2 = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  const formatDurationDisplay = (val: any) => {
+    if (val === '-' || val == null) return '-';
+    const seconds = Number(val);
+    if (!Number.isFinite(seconds) || seconds < 0) return '-';
+    if (seconds < 60) return `${seconds}`;
+    if (seconds < 3600) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${pad2(m)}:${pad2(s)}`;
+    }
+    const h = Math.floor(seconds / 3600);
+    const rem = seconds % 3600;
+    const m = Math.floor(rem / 60);
+    const s = rem % 60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
+  };
+
   // Build columns dynamically for tanks
   const columns: ColumnsType<InformationTimer> = [
     {
@@ -151,68 +224,65 @@ const InformationTimerPage: React.FC = () => {
     },
     {
       title: t("product_code"),
-      dataIndex: "code",
-      key: "code",
+      dataIndex: "productCode",
+      key: "productCode",
       render: (code: string) => <span style={{ color: '#27ae60', fontWeight: 600 }}>{code}</span>,
     },
     {
       title: t("start_date"),
       key: "ngay_bat_dau",
-      render: (_: any, record: InformationTimer) => {
-        const firstTank = record.tanks[0];
-        if (!firstTank) return "-";
-        return dayjs.unix(firstTank.timeIn).format("DD-MM-YYYY");
+      render: (_: any, record: any) => {
+        const first = record?.tanks?.find((t: any) => !!t?.enteredAt);
+        return first?.enteredAt ? dayjs(first.enteredAt).format("DD-MM-YYYY") : '-';
       },
     },
     {
       title: t("time_in"),
       key: "gio_vao",
-      render: (_: any, record: InformationTimer) => {
-        const firstTank = record.tanks[0];
-        if (!firstTank) return "-";
-        return dayjs.unix(firstTank.timeIn).format("HH:mm:ss");
+      render: (_: any, record: any) => {
+        const first = record?.tanks?.find((t: any) => !!t?.enteredAt);
+        return first?.enteredAt ? dayjs(first.enteredAt).format("HH:mm:ss") : '-';
       },
     },
     {
       title: t("time_out"),
       key: "gio_ra",
-      render: (_: any, record: InformationTimer) => {
-        const lastTank = record.tanks[record.tanks.length - 1];
-        if (!lastTank) return "-";
-        return dayjs.unix(lastTank.timeOut).format("HH:mm:ss");
+      render: (_: any, record: any) => {
+        const last = [...(record?.tanks || [])].reverse().find((t: any) => !!t?.exitedAt);
+        return last?.exitedAt ? dayjs(last.exitedAt).format("HH:mm:ss") : '-';
       },
     },
     ...tankOrder.map((tank) => {
       // Determine children columns for each tank
       let children: ColumnsType<InformationTimer> = [];
       
-      if (["electro_degreasing", "nickel_plating", "dryer"].includes(tank)) {
+      if (["nickel_plating", "dryer"].includes(tank)) {
         children = [
           {
             title: t("time_in"),
             key: `${tank}_vao`,
             align: "center" as const,
-            render: (_: any, record: InformationTimer) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo ? dayjs.unix(tankInfo.timeIn).format("HH:mm:ss") : '-';
+            render: (_: any, record: any) => {
+              const tankInfo = findTankForColumn(record, tank);
+              return tankInfo ? formatTime(tankInfo.enteredAt) : '-';
             },
           },
           {
             title: t("duration"),
             key: `${tank}_trong`,
             align: "center" as const,
-            render: (_: any, record: InformationTimer) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo ? (tankInfo.timeOut - tankInfo.timeIn) : '-';
+            render: (_: any, record: any) => {
+              const tankInfo = findTankForColumn(record, tank);
+              return tankInfo ? formatDurationDisplay(calcDurationSeconds(tankInfo.enteredAt, tankInfo.exitedAt)) : '-';
             },
           },
           {
             title: t("slot"),
             key: `${tank}_slot`,
             align: "center" as const,
-            render: (_: any, record: InformationTimer) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.slot ?? '-';
+            render: (_: any, record: any) => {
+              const tankInfo = findTankForColumn(record, tank);
+              return tankInfo?.tank?.slot ?? '-';
             },
           },
         ];
@@ -222,18 +292,18 @@ const InformationTimerPage: React.FC = () => {
             title: t("time_in"),
             key: `${tank}_vao`,
             align: "center" as const,
-            render: (_: any, record: InformationTimer) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo ? dayjs.unix(tankInfo.timeIn).format("HH:mm:ss") : '-';
+            render: (_: any, record: any) => {
+              const tankInfo = findTankForColumn(record, tank);
+              return tankInfo ? formatTime(tankInfo.enteredAt) : '-';
             },
           },
           {
             title: t("duration"),
             key: `${tank}_trong`,
             align: "center" as const,
-            render: (_: any, record: InformationTimer) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo ? (tankInfo.timeOut - tankInfo.timeIn) : '-';
+            render: (_: any, record: any) => {
+              const tankInfo = findTankForColumn(record, tank);
+              return tankInfo ? formatDurationDisplay(calcDurationSeconds(tankInfo.enteredAt, tankInfo.exitedAt)) : '-';
             },
           },
         ];
@@ -242,7 +312,7 @@ const InformationTimerPage: React.FC = () => {
       return {
         title: (
           <div style={{ background: colorMap[tank], padding: 4, borderRadius: 4, minWidth: 90, textAlign: 'center' }}>
-            {tankLabels[tank]}
+            {headerNames[tank] || tank}
           </div>
         ),
         key: tank,
