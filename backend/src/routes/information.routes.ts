@@ -10,7 +10,8 @@ import {
     getInformationTimer,
     downloadInformationTimer,
     getInformationTimerDetail,
-    getInformationTimerMongo
+    getInformationTimerMongo,
+    getInformationTimerDetailMongo
 } from '@/controllers/information.controller';
 
 
@@ -36,5 +37,7 @@ router.route('/information/timer')
 router.get('/information/timer/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadInformationTimer);
 // timer information detail for each code
 router.get('/information/timer/:code', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTimerDetail);
+// timer information detail for each code and carrier Id
+router.get('/information/timer/:code/:carrier', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTimerDetailMongo);
 
 export default router; 

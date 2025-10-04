@@ -325,7 +325,7 @@ const InformationTimerPage: React.FC = () => {
   // Add key and index for table rows
   const tableData = data.map((item, idx) => ({
     ...item,
-    key: item.code,
+    key: `${(item as any).productCode || (item as any).code}-${(item as any).carrierPick ?? idx}`,
     index: idx + 1,
   }));
 
@@ -359,7 +359,11 @@ const InformationTimerPage: React.FC = () => {
         columns={columns}
         dataSource={tableData}
         loading={loading}
-        rowKey={(record) => record.code}
+        rowKey={(record) => {
+            const payload = { code: (record as any).productCode, carrierPick: (record as any).carrierPick };
+            const encoded = encodeURIComponent(btoa(JSON.stringify(payload)));
+            return encoded;
+        }}
         pagination={{
           current: pagination.page,
           pageSize: pagination.limit,
@@ -372,7 +376,11 @@ const InformationTimerPage: React.FC = () => {
         bordered
         scroll={{ x: 'max-content' }}
         onRow={(record) => ({
-          onClick: () => router.push(`/information/timer/${record.code}`),
+          onClick: () => {
+            const payload = { code: (record as any).productCode, carrierPick: (record as any).carrierPick };
+            const encoded = encodeURIComponent(btoa(JSON.stringify(payload)));
+            router.push(`/information/timer/${encoded}`);
+          },
           style: { cursor: 'pointer' },
         })}
       />

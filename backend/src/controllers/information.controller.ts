@@ -405,6 +405,45 @@ export const getInformationTimerDetail = async (
   }
 };
 
+export const getInformationTimerDetailMongo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { code: productCode, carrier: carrierPick } = req.params;
+    
+    if (!productCode || !carrierPick) {
+      return res.status(400).json(returnError(new Error('Missing productCode or carrierPick parameter')));
+    }
+
+    const carrierPickNum = Number(carrierPick);
+    if (isNaN(carrierPickNum)) {
+      return res.status(400).json(returnError(new Error('Invalid carrierPick parameter')));
+    }
+
+    // Get the specific record by productCode and carrierPick
+    const result = await robotHistoryService.listByFilters({
+      page: 1,
+      limit: 1,
+      search: productCode,
+      // Add additional filter for carrierPick in the service
+      carrierPick: carrierPickNum,
+    });
+
+    if (!result.docs || result.docs.length === 0) {
+      return res.status(404).json(returnError(new Error('No timer information found for this productCode and carrierPick')));
+    }
+
+    // Transform the data using the same mapping function
+    const transformedDocs = mappingTankToList(result.docs);
+    
+    return res.status(200).json(returnMessage(transformedDocs[0], 'Fetched timer information detail successfully'));
+  } catch (error) {
+    return res.status(500).json(returnError(error as Error));
+  }
+};
+
 
 export const downloadInformationTimer = async (
   req: Request,

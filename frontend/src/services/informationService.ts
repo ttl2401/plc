@@ -209,9 +209,28 @@ export interface TimerTankInfo {
   slot?: number;
 }
 
+export interface NewTimerTankInfo {
+  tankId: number;
+  tankKey: string;
+  enteredAt: string | null;
+  exitedAt: string | null;
+  tank: {
+    key: string;
+    groupKey: string;
+    name: string;
+  };
+}
+
 export interface InformationTimer {
   code: string;
   tanks: TimerTankInfo[];
+}
+
+export interface NewInformationTimer {
+  productCode: string;
+  carrierPick: number;
+  lastEventTime: string;
+  tanks: NewTimerTankInfo[];
 }
 
 export interface FetchInformationTimerResponse {
@@ -294,18 +313,20 @@ export const handleExportExcelTimer = async ({ line = 1, search = '', from = '',
 export interface FetchInformationTimerDetailResponse {
   success: boolean;
   message: string;
-  data: InformationTimer;
+  data: NewInformationTimer;
 }
 
-export const fetchInformationTimerDetail = async (code: string): Promise<FetchInformationTimerDetailResponse> => {
-  const response = await authenticatedFetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/information/timer/${code}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
-  );
+export const fetchInformationTimerDetail = async (code: string, carrierPick?: number): Promise<FetchInformationTimerDetailResponse> => {
+  let url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/information/timer/${code}`;
+  if (carrierPick !== undefined) {
+    url += `/${carrierPick}`;
+  }
+  
+  const response = await authenticatedFetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
   return response.json();
 }; 

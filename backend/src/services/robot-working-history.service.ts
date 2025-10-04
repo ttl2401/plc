@@ -107,6 +107,7 @@ export class RobotWorkingHistoryService {
     to?: number;          // UNIX seconds (optional)
     tank?: string;        // tankKey exact match (optional)
     search?: string;      // productCode LIKE (optional)
+    carrierPick?: number; // carrierPick exact match (optional)
     page?: number;        // default 1
     limit?: number;       // default 10 (0 => lấy hết)
   }): Promise<Paginate<GroupDoc>> {
@@ -115,6 +116,7 @@ export class RobotWorkingHistoryService {
       to,
       tank,
       search,
+      carrierPick,
       page = 1,
       limit = 10,
     } = params || {};
@@ -123,6 +125,7 @@ export class RobotWorkingHistoryService {
     const match: Record<string, any> = {};
     if (tank?.trim()) match.tankKey = tank.trim();
     if (search?.trim()) match.productCode = { $regex: search.trim(), $options: 'i' };
+    if (typeof carrierPick === 'number') match.carrierPick = carrierPick;
     if (typeof from === 'number' || typeof to === 'number') {
       match.createdAt = {};
       if (typeof from === 'number') match.createdAt.$gte = new Date(from * 1000);
