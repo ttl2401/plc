@@ -48,6 +48,9 @@ const robotWorkingHistorySchema = new Schema<IRobotWorkingHistory>(
 );
 
 // Index for faster queries 
+robotWorkingHistorySchema.index({ productCode: 1, carrierPick: 1, tankKey: 1, robotKey: 1 });
+robotWorkingHistorySchema.index({ createdAt: 1 });
+robotWorkingHistorySchema.index({ tankKey: 1 });
 robotWorkingHistorySchema.index({ robotKey: 1 });
 robotWorkingHistorySchema.index({ productCode: 1 });
 

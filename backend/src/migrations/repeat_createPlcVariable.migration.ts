@@ -27,7 +27,16 @@ const migrate = async (): Promise<Boolean> => {
     try {
       let exist = await PlcVariable.findOne({name: variable.name});  
       if(!exist){
-        await PlcVariable.create(variable);
+        const payload = {
+          name: variable.name,
+          dbNumber: variable.dbNumber,
+          dataType: variable.dataType,
+          offset: variable.offset,
+          type: variable.type,
+          startValue: variable.startValue,
+          value: variable.value
+        }
+        await PlcVariable.create(payload);
       }
     }
     catch(e){
@@ -41,7 +50,16 @@ const migrate = async (): Promise<Boolean> => {
     try {
       let exist = await PlcVariable.findOne({name: variable.name});  
       if(!exist){
-        await PlcVariable.create(variable);
+        const payload = {
+          name: variable.name,
+          dbNumber: variable.dbNumber,
+          dataType: variable.dataType,
+          offset: variable.offset,
+          type: variable.type,
+          startValue: variable.startValue,
+          value: variable.value
+        }
+        await PlcVariable.create(payload);
       }
     }
     catch(e){

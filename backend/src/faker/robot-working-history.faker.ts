@@ -32,6 +32,12 @@ const faker = async (): Promise<Boolean> => {
    
     const products = await Product.find({}, null, {sort: {createdAt: -1}});
     let carrierPick = 1096;
+
+    let checkIfAlreadyFaker = await robotWorkingHistoryService.getOneByQuery({ carrierPick: carrierPick });
+    if(checkIfAlreadyFaker){
+        return true;
+    }
+    
     for (let i = 0; i < 15; i++) {
         if(products[i]){
             const product = products[i];

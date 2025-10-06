@@ -40,7 +40,7 @@ const Index = () => {
     Nickel_Plating_3: 'Nickel plating 3',
     Ultrasonic_Hot_Rinse: 'Ultrasonic hot rinse',
     Hot_Rinse: 'Hot Rinse',
-    Dryer_1: 'Dryer 1'
+    Dryer_1: 'Dryer'
   };
 
   const temperatureOrder = [
@@ -51,7 +51,6 @@ const Index = () => {
     'Pre_Nickel_Plating',
     'Nickel_Plating_1',
     'Nickel_Plating_2',
-    'Nickel_Plating_3',
     'Ultrasonic_Hot_Rinse',
     'Hot_Rinse',
     'Dryer_1'
@@ -62,8 +61,7 @@ const Index = () => {
     'Electro_Degreasing_2',
     'Pre_Nickel_Plating',
     'Nickel_Plating_1',
-    'Nickel_Plating_2',
-    'Nickel_Plating_3'
+    'Nickel_Plating_2'
   ];
 
   const toNumber = (v: unknown): number | undefined =>

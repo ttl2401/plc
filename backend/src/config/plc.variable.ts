@@ -91,7 +91,8 @@ export const temperatureVariableControl = [
     "offset": 0.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 5
   },
   {
     "name": "Nhiet_do_Boiling_Degreasing",
@@ -100,7 +101,8 @@ export const temperatureVariableControl = [
     "offset": 4.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 9
   },
   {
     "name": "Nhiet_do_Electro_Degreasing_1",
@@ -109,7 +111,8 @@ export const temperatureVariableControl = [
     "offset": 8.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 13
   },
   {
     "name": "Nhiet_do_Electro_Degreasing_2",
@@ -118,7 +121,8 @@ export const temperatureVariableControl = [
     "offset": 12.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 14
   },
   {
     "name": "Nhiet_do_Nickel_Plating_1",
@@ -127,7 +131,8 @@ export const temperatureVariableControl = [
     "offset": 16.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 23
   },
   {
     "name": "Nhiet_do_Nickel_Plating_2",
@@ -136,7 +141,8 @@ export const temperatureVariableControl = [
     "offset": 20.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 24
   },
   {
     "name": "Nhiet_do_Nickel_Plating_3",
@@ -145,7 +151,8 @@ export const temperatureVariableControl = [
     "offset": 24.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 25
   },
   {
     "name": "Nhiet_do_Ultrasonic_Hot_Rinse",
@@ -154,7 +161,8 @@ export const temperatureVariableControl = [
     "offset": 28.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 29
   },
   {
     "name": "Nhiet_do_Hot_Rinse",
@@ -163,7 +171,8 @@ export const temperatureVariableControl = [
     "offset": 32.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 30
   },
   {
     "name": "Nhiet_do_Dryer_1",
@@ -172,7 +181,8 @@ export const temperatureVariableControl = [
     "offset": 36.0,
     "type": "May_tinh_Nhiet_Muc",
     "startValue": 0.0,
-    "value": 0.0
+    "value": 0.0,
+    "tankId": 31
   },
   {
     "name": "Nhiet_do_cai_Washing",
@@ -267,12 +277,12 @@ export const temperatureVariableControl = [
 ]
 
 export const electricityVariableControl = [
-  { "name": "Vi_tri_Electro_Degreasing_1",   "dbNumber": 155, "dataType": "Int", "offset": 0.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0 },
-  { "name": "Vi_tri_Electro_Degreasing_2",   "dbNumber": 155, "dataType": "Int", "offset": 2.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0 },
-  { "name": "Vi_tri_Pre_Nickel_Plating",     "dbNumber": 155, "dataType": "Int", "offset": 4.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0 },
-  { "name": "Vi_tri_Nickel_Plating_1",       "dbNumber": 155, "dataType": "Int", "offset": 6.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0 },
-  { "name": "Vi_tri_Nickel_Plating_2",       "dbNumber": 155, "dataType": "Int", "offset": 8.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0 },
-  { "name": "Vi_tri_Nickel_Plating_3",       "dbNumber": 155, "dataType": "Int", "offset": 10.0, "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0 },
+  { "name": "Vi_tri_Electro_Degreasing_1",   "dbNumber": 155, "dataType": "Int", "offset": 0.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0, "tankId": 13 },
+  { "name": "Vi_tri_Electro_Degreasing_2",   "dbNumber": 155, "dataType": "Int", "offset": 2.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0, "tankId": 14 },
+  { "name": "Vi_tri_Pre_Nickel_Plating",     "dbNumber": 155, "dataType": "Int", "offset": 4.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0, "tankId": 21  },
+  { "name": "Vi_tri_Nickel_Plating_1",       "dbNumber": 155, "dataType": "Int", "offset": 6.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0, "tankId": 23  },
+  { "name": "Vi_tri_Nickel_Plating_2",       "dbNumber": 155, "dataType": "Int", "offset": 8.0,  "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0, "tankId": 24  },
+  { "name": "Vi_tri_Nickel_Plating_3",       "dbNumber": 155, "dataType": "Int", "offset": 10.0, "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 0, "tankId": 25  },
 
   { "name": "Cai_chinh_luu_Electro_Degreasing_1", "dbNumber": 155, "dataType": "Int", "offset": 32.0, "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 60 },
   { "name": "Cai_chinh_luu_Electro_Degreasing_2", "dbNumber": 155, "dataType": "Int", "offset": 34.0, "type": "May_tinh_Chinh_luu_R", "startValue": 0, "value": 60 },

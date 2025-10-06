@@ -211,3 +211,58 @@ export const mappingTankNumberInLine : Record<number, any> = {
 
     
 }
+
+
+/**
+ * Monitor Temperature at extend/electric-current
+ */
+
+function pickTanks(ids: number[], mapping: any): Record<number, any> {
+    const out: Record<number, any> = Object.create(null); // tránh prototype
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i]!;
+      const v = mapping[id as number];
+      if (v !== undefined) out[id] = v; 
+    }
+    return out;
+}
+
+function mergeSortedUnique(a: number[], b: number[]): number[] {
+    const c: number[] = [];
+    let i = 0, j = 0;
+    let last: number | undefined;
+  
+    while (i < a.length && j < b.length) {
+      let v: number;
+      if (a[i] < b[j]) v = a[i++];
+      else if (a[i] > b[j]) v = b[j++];
+      else { v = a[i]; i++; j++; } // bằng nhau -> lấy 1 lần
+  
+      if (v !== last) { c.push(v); last = v; }
+    }
+    while (i < a.length) {
+      const v = a[i++];
+      if (v !== last) { c.push(v); last = v; }
+    }
+    while (j < b.length) {
+      const v = b[j++];
+      if (v !== last) { c.push(v); last = v; }
+    }
+    return c;
+  }
+
+  
+// Temperature
+export const listTankMonitorWithTemperature = [ 5, 9, 13, 14, 23, 24, 29, 30, 31 ]
+export const elementTankMonitorWithTemperature = pickTanks(listTankMonitorWithTemperature, mappingTankNumberInLine)
+
+// Electric
+export const listTankMonitorWithElectric = [ 13, 14, 21, 23, 24 ]
+export const elementTankMonitorWithElectric = pickTanks(listTankMonitorWithElectric, mappingTankNumberInLine)
+
+// Both
+export const listTankMonitorWithTemperatureAndElectric = mergeSortedUnique(listTankMonitorWithTemperature, listTankMonitorWithElectric);
+export const elementTankMonitorWithTemperatureAndElectric = pickTanks(listTankMonitorWithTemperatureAndElectric, mappingTankNumberInLine)
+/**
+ * End
+ */

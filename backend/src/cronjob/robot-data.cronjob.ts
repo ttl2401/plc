@@ -4,6 +4,9 @@ import { PLCService } from '@/services/plc.service';
 import { PlcVariableConfig } from '@/models/plc-variable-config.model';
 import { RobotWorkingHistory } from '@/models/robot-working-history.model';
 import { MappingCarrierCode } from '@/models/mapping-carrier-pick-product-code.model';
+import { MappingTankProductCarrier } from '@/models/mapping-current-tank-product-carrier.model';
+
+import { elementTankMonitorWithTemperatureAndElectric } from '@/config/constant';
 
 const plcService = new PLCService();
 
@@ -47,6 +50,7 @@ export const cronjob = async function(){
                     type = "exit"
                 }
 
+                let productCode;
                 // Store in History
                 const query: any = {
                     robotKey : mappingRobotInLine[1],
@@ -60,11 +64,15 @@ export const cronjob = async function(){
                     const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
                     if(checkProductCode) {
                         query.productCode = checkProductCode.productCode;
+                        productCode = checkProductCode.productCode;
                     }
                     await RobotWorkingHistory.create(query);
 
                     // reset necessary info to 0
-                    await plcService.writeVariableToPLC('Carrier_Ma_1', 0)
+                    if (checkProductCode){
+                        await plcService.writeVariableToPLC('Carrier_Ma_1', 0)
+                    }
+                    
 
 
                 }else {
@@ -72,9 +80,14 @@ export const cronjob = async function(){
                         const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
                         if(checkProductCode) {
                             checkHistory.productCode = checkProductCode.productCode;
+                            productCode = checkProductCode.productCode;
                             await checkHistory.save();
+                            await plcService.writeVariableToPLC('Carrier_Ma_1', 0);
                         }
                     }
+                }
+                if(productCode){
+                    await mappingTankWithProductAndCarrier(Ho_Ma_1, productCode, Carrier_Ma_1, type);
                 }
             }
  
@@ -96,6 +109,7 @@ export const cronjob = async function(){
                     type = "exit"
                 }
 
+                let productCode;
                 // Store in History
                 const query: any = {
                     robotKey : mappingRobotInLine[2],
@@ -109,21 +123,28 @@ export const cronjob = async function(){
                     const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
                     if(checkProductCode) {
                         query.productCode = checkProductCode.productCode;
+                        productCode = checkProductCode.productCode;
                     }
                     await RobotWorkingHistory.create(query);
 
                     // reset necessary info to 0
-                    await plcService.writeVariableToPLC('Carrier_Ma_2', 0)
-
+                    if (checkProductCode){
+                        await plcService.writeVariableToPLC('Carrier_Ma_2', 0)
+                    }
 
                 }else {
                     if (!checkHistory.productCode){
                         const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
                         if(checkProductCode) {
                             checkHistory.productCode = checkProductCode.productCode;
+                            productCode = checkProductCode.productCode;
                             await checkHistory.save();
+                            await plcService.writeVariableToPLC('Carrier_Ma_2', 0);
                         }
                     }
+                }
+                if(productCode){
+                    await mappingTankWithProductAndCarrier(Ho_Ma_2, productCode, Carrier_Ma_2, type);
                 }
             }
         }
@@ -143,6 +164,7 @@ export const cronjob = async function(){
                     type = "exit"
                 }
 
+                let productCode;
                 // Store in History
                 const query: any = {
                     robotKey : mappingRobotInLine[3],
@@ -156,11 +178,14 @@ export const cronjob = async function(){
                     const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
                     if(checkProductCode) {
                         query.productCode = checkProductCode.productCode;
+                        productCode = checkProductCode.productCode;
                     }
                     await RobotWorkingHistory.create(query);
 
                     // reset necessary info to 0
-                    await plcService.writeVariableToPLC('Carrier_Ma_3', 0)
+                    if (checkProductCode){
+                        await plcService.writeVariableToPLC('Carrier_Ma_3', 0);
+                    }
 
 
                 }else {
@@ -168,9 +193,14 @@ export const cronjob = async function(){
                         const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
                         if(checkProductCode) {
                             checkHistory.productCode = checkProductCode.productCode;
+                            productCode = checkProductCode.productCode;
                             await checkHistory.save();
+                            await plcService.writeVariableToPLC('Carrier_Ma_3', 0);
                         }
                     }
+                }
+                if(productCode){
+                    await mappingTankWithProductAndCarrier(Ho_Ma_3, productCode, Carrier_Ma_3, type);
                 }
             }
         }
@@ -189,3 +219,21 @@ const mappingCarrierIndex = async (Carrier_Ma_1: any) => {
     );
 }
 
+const mappingTankWithProductAndCarrier = async (tankId: number, productCode: string, carrierPick: number, type: string ) => {
+    if (type == 'enter'){
+        const checkExitTankWithProductAndCarrier = await MappingTankProductCarrier.findOne({
+            tankId, productCode, carrierPick
+        });
+        if(!checkExitTankWithProductAndCarrier){
+            const tankKey = elementTankMonitorWithTemperatureAndElectric[tankId]?.key;
+            await MappingTankProductCarrier.create({
+                tankId, productCode, tankKey, carrierPick
+            });
+        }
+    }else if(type == 'exit') {
+        await MappingTankProductCarrier.findOneAndUpdate({tankId}, {
+            productCode : null,
+            carrierPick : null
+        })
+    }
+}

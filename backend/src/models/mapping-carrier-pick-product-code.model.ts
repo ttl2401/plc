@@ -1,3 +1,4 @@
+// Dùng để mapping Carrier Pick ID với product được apply tại thời điểm đó ( bấm apply khi scan)
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IPlcMappingCarrierPickProductCode extends Document {
