@@ -168,6 +168,54 @@ export const getInformationTemperature = async (
   }
 };
 
+
+export const getInformationProcess = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  try {
+    const page  = Number(req.query.page ?? 1);
+    const limit = Number(req.query.limit ?? 10);
+    const search = typeof req.query.search === 'string' ? req.query.search : undefined;
+
+    // from/to có thể là số giây epoch hoặc chuỗi flux (-30d, -7d, 2025-10-01T00:00:00Z ...)
+    const fromRaw = req.query.from;
+    const toRaw   = req.query.to;
+
+    const from = typeof fromRaw === 'string' && /^\d+$/.test(fromRaw) ? Number(fromRaw)
+               : (typeof fromRaw === 'string' ? fromRaw : undefined);
+    const to   = typeof toRaw   === 'string' && /^\d+$/.test(toRaw)   ? Number(toRaw)
+               : (typeof toRaw   === 'string' ? toRaw   : undefined);
+
+    const result = await temperatureService.getInformationByCodeCarrier({
+      page, limit, search, from, to
+    }) as any;
+
+    result.docs = mappingTankToList(result.docs);
+    // Chuẩn hoá theo format trả về
+    return res.status(200).json({
+      success: true,
+      message: 'Fetched information successfully',
+      data: result.docs,
+      pagination: {
+        totalDocs: result.totalDocs,
+        limit: result.limit,
+        totalPages: result.totalPages,
+        page: result.page,
+        pagingCounter: result.pagingCounter,
+        hasPrevPage: result.hasPrevPage,
+        hasNextPage: result.hasNextPage,
+        prevPage: result.prevPage,
+        nextPage: result.nextPage,
+      }
+    });
+  } catch (e: any) {
+    return res.status(500).json(returnError(e as Error));
+  }
+};
+
+
 export const downloadInformationTemperature = async (
   req: Request,
   res: Response,

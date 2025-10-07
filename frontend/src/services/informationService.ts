@@ -117,16 +117,23 @@ export const handleExportExcel = async ({ line = 1, mode = '', limit = 0 }: { li
 }; 
 
 export interface TankInfo {
-  name: string;
+  tankId: string;
   timeIn: number;
   timeOut: number;
   temperature?: number;
-  ampere?: number;
+  electricity?: number;
   slot?: number;
+  tank: {
+    key: string;
+    groupKey: string;
+    name: string;
+    slot?: number;
+  };
 }
 
 export interface InformationTemperature {
   code: string;
+  carrier?: string;
   tanks: TankInfo[];
 }
 
@@ -144,7 +151,7 @@ export const fetchInformationTemperature = async ({ page = 1, limit = 10, search
   if (search) params.append('search', search);
 
   const response = await authenticatedFetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/information/temperature?${params.toString()}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/information/process?${params.toString()}`,
     {
       method: 'GET',
       headers: {

@@ -7,6 +7,7 @@ import {
     downloadInformationPlating,
     getInformationTemperature,
     downloadInformationTemperature,
+    getInformationProcess,
     getInformationTimer,
     downloadInformationTimer,
     getInformationTimerDetail,
@@ -26,6 +27,9 @@ router.get('/information/plating/download', auth, restrictTo(ROLES.ADMIN, ROLES.
 // temperature information 
 router.route('/information/temperature')
 .get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationTemperature);
+
+router.route('/information/process')
+.get(auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), getInformationProcess);
 // Route for downloading temperature information as Excel 
 router.get('/information/temperature/download', auth, restrictTo(ROLES.ADMIN, ROLES.MANAGER, ROLES.USER), downloadInformationTemperature);
 

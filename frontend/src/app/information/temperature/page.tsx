@@ -14,7 +14,8 @@ const { Search } = Input;
 const tankOrder = [
   "washing",
   "boiling_degreasing",
-  "electro_degreasing",
+  "electro_degreasing_tank_1",
+  "electro_degreasing_tank_2",
   "pre_nickel_plating",
   "nickel_plating",
   "ultrasonic_hot_rinse",
@@ -25,7 +26,8 @@ const tankOrder = [
 const tankLabels: Record<string, string> = {
   washing: "Washing",
   boiling_degreasing: "Boiling Degreasing",
-  electro_degreasing: "Electro Degreasing",
+  electro_degreasing_tank_1: "Electro Degreasing 1",
+  electro_degreasing_tank_2: "Electro Degreasing 2",
   pre_nickel_plating: "Pre-Nickel",
   nickel_plating: "Nickel Plating",
   ultrasonic_hot_rinse: "Ultrasonic",
@@ -34,9 +36,10 @@ const tankLabels: Record<string, string> = {
 };
 
 const colorMap: Record<string, string> = {
-  washing: "#F5F7FA",
+  washing: "#E8E8E8",
   boiling_degreasing: "#F5F7FA",
-  electro_degreasing: "#D1F2EB",
+  electro_degreasing_tank_1: "#D1F2EB",
+  electro_degreasing_tank_2: "#D1F2EB",
   pre_nickel_plating: "#FCF3CF",
   nickel_plating: "#D6EAF8",
   ultrasonic_hot_rinse: "#FDEDEC",
@@ -113,6 +116,24 @@ const InformationTemperaturePage: React.FC = () => {
     }
   };
 
+  // Helper to find tank for column
+  const findTankForColumn = (record: InformationTemperature, columnKey: string) => {
+    if (!record?.tanks) return undefined;
+    
+    if (columnKey === 'electro_degreasing_tank_1' || columnKey === 'electro_degreasing_tank_2') {
+      return record.tanks.find(t => t.tank.key === columnKey);
+    }
+    
+    // For other tanks, find by groupKey
+    return record.tanks.find(t => t.tank.groupKey === columnKey);
+  };
+
+  // Helper to check if slot column should be shown for a tank group
+  const shouldShowSlotColumn = (record: InformationTemperature, columnKey: string) => {
+    const tankInfo = findTankForColumn(record, columnKey);
+    return tankInfo?.tank?.slot !== undefined;
+  };
+
   // Build columns dynamically for tanks
   const columns: ColumnsType<InformationTemperature> = [
     {
@@ -158,121 +179,47 @@ const InformationTemperaturePage: React.FC = () => {
     ...tankOrder.map((tank) => {
       // Determine children columns for each tank
       let children: ColumnsType<InformationTemperature> = [];
-      if (tank === "electro_degreasing") {
-        children = [
-          {
-            title: 'oC',
-            key: `${tank}_temperature`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.temperature ?? '-';
-            },
+      
+      // Base columns for all tanks
+      children = [
+        {
+          title: 'oC',
+          key: `${tank}_temperature`,
+          align: "center" as const,
+          render: (_: any, record: InformationTemperature) => {
+            const tankInfo = findTankForColumn(record, tank);
+            return tankInfo?.temperature ?? '-';
           },
-          {
-            title: 'A',
-            key: `${tank}_ampere`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.ampere ?? '-';
-            },
+        },
+      ];
+
+      // Add electricity column for tanks that have it
+      if (["electro_degreasing_tank_1", "electro_degreasing_tank_2", "pre_nickel_plating", "nickel_plating"].includes(tank)) {
+        children.push({
+          title: 'A',
+          key: `${tank}_electricity`,
+          align: "center" as const,
+          render: (_: any, record: InformationTemperature) => {
+            const tankInfo = findTankForColumn(record, tank);
+            return tankInfo?.electricity ?? '-';
           },
-          {
-            title: 'Slot',
-            key: `${tank}_slot`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.slot ?? '-';
-            },
-          },
-        ];
-      } else if (tank === "pre_nickel_plating") {
-        children = [
-          {
-            title: 'oC',
-            key: `${tank}_temperature`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.temperature ?? '-';
-            },
-          },
-          {
-            title: 'A',
-            key: `${tank}_ampere`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.ampere ?? '-';
-            },
-          },
-        ];
-      } else if (tank === "nickel_plating") {
-        children = [
-          {
-            title: 'oC',
-            key: `${tank}_temperature`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.temperature ?? '-';
-            },
-          },
-          {
-            title: 'A',
-            key: `${tank}_ampere`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.ampere ?? '-';
-            },
-          },
-          {
-            title: 'Slot',
-            key: `${tank}_slot`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.slot ?? '-';
-            },
-          },
-        ];
-      } else if (["dryer"].includes(tank)) {
-        children = [
-          {
-            title: 'oC',
-            key: `${tank}_temperature`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.temperature ?? '-';
-            },
-          },
-          {
-            title: 'Slot',
-            key: `${tank}_slot`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.slot ?? '-';
-            },
-          },
-        ];
-      } else {
-        children = [
-          {
-            title: 'oC',
-            key: `${tank}_temperature`,
-            align: "center" as const,
-            render: (_: any, record: InformationTemperature) => {
-              const tankInfo = record.tanks.find(t => t.name === tank);
-              return tankInfo?.temperature ?? '-';
-            },
-          },
-        ];
+        });
       }
+
+      // Add slot column conditionally - only if any record has slot data for this tank
+      const hasSlotData = data.some(record => shouldShowSlotColumn(record, tank));
+      if (hasSlotData) {
+        children.push({
+          title: 'Slot',
+          key: `${tank}_slot`,
+          align: "center" as const,
+          render: (_: any, record: InformationTemperature) => {
+            const tankInfo = findTankForColumn(record, tank);
+            return tankInfo?.tank?.slot ?? tankInfo?.slot ?? '-';
+          },
+        });
+      }
+      
       return {
         title: (
           <div style={{ background: colorMap[tank], padding: 4, borderRadius: 4, minWidth: 90, textAlign: 'center' }}>
@@ -309,7 +256,7 @@ const InformationTemperaturePage: React.FC = () => {
         columns={columns}
         dataSource={tableData}
         loading={loading}
-        rowKey={(record) => record.code}
+        rowKey={(record) => `${record.code}__${String(record.carrier ?? "")}`}
         pagination={{
           current: pagination.page,
           pageSize: pagination.limit,
