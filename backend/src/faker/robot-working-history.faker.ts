@@ -31,7 +31,7 @@ const faker = async (): Promise<Boolean> => {
     
    
     const products = await Product.find({}, null, {sort: {createdAt: -1}});
-    let carrierPick = 1096;
+    let carrierPick = 1111;
 
     let checkIfAlreadyFaker = await robotWorkingHistoryService.getOneByQuery({ carrierPick: carrierPick });
     if(checkIfAlreadyFaker){
