@@ -4,7 +4,7 @@ export interface IRobotWorkingHistory extends Document {
   robotKey: string;
   carrierPick: number;
   tankId: number;
-  tankKey: string;
+  tankKey?: string;
   action: string;
   productCode: string;
   createdAt: Date;
@@ -29,7 +29,7 @@ const robotWorkingHistorySchema = new Schema<IRobotWorkingHistory>(
     },
     tankKey: {
       type: String,
-      required: true,
+      required: false,
     },
     action: {
       type: String,
