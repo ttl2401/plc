@@ -62,3 +62,30 @@ export const updatePLCVariable = async (payload: UpdatePLCVariableRequest): Prom
   );
   return response.json();
 };
+
+export const fetchPLCVariablesChecklist = async (): Promise<PLCVariablesResponse> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/plc/variables/checklist`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.json();
+};
+
+export const updatePLCVariableChecklist = async (payload: UpdatePLCVariableRequest): Promise<UpdatePLCVariableResponse> => {
+  const response = await authenticatedFetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/plc/variables/checklist`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+  return response.json();
+};

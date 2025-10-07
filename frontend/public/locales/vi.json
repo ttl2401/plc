@@ -237,5 +237,16 @@
   "robot_control_inactive": "KHÔNG HOẠT ĐỘNG",
   "robot_control_active": "ĐANG HOẠT ĐỘNG",
   "yes": "Có",
-  "no": "Không"
+  "no": "Không",
+  "plc_checklist_label.Checklist_quat_tu_say_1": "Quạt Tự Sấy 1",
+  "plc_checklist_label.Checklist_bom_rua_phun_ho_26": "Bơm rửa phun hồ 26",
+  "plc_checklist_label.Checklist_bom_loc_1_ho_5": "Bơm lọc 1 hồ Washing",
+  "plc_checklist_label.Checklist_bom_loc_2_ho_pre_21": "Bơm lọc 2 hồ Pre-nickel",
+  "plc_checklist_label.Checklist_bom_loc_3_ho_ma_23": "Bơm lọc 3 hồ Nickel 23",
+  "plc_checklist_label.Checklist_bom_loc_4_ho_24": "Bơm lọc 4 hồ Nickel 24",
+  "plc_checklist_label.Checklist_bom_khuay_1": "Bơm khuấy 1",
+  "plc_checklist_label.Checklist_quat_hut_thap_xlk": "Quạt hút tháp Xử lý khí",
+  "plc_checklist_label.Checklist_bom_nuoc_thap_xlk": "Bơm nước tháp xử lý khí",
+  "plc_checklist_label.Checklist_may_thoi_khi": "Máy thổi khí",
+  "plc_checklist_label.Checklist_bom_tach_dau": "Bơm Tách dầu"
 } 

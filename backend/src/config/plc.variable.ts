@@ -82,6 +82,108 @@ export const plcControlButtonConfig = [
     }
   ]
   
+  export const plcChecklistButtonConfig = [
+    {
+      "name": "Checklist_quat_tu_say_1",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 1.4,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_bom_rua_phun_ho_26",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 1.5,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_bom_loc_1_ho_5",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 1.6,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_bom_loc_2_ho_pre_21",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 1.7,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_bom_loc_3_ho_ma_23",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 2.0,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_bom_loc_4_ho_24",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 2.1,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_bom_khuay_1",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 2.2,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_quat_hut_thap_xlk",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 2.3,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_bom_nuoc_thap_xlk",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 2.4,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_may_thoi_khi",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 2.5,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+    {
+      "name": "Checklist_bom_tach_dau",
+      "dbNumber": 65,
+      "dataType": "Bool",
+      "offset": 2.6,
+      "type": "plc_checklist_control",
+      "startValue": false,
+      "value": false
+    },
+  ]
+
 
 export const temperatureVariableControl = [
   {

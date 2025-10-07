@@ -238,4 +238,16 @@
   "robot_control_active": "ACTIVE",
   "yes": "Yes",
   "no": "No"
-} 
+,
+  "plc_checklist_label.Checklist_quat_tu_say_1": "Self-drying fan 1",
+  "plc_checklist_label.Checklist_bom_rua_phun_ho_26": "Spray Pump cascade rinse 26",
+  "plc_checklist_label.Checklist_bom_loc_1_ho_5": "filter pump washing",
+  "plc_checklist_label.Checklist_bom_loc_2_ho_pre_21": "filter pump Pre-nickel",
+  "plc_checklist_label.Checklist_bom_loc_3_ho_ma_23": "filter pump Nickel 23",
+  "plc_checklist_label.Checklist_bom_loc_4_ho_24": "filter pump Nickel 24",
+  "plc_checklist_label.Checklist_bom_khuay_1": "Agitator pump 1",
+  "plc_checklist_label.Checklist_quat_hut_thap_xlk": "Fan Air treatment tower",
+  "plc_checklist_label.Checklist_bom_nuoc_thap_xlk": "Pump Air treatment tower",
+  "plc_checklist_label.Checklist_may_thoi_khi": "air blower",
+  "plc_checklist_label.Checklist_bom_tach_dau": "oil separator pump"
+}
