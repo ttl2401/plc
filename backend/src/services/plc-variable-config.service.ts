@@ -21,6 +21,6 @@ export class PlcVariableConfigService {
    * Update
    */
   async updateValueByKey(key: string, value: any): Promise<any> {
-    return await PlcVariableConfig.updateOne({key : key}, {value: value}, { new: true, upsert: true });
+    return await PlcVariableConfig.updateOne({key : key}, {value: value}, { upsert: true });
   }
 } 
