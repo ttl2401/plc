@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Card, Checkbox, Button, Row, Col, Typography } from "antd";
-import { PoweroffOutlined } from "@ant-design/icons"; // Ant Design icon
+import { Card, Checkbox, Button, Row, Col, Typography, Spin } from "antd";
+import { PoweroffOutlined, LoadingOutlined } from "@ant-design/icons"; // Ant Design icon
 import { useLanguage } from '@/components/layout/DashboardLayout';
 import { fetchPLCVariablesChecklist, PLCVariable, updatePLCVariableChecklist } from '@/services/plcVariableService';
 
@@ -114,28 +114,36 @@ const Index = () => {
                 <Col xs={24} sm={12} lg={8} key={item._id}>
                   <Card
                     hoverable
-                    onMouseDown={() => onPressStart(item._id, item)}
-                    onMouseUp={() => onPressEnd(item._id, item)}
-                    onMouseLeave={() => {
-                      const tmr = pressTimerRef.current[item._id];
-                      if (tmr) { clearTimeout(tmr); pressTimerRef.current[item._id] = null; }
-                    }}
-                    onTouchStart={() => onPressStart(item._id, item)}
-                    onTouchEnd={() => onPressEnd(item._id, item)}
                     className={isOn ? 'bg-green-100' : ''}
                     style={{
                       borderColor: isOn ? "limegreen" : "#f0f0f0",
-                      cursor: updating[item._id] ? "not-allowed" : "pointer",
+                      cursor: 'default',
                       transition: "all 0.3s"
                     }}
-   
                     styles={{ body: { padding: 20, textAlign: "center" } }}
                   >
                     <div style={{ fontWeight: 500, color: color === "red" ? "#ff4d4f" : "#222", marginBottom: 12 }}>
                       {displayName}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                      <div
+                      <div style={{ position: 'relative', width: 68, height: 68, marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {updating[item._id] && (
+                          <Spin
+                            spinning
+                            indicator={<LoadingOutlined style={{ color: isOn ? '#ffffff' : 'limegreen', fontSize: 74 }} spin />}
+                            style={{ position: 'absolute', top: -3, left: -46, width: 160, height: 160, zIndex: 1 }}
+                            size="large"
+                          />
+                        )}
+                        <div
+                        onMouseDown={(e) => { e.stopPropagation(); onPressStart(item._id, item); }}
+                        onMouseUp={(e) => { e.stopPropagation(); onPressEnd(item._id, item); }}
+                        onMouseLeave={() => {
+                          const tmr = pressTimerRef.current[item._id];
+                          if (tmr) { clearTimeout(tmr); pressTimerRef.current[item._id] = null; }
+                        }}
+                        onTouchStart={(e) => { e.stopPropagation(); onPressStart(item._id, item); }}
+                        onTouchEnd={(e) => { e.stopPropagation(); onPressEnd(item._id, item); }}
                         style={{
                           width: 60,
                           height: 60,
@@ -145,8 +153,10 @@ const Index = () => {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          marginBottom: 8,
-                          transition: "all 0.3s"
+                          transition: "all 0.3s",
+                          cursor: updating[item._id] ? 'not-allowed' : 'pointer',
+                          position: 'relative',
+                          zIndex: 2,
                         }}
                       >
                         <PoweroffOutlined
@@ -155,6 +165,7 @@ const Index = () => {
                             color: isOn ? "#fff" : "#aaa"
                           }}
                         />
+                        </div>
                       </div>
                       <span
                         style={{
