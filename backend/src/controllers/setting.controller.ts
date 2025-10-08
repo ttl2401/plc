@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { returnMessage, returnError } from '@/controllers/base.controller';
-
+import _ from 'lodash';
 import { TankGroupService } from '@/services/tank-group.service';
 import { TankService } from '@/services/tank.service';
 import { RobotService } from '@/services/robot.service';
@@ -12,7 +12,7 @@ const robotService = new RobotService();
 const plcService = new PLCService();
 const plcVariableService = new PlcVariableService();
 
-import { getListSettingTimer } from '@/transforms/tank-group.transform'
+import { mappingTankToVariablesSettingTimer } from '@/transforms/plc-variable.transform'
 import { getListSettingTemperature, getListSettingChemistry } from '@/transforms/tank.transform'
 import { getListSettingRobot } from '@/transforms/robot.transform'
 
@@ -22,16 +22,18 @@ export const getSettingTimer = async (
     next: NextFunction
 ) => {
   try {
+
+    const variables = await plcService.readVariablesFromPLC({type: 'may_tinh_Ghi_CPU_setting_timer'});
     
-    const tankGroups = await tankGroupService.getTankGroupsWithTimerSetting();
-    const data = getListSettingTimer(tankGroups);
-    return res.status(200).json(returnMessage(data, 'Tank Groups with timer setting retrieved successfully'));
+    const data = mappingTankToVariablesSettingTimer(variables).sort();
+
+    return res.status(200).json(returnMessage(_.sortBy(data, "tankId"), 'Timer setting retrieved successfully'));
   } catch (error) {
     next(error);
   }
 }; 
 
-export const updateSettingTimer = async (
+export const updateSettingTimerOld = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -48,6 +50,31 @@ export const updateSettingTimer = async (
     next(error);
   }
 };
+
+export const updateSettingTimer = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { list: variables } = req.body;
+ 
+    // Update variables in MongoDB
+    const updatedVariables = await plcVariableService.updateMultipleVariables(variables, 'may_tinh_Ghi_CPU_setting_timer');
+    
+    // Write variables to PLC
+    const plcResults = await plcService.writeMultipleVariablesToPLC(variables);
+    
+    // Check if all PLC writes were successful
+    const allSuccessful = plcResults.every(result => result === true);
+    
+    if (allSuccessful) {
+      res.json(returnMessage(updatedVariables, `Updated ${updatedVariables.length} variables successfully in both database and PLC`));
+    } else {
+      // Some PLC writes failed, but database updates succeeded
+      const failedCount = plcResults.filter(result => result === false).length;
+      res.json(returnMessage(updatedVariables, `Updated ${updatedVariables.length} variables in database, but ${failedCount} PLC writes failed`));
+    }
+  } catch (err) {
+    next(err);
+  }
+}; 
 
 
 export const getSettingTemperature = async (

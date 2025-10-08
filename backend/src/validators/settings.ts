@@ -3,10 +3,10 @@ import { body } from 'express-validator';
 export const updateSettingTimerRules = [
   body('list')
     .isArray().withMessage('list phải là một array'),
-  body('list.*._id')
-    .isString().withMessage('tankId phải là string'),
-  body('list.*.timer')
-    .isNumeric().withMessage('timer phải là số')
+  body('list.*.name')
+    .isString().withMessage('name phải là string'),
+  body('list.*.value')
+    .isNumeric().withMessage('value phải là số')
 ];
 
 export const updateSettingTemperatureRules = [

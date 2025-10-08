@@ -2,9 +2,21 @@ import { authenticatedFetch } from '../utils/api';
 
 // interface for setting timer
 export interface TimerSetting {
-  _id: string;
   name: string;
-  timer: number | null;
+  dbNumber: number;
+  dataType: string;
+  offset: number;
+  startValue: number;
+  type: string;
+  value: number;
+  tankId?: number;
+  disable?: boolean;
+  tank: {
+    key: string;
+    groupKey: string;
+    name: string;
+    slot?: number;
+  };
 }
 
 export interface FetchTimerSettingsResponse {
@@ -55,7 +67,7 @@ export const fetchTimerSettings = async (): Promise<FetchTimerSettingsResponse> 
   return data as FetchTimerSettingsResponse;
 };
 
-export const updateTimerSettings = async (payload: { list: TimerSetting[] }): Promise<UpdateTimerSettingsResponse> => {
+export const updateTimerSettings = async (payload: { list: { _id: string; name: string; value: number }[] }): Promise<UpdateTimerSettingsResponse> => {
   const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/timer`,
     {

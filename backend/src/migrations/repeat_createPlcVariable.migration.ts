@@ -3,7 +3,8 @@ import { plcControlButtonConfig,
   electricityVariableControl,
   settingTemperatureControl,
   carrierVariableInformation,
-  plcChecklistButtonConfig
+  plcChecklistButtonConfig,
+  settingTimerControl
 } from '@/config/plc.variable';
 import { PlcVariable } from '@/models/plc-variable.model';
 
@@ -120,6 +121,19 @@ const migrate = async (): Promise<Boolean> => {
     }
   } 
 
+  // Setting Timer
+  for (const variable of settingTimerControl){
+    try {
+      let exist = await PlcVariable.findOne({name: variable.name});  
+      if(!exist){
+        await PlcVariable.create(variable);
+      }
+    }
+    catch(e){
+      console.error(e);
+      return false;
+    }
+  } 
 
   return true;
 };

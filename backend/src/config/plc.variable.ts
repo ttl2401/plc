@@ -636,6 +636,121 @@ export const carrierVariableInformation = [
     "value": 0
   } 
 ]
+
+// Setting timer 
+export const settingTimerControl = [
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_5",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 16,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 5
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_9",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 18,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 9
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_13",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 20,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 13
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_14",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 22,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 14
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_20",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 24,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 20
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_21",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 26,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 21
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_23",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 28,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 23
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_24",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 30,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 24
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_25",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 32,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 25,
+    "disable": true
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_29",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 34,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 29
+  },
+  {
+    "name": "may_tinh_Ghi_CPU_Thoi_gian_Ho_31",
+    "dbNumber": 259,
+    "dataType": "Int",
+    "offset": 36,
+    "type": "may_tinh_Ghi_CPU_setting_timer",
+    "startValue": 0,
+    "value": 0,
+    "tankId" : 31
+  },
+]
 /** 
 export const cardScannerCPUWriterControl = [
   {

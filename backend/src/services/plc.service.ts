@@ -60,7 +60,7 @@ export class PLCService {
       const { type } = queries;
       
       // First, fetch all variables from MongoDB
-      const variables = listVariables ? listVariables : (await PlcVariable.find({ type }).sort({ name: 1 }));
+      const variables = listVariables ? listVariables : (await PlcVariable.find({ type }).sort({ name: 1 }).lean());
       
       // If no snap7 client available, return variables with stored values
       if (!this.client) {

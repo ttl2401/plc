@@ -22,7 +22,7 @@ const TimerSettingsPage: React.FC = () => {
       // Initialize timers state
       const initialTimers: { [_id: string]: number | null } = {};
       response.data.forEach((setting: TimerSetting) => {
-        initialTimers[setting._id] = setting.timer ?? null;
+        initialTimers[setting._id] = setting.value ?? null;
       });
       setTimers(initialTimers);
       form.setFieldsValue(initialTimers);
@@ -39,12 +39,14 @@ const TimerSettingsPage: React.FC = () => {
   }, []);
 
   const handleFinish = async (values: { [id: string]: number | null }) => {
-    // Build the list array for the payload
-    const list = settings.map((setting) => ({
-      _id: setting._id,
-      name: setting.name,
-      timer: values[setting._id] ?? null,
-    }));
+    // Build the list array for the payload - only include non-disabled settings
+    const list = settings
+      .filter((setting) => !setting.disable)
+      .map((setting) => ({
+        _id: setting._id,
+        name: setting.name,
+        value: values[setting._id] ?? 0,
+      }));
     try {
       const response = await updateTimerSettings({ list });
       if (response.success) {
@@ -71,21 +73,23 @@ const TimerSettingsPage: React.FC = () => {
           initialValues={timers}
         >
           <Row gutter={[32, 32]}>
-            {settings.map((setting) => (
-              <Col key={setting._id} xs={24} sm={12} md={8} lg={6} className="flex flex-col items-center">
-                <Form.Item
-                  label={<span className="font-semibold text-center">{setting.name}</span>}
-                  name={setting._id}
-                  className="w-full"
-                >
-                  <InputNumber
-                    min={0}
-                    className="w-20 h-10 text-xl font-medium text-center"
-                    style={{ width: '80%' }}
-                  />
-                </Form.Item>
-              </Col>
-            ))}
+            {settings
+              .filter((setting) => !setting.disable)
+              .map((setting) => (
+                <Col key={setting._id} xs={24} sm={12} md={8} lg={6} className="flex flex-col items-center">
+                  <Form.Item
+                    label={<span className="font-semibold text-center">{setting.tank.name}</span>}
+                    name={setting._id}
+                    className="w-full"
+                  >
+                    <InputNumber
+                      min={0}
+                      className="w-20 h-10 text-xl font-medium text-center"
+                      style={{ width: '80%' }}
+                    />
+                  </Form.Item>
+                </Col>
+              ))}
           </Row>
           <div className="flex w-full justify-end mt-8">
             <Button
