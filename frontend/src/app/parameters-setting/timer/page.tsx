@@ -86,6 +86,7 @@ const TimerSettingsPage: React.FC = () => {
                       min={0}
                       className="w-20 h-10 text-xl font-medium text-center"
                       style={{ width: '80%' }}
+                      disabled={loading}
                     />
                   </Form.Item>
                 </Col>
@@ -97,6 +98,7 @@ const TimerSettingsPage: React.FC = () => {
               htmlType="submit"
               className="px-12 py-3 text-md"
               size="large"
+              disabled={loading}
             >
               {t('apply')}
             </Button>
