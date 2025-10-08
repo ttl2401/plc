@@ -12,6 +12,7 @@ const TimerSettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<TimerSetting[]>([]);
   const [timers, setTimers] = useState<{ [_id: string]: number | null }>({});
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
 
   const fetchSettings = async () => {
@@ -39,11 +40,11 @@ const TimerSettingsPage: React.FC = () => {
   }, []);
 
   const handleFinish = async (values: { [id: string]: number | null }) => {
+    setSaving(true);
     // Build the list array for the payload - only include non-disabled settings
     const list = settings
       .filter((setting) => !setting.disable)
       .map((setting) => ({
-      
         name: setting.name,
         value: values[setting.name] ?? 0,
       }));
@@ -57,6 +58,8 @@ const TimerSettingsPage: React.FC = () => {
       }
     } catch (err) {
       message.error(t('apply_error'));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -86,7 +89,7 @@ const TimerSettingsPage: React.FC = () => {
                       min={0}
                       className="w-20 h-10 text-xl font-medium text-center"
                       style={{ width: '80%' }}
-                      disabled={loading}
+                      disabled={loading || saving}
                     />
                   </Form.Item>
                 </Col>
@@ -98,7 +101,8 @@ const TimerSettingsPage: React.FC = () => {
               htmlType="submit"
               className="px-12 py-3 text-md"
               size="large"
-              disabled={loading}
+              disabled={loading || saving}
+              loading={saving}
             >
               {t('apply')}
             </Button>
