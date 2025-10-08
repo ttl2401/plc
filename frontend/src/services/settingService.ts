@@ -67,7 +67,7 @@ export const fetchTimerSettings = async (): Promise<FetchTimerSettingsResponse> 
   return data as FetchTimerSettingsResponse;
 };
 
-export const updateTimerSettings = async (payload: { list: { _id: string; name: string; value: number }[] }): Promise<UpdateTimerSettingsResponse> => {
+export const updateTimerSettings = async (payload: { list: { name: string; value: number }[] }): Promise<UpdateTimerSettingsResponse> => {
   const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/timer`,
     {

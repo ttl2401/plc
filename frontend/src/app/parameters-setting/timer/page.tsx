@@ -20,9 +20,9 @@ const TimerSettingsPage: React.FC = () => {
       const response: FetchTimerSettingsResponse = await fetchTimerSettings();
       setSettings(response.data);
       // Initialize timers state
-      const initialTimers: { [_id: string]: number | null } = {};
+      const initialTimers: { [name: string]: number | null } = {};
       response.data.forEach((setting: TimerSetting) => {
-        initialTimers[setting._id] = setting.value ?? null;
+        initialTimers[setting.name] = setting.value ?? null;
       });
       setTimers(initialTimers);
       form.setFieldsValue(initialTimers);
@@ -43,9 +43,9 @@ const TimerSettingsPage: React.FC = () => {
     const list = settings
       .filter((setting) => !setting.disable)
       .map((setting) => ({
-        _id: setting._id,
+      
         name: setting.name,
-        value: values[setting._id] ?? 0,
+        value: values[setting.name] ?? 0,
       }));
     try {
       const response = await updateTimerSettings({ list });
@@ -76,10 +76,10 @@ const TimerSettingsPage: React.FC = () => {
             {settings
               .filter((setting) => !setting.disable)
               .map((setting) => (
-                <Col key={setting._id} xs={24} sm={12} md={8} lg={6} className="flex flex-col items-center">
+                <Col key={setting.name} xs={24} sm={12} md={8} lg={6} className="flex flex-col items-center">
                   <Form.Item
                     label={<span className="font-semibold text-center">{setting.tank.name}</span>}
-                    name={setting._id}
+                    name={setting.name}
                     className="w-full"
                   >
                     <InputNumber
