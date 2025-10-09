@@ -299,16 +299,8 @@ export interface ApplyScannedProductResponse {
 }
 
 export const applyScannedProduct = async (
-  code: string,
-  line: string,
-  settings?: Record<string, number>
+  payload: { code: string; line: string; currentSettings?: Record<string, number> }
 ): Promise<ApplyScannedProductResponse> => {
-  const payload: { code: string; line: string; settings?: Record<string, number> } = { code, line };
-  
-  if (settings) {
-    payload.settings = settings;
-  }
-  
   const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/apply-scanned`,
     {

@@ -42,6 +42,9 @@ export const cronjob = async function(){
             const Carrier_Ma_1 = objVariables.Carrier_Ma_1 ? parseInt(objVariables.Carrier_Ma_1) : 0;
             // Mapping Carrier Index
             await mappingCarrierIndex(Carrier_Ma_1);
+
+            
+
             if (Carrier_Ma_1 > 0){
                 const Carrier_Ma_vao_1 = objVariables.Carrier_Ma_vao_1 ? parseInt(objVariables.Carrier_Ma_vao_1) : 0;
                 const Carrier_Ma_ra_1 = objVariables.Carrier_Ma_ra_1 ? parseInt(objVariables.Carrier_Ma_ra_1) : 0;
@@ -70,6 +73,10 @@ export const cronjob = async function(){
 
                     // reset necessary info to 0
                     if (checkProductCode){
+                        // Apply product settings to PLC
+                        const isWritten = await writeProductSettingsToPLC();
+
+                        // reset necessary info to 0
                         await plcService.writeVariableToPLC('Carrier_Ma_1', 0)
                     }
                     
@@ -82,10 +89,16 @@ export const cronjob = async function(){
                             checkHistory.productCode = checkProductCode.productCode;
                             productCode = checkProductCode.productCode;
                             await checkHistory.save();
+
+                            // Apply product settings to PLC
+                        const isWritten = await writeProductSettingsToPLC();
+
+                            // reset necessary info to 0
                             await plcService.writeVariableToPLC('Carrier_Ma_1', 0);
                         }
                     }
                 }
+
                 if(productCode){
                     await mappingTankWithProductAndCarrier(Ho_Ma_1, productCode, Carrier_Ma_1, type);
                 }
@@ -236,4 +249,18 @@ const mappingTankWithProductAndCarrier = async (tankId: number, productCode: str
             carrierPick : null
         })
     }
+}
+
+const writeProductSettingsToPLC = async () => {
+    const currentPlatingProduct = await PlcVariableConfig.findOne({key: 'current_plating_product' });
+    if(currentPlatingProduct && currentPlatingProduct.value?.settings){
+        const settings = currentPlatingProduct.value.settings;
+        const arraySettings = Object.entries(settings).map(([name, value]) => ({
+            name,
+            value,
+          }));
+        await plcService.writeMultipleVariablesToPLC(arraySettings);
+        return true;
+    }
+    return false;
 }
