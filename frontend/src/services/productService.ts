@@ -300,8 +300,15 @@ export interface ApplyScannedProductResponse {
 
 export const applyScannedProduct = async (
   code: string,
-  line: string
+  line: string,
+  settings?: Record<string, number>
 ): Promise<ApplyScannedProductResponse> => {
+  const payload: { code: string; line: string; settings?: Record<string, number> } = { code, line };
+  
+  if (settings) {
+    payload.settings = settings;
+  }
+  
   const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/products/apply-scanned`,
     {
@@ -309,7 +316,7 @@ export const applyScannedProduct = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ code, line }),
+      body: JSON.stringify(payload),
     }
   );
 

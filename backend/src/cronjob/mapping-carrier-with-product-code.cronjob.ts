@@ -21,19 +21,19 @@ export const cronjob = function(){
              */
             if(currentMappingRec){
                 if(!currentMappingRec.productCode){
-                    const currentPlatingCodeRec = await PlcVariableConfig.findOne({key: 'current_plating_product_code' });
-                    if(currentPlatingCodeRec && currentPlatingCodeRec.value){
-                        currentMappingRec.productCode  = currentPlatingCodeRec.value;
+                    const currentPlatingCodeRec = await PlcVariableConfig.findOne({key: 'current_plating_product' });
+                    if(currentPlatingCodeRec && currentPlatingCodeRec.value?.code){
+                        currentMappingRec.productCode  = currentPlatingCodeRec.value.code;
                         await currentMappingRec.save();
                     }         
                     
                 }
             }else {
-                const currentPlatingCodeRec = await PlcVariableConfig.findOne({key: 'current_plating_product_code' });
-                if(currentPlatingCodeRec && currentPlatingCodeRec.value){
+                const currentPlatingCodeRec = await PlcVariableConfig.findOne({key: 'current_plating_product' });
+                if(currentPlatingCodeRec && currentPlatingCodeRec.value?.code){
                     await MappingCarrierCode.create({
                         carrierPickId: currentIndex.value,
-                        productCode: currentPlatingCodeRec.value
+                        productCode: currentPlatingCodeRec.value.code
                     })
                 } 
             }

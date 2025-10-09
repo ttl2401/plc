@@ -751,116 +751,83 @@ export const settingTimerControl = [
     "tankId" : 31
   },
 ]
-/** 
+
+/**
+ * Quet the setting thoi gian, dong dien cho san pham ( card scanner)
+ */
 export const cardScannerCPUWriterControl = [
   {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "name": "May_tinh_Ghi_CPU_Dong_Tay_dien_13",
     "dbNumber": 259,
     "dataType": "Int",
     "offset": 0.0,
-    "type": "May_tinh_Ghi_CPU",
+    "type": "May_tinh_Ghi_CPU_setting_product",
     "startValue": 0,
     "value": 0
   },
   {
-    "name": "May_tinh_Ghi_CPU_Thoi_gian_Ma",
+    "name": "May_tinh_Ghi_CPU_Dong_Tay_dien_14",
     "dbNumber": 259,
     "dataType": "Int",
     "offset": 2.0,
-    "type": "May_tinh_Ghi_CPU",
+    "type": "May_tinh_Ghi_CPU_setting_product",
     "startValue": 0,
     "value": 0
   },
   {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "name": "May_tinh_Ghi_CPU_Thoi_gian_tang_tay_14",
     "dbNumber": 259,
     "dataType": "Int",
     "offset": 4.0,
-    "type": "May_tinh_Ghi_CPU",
+    "type": "May_tinh_Ghi_CPU_setting_product",
     "startValue": 0,
     "value": 0
   },
   {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "name": "May_tinh_Ghi_CPU_Thoi_gian_tang_tay_13",
     "dbNumber": 259,
     "dataType": "Int",
     "offset": 6.0,
-    "type": "May_tinh_Ghi_CPU",
+    "type": "May_tinh_Ghi_CPU_setting_product",
     "startValue": 0,
     "value": 0
   },
   {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Ni_21",
     "dbNumber": 259,
     "dataType": "Int",
     "offset": 8.0,
-    "type": "May_tinh_Ghi_CPU",
+    "type": "May_tinh_Ghi_CPU_setting_product",
     "startValue": 0,
     "value": 0
   },
   {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "name": "May_tinh_Ghi_CPU_Thoi_gian_tang_21",
     "dbNumber": 259,
     "dataType": "Int",
     "offset": 10.0,
-    "type": "May_tinh_Ghi_CPU",
+    "type": "May_tinh_Ghi_CPU_setting_product",
     "startValue": 0,
     "value": 0
   },
   {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "name": "May_tinh_Ghi_CPU_Dong_Ma_Ni_22_24",
     "dbNumber": 259,
     "dataType": "Int",
     "offset": 12.0,
-    "type": "May_tinh_Ghi_CPU",
+    "type": "May_tinh_Ghi_CPU_setting_product",
     "startValue": 0,
     "value": 0
   },
   {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
+    "name": "May_tinh_Ghi_CPU_Thoi_gian_tang_22_24",
     "dbNumber": 259,
     "dataType": "Int",
     "offset": 14.0,
-    "type": "May_tinh_Ghi_CPU",
+    "type": "May_tinh_Ghi_CPU_setting_product",
     "startValue": 0,
     "value": 0
   },
-  {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
-    "dbNumber": 259,
-    "dataType": "Int",
-    "offset": 16.0,
-    "type": "May_tinh_Ghi_CPU",
-    "startValue": 0,
-    "value": 0
-  },
-  {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
-    "dbNumber": 259,
-    "dataType": "Int",
-    "offset": 18.0,
-    "type": "May_tinh_Ghi_CPU",
-    "startValue": 0,
-    "value": 0
-  },
-  {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
-    "dbNumber": 259,
-    "dataType": "Int",
-    "offset": 20.0,
-    "type": "May_tinh_Ghi_CPU",
-    "startValue": 0,
-    "value": 0
-  },
-  {
-    "name": "May_tinh_Ghi_CPU_Dong_Ma_Cu",
-    "dbNumber": 259,
-    "dataType": "Int",
-    "offset": 22.0,
-    "type": "May_tinh_Ghi_CPU",
-    "startValue": 0,
-    "value": 0
-  }
+
 ]
 
-*/

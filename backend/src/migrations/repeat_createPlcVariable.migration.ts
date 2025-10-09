@@ -4,7 +4,8 @@ import { plcControlButtonConfig,
   settingTemperatureControl,
   carrierVariableInformation,
   plcChecklistButtonConfig,
-  settingTimerControl
+  settingTimerControl,
+  cardScannerCPUWriterControl
 } from '@/config/plc.variable';
 import { PlcVariable } from '@/models/plc-variable.model';
 
@@ -134,6 +135,24 @@ const migrate = async (): Promise<Boolean> => {
       return false;
     }
   } 
+
+  /**
+   * Setting product variable for card scanner
+   */
+  for (const variable of cardScannerCPUWriterControl){
+    try {
+      let exist = await PlcVariable.findOne({name: variable.name});  
+      if(!exist){
+        await PlcVariable.create(variable);
+      }
+    }
+    catch(e){
+      console.error(e);
+      return false;
+    }
+  } 
+
+
 
   return true;
 };

@@ -31,11 +31,11 @@ const migrate = async (): Promise<Boolean> => {
     /**
      * current_product_code is the Code that user apply to plating from scanner page
      */
-    const current_product_code = await PlcVariableConfig.findOne({key: "current_plating_product_code"});
+    const current_product_code = await PlcVariableConfig.findOne({key: "current_plating_product"});
     if(!current_product_code){
         const newLoaddingPosition = new PlcVariableConfig({
-            key: "current_plating_product_code",
-            value: null
+            key: "current_plating_product",
+            value: {}
         });
         await newLoaddingPosition.save();
     }

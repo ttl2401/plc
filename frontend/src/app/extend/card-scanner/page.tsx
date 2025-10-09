@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Button, Card, Input, Avatar, Row, Col, Space } from "antd";
+import { Button, Card, Input, Avatar, Row, Col, Space, InputNumber } from "antd";
 import { UserOutlined, SearchOutlined, QrcodeOutlined } from "@ant-design/icons";
 import Sidebar from '@/components/extend-information/Sidebar';
 import { fetchProductByCode, applyScannedProduct } from '@/services/productService';
@@ -19,8 +19,32 @@ const Index = () => {
   const [rackPlating, setRackPlating] = useState<any>(null);
   const [barrelPlating, setBarrelPlating] = useState<any>(null);
   const [defaultPlating, setDefaultPlating] = useState<any>(null);
+  const [defaultModeValues, setDefaultModeValues] = useState<Record<string, number>>({});
+  const [initialDefaultModeValues, setInitialDefaultModeValues] = useState<Record<string, number>>({});
 
-
+  // Mapping function for default mode tank values to PLC variable names
+  const getPLCVariableName = (tankName: string, field: 'currentTotal' | 'T1'): string => {
+    const mapping: Record<string, Record<string, string>> = {
+      'Electro Degreasing 1': {
+        currentTotal: 'May_tinh_Ghi_CPU_Dong_Tay_dien_13',
+        T1: 'May_tinh_Ghi_CPU_Thoi_gian_tang_tay_13'
+      },
+      'Electro Degreasing 2': {
+        currentTotal: 'May_tinh_Ghi_CPU_Dong_Tay_dien_14',
+        T1: 'May_tinh_Ghi_CPU_Thoi_gian_tang_tay_14'
+      },
+      'Pre-nickel Plating': {
+        currentTotal: 'May_tinh_Ghi_CPU_Dong_Ma_Ni_21',
+        T1: 'May_tinh_Ghi_CPU_Thoi_gian_tang_21'
+      },
+      'Nickel Plating': {
+        currentTotal: 'May_tinh_Ghi_CPU_Dong_Ma_Ni_22_24',
+        T1: 'May_tinh_Ghi_CPU_Thoi_gian_tang_22_24'
+      }
+    };
+    
+    return mapping[tankName]?.[field] || '';
+  };
 
   const handleSearch = async (value: string) => {
     setSearch(value);
@@ -28,6 +52,8 @@ const Index = () => {
     setRackPlating(null);
     setBarrelPlating(null);
     setDefaultPlating(null);
+    setDefaultModeValues({});
+    setInitialDefaultModeValues({});
     if (!value || value.length < 2) {
       setProduct(null);
       return;
@@ -63,6 +89,19 @@ const Index = () => {
           setDefaultPlating(settingRes.data.defaultPlating);
           setRackPlating(null);
           setBarrelPlating(null);
+          
+          // Initialize default mode values from the setting data
+          const initialValues: Record<string, number> = {};
+          if (settingRes.data.defaultPlating?.tankAndGroups) {
+            settingRes.data.defaultPlating.tankAndGroups.forEach((tank: any) => {
+              const currentTotalVar = getPLCVariableName(tank.modelName, 'currentTotal');
+              const t1Var = getPLCVariableName(tank.modelName, 'T1');
+              if (currentTotalVar) initialValues[currentTotalVar] = tank.currentTotal || 0;
+              if (t1Var) initialValues[t1Var] = tank.T1 || 0;
+            });
+          }
+          setDefaultModeValues(initialValues);
+          setInitialDefaultModeValues(initialValues);
         }
       }
     } catch (err) {
@@ -71,6 +110,8 @@ const Index = () => {
       setRackPlating(null);
       setBarrelPlating(null);
       setDefaultPlating(null);
+      setDefaultModeValues({});
+      setInitialDefaultModeValues({});
     } finally {
       setLoading(false);
     }
@@ -79,7 +120,14 @@ const Index = () => {
   const handleApply = async () => {
     if (!product) return;
     try {
-      const res = await applyScannedProduct(product.code, selectedLine);
+      let settings: Record<string, number> | undefined;
+      
+      // Build settings payload for default mode
+      if (runMode === 'default' && Object.keys(initialDefaultModeValues).length > 0) {
+        settings = initialDefaultModeValues;
+      }
+      
+      const res = await applyScannedProduct(product.code, selectedLine, settings);
       if (!res.success) {
         message.error(res.message || 'Failed to apply scanned product');
         return;
@@ -294,6 +342,8 @@ const Index = () => {
                       setRackPlating(null);
                       setBarrelPlating(null);
                       setDefaultPlating(null);
+                      setDefaultModeValues({});
+                      setInitialDefaultModeValues({});
                       setSearch("");
                     }}
                   >

@@ -311,13 +311,13 @@ export const applyProductToPlating = async (
   next: NextFunction
 ) => {
   try {
-    const { code } = req.body;
+    const { code, settings } = req.body;
 
     const product = await productService.getProductByCode(code);
     if(!product){
       return res.status(404).json(returnError('Product not found'));
     }
-    await plcVariableConfigService.updateValueByKey('current_plating_product_code', code);
+    await plcVariableConfigService.updateValueByKey('current_plating_product', {code, settings});
 
     return res.status(200).json(returnMessage(true, 'Product applied. Waiting for plating!'));
   } catch (error) {
