@@ -1,6 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
+import { productPlatingModes } from '@/config/constant';
 
+const enumProductPlatingMode = productPlatingModes.map(item => item.key);
 export interface IProduct extends Document {
   code: string;
   name?: string;
@@ -27,7 +29,17 @@ export interface ITransformedProduct {
 export interface IProductSetting {
   line: number;
   mode: string;
-  rackPlating: {
+  defaultPlating?: {
+    tankAndGroups: Array<{
+      model: string;
+      modelId: string;
+      modelKey: string;
+      modelName: string;
+      currentTotal: number;
+      T1: number;
+    }>;
+  } | null;
+  rackPlating?: {
     jigCarrier: number;
     pcsJig: number;
     timer: number;
@@ -42,7 +54,7 @@ export interface IProductSetting {
       T2: number;
     }>;
   } | null;
-  barrelPlating: {
+  barrelPlating?: {
     kgBarrel: number;
     timer: number;
     tankAndGroups: Array<{
@@ -59,7 +71,23 @@ export interface IProductSetting {
 
 const productSettingSchemaEntry = new Schema({
   line: { type: Number, required: true },
-  mode: { type: String, required: true, enum: ['rack', 'barrel'] },
+  mode: { type: String, required: true, enum: enumProductPlatingMode, default : 'default' },
+  defaultPlating: {
+    type: {
+      tankAndGroups: [{
+        model: String,
+        modelId: String,
+        modelKey: String,
+        modelName: String,
+        currentJig: Number,
+        currentTotal: Number,
+        T1: Number,
+        T2: Number
+      }]
+    },
+    default: null,
+    required: false
+  },
   rackPlating: {
     type: {
       jigCarrier: Number,

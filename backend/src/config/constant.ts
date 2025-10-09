@@ -1,3 +1,6 @@
+/**
+ * Use to mapping setting of product
+ */
 export const ProductSettingDefaultTanks = [
     {
         model : "Tanks",
@@ -17,6 +20,27 @@ export const ProductSettingDefaultTanks = [
     }
 ]
 
+// Uncomment to enable rack and barrel mode
+export const productPlatingModes = [
+    // {
+    //     name : "Rack",
+    //     key : "rack"
+    // },
+    // {
+    //     name : "Barrel",
+    //     key : "barrel"  
+    // },
+    {
+        name: "Default",
+        key: 'default'
+    }
+]
+/**
+ * End Setting Product
+ */
+
+
+// Default robot key
 export const mappingRobotInLine = {
     1 : {
         key : "robot_1"

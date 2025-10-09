@@ -1,4 +1,6 @@
 import { body } from 'express-validator';
+import { productPlatingModes } from '@/config/constant';
+const enumProductPlatingMode = productPlatingModes.map(item => item.key);
 
 export const updateSettingPlatingRules = [
   body('settings')
@@ -10,15 +12,6 @@ export const updateSettingPlatingRules = [
   body('settings.mode')
     .isString().withMessage('Mode phải là một chuỗi')
     .notEmpty().withMessage('Mode không được để trống')
-    .isIn(['rack', 'barrel']).withMessage('Mode phải là "rack" hoặc "barrel"'),
+    .isIn(enumProductPlatingMode).withMessage(`Mode phải thuộc (${enumProductPlatingMode.join(', ')})`),
 
-  body('settings.rackPlating')
-    .isObject().withMessage('rackPlating phải là một object'),
-  body('settings.rackPlating.tankAndGroups')
-    .isArray().withMessage('tankAndGroups của rackPlating phải là một array'),
-
-  body('settings.barrelPlating')
-    .isObject().withMessage('barrelPlating phải là một object'),
-  body('settings.barrelPlating.tankAndGroups')
-    .isArray().withMessage('tankAndGroups của barrelPlating phải là một array'),
 ]; 

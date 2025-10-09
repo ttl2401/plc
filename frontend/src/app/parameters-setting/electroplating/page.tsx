@@ -19,14 +19,14 @@ const ElectroplatingSettingsPage: React.FC = () => {
   const [productSetting, setProductSetting] = useState<any>(null);
   const [productHistory, setProductHistory] = useState<any[]>([]);
   const [infoLoading, setInfoLoading] = useState(false);
-  const [runMode, setRunMode] = useState<'rack' | 'barrel'>('rack');
+  const [runMode, setRunMode] = useState<'rack' | 'barrel' | 'default'>('rack');
   const [form] = Form.useForm();
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scannerError, setScannerError] = useState('');
 
   useEffect(() => {
     if (productSetting) {
-      form.setFieldsValue({
+      const formValues: any = {
         rack_jigCarrier: productSetting?.rackPlating?.jigCarrier,
         rack_pcsJig: productSetting?.rackPlating?.pcsJig,
         rack_timer: productSetting?.rackPlating?.timer,
@@ -43,7 +43,18 @@ const ElectroplatingSettingsPage: React.FC = () => {
           [`barrel_tank_${idx}_T1`, tank.T1],
           [`barrel_tank_${idx}_T2`, tank.T2],
         ]) || []),
-      });
+      };
+
+      // Add default mode fields if they exist
+      if (productSetting?.defaultPlating?.tankAndGroups) {
+        const defaultFields = Object.fromEntries(productSetting.defaultPlating.tankAndGroups.flatMap((tank: any, idx: number) => [
+          [`default_tank_${idx}_currentTotal`, tank.currentTotal],
+          [`default_tank_${idx}_T1`, tank.T1],
+        ]));
+        Object.assign(formValues, defaultFields);
+      }
+
+      form.setFieldsValue(formValues);
     } else {
       form.resetFields();
     }
@@ -83,6 +94,8 @@ const ElectroplatingSettingsPage: React.FC = () => {
       setProductHistory(historyRes.data);
       if (settingRes.data?.mode) {
         setRunMode(settingRes.data.mode);
+      } else {
+        setRunMode('default');
       }
     } catch (err) {
       message.error(t('failed_to_load_product_info'));
@@ -98,44 +111,66 @@ const ElectroplatingSettingsPage: React.FC = () => {
   const handleFormFinish = async (values: any) => {
     if (!selectedProduct || !productSetting) return;
     try {
-      // Build rackPlating.tankAndGroups
-      const rackTankAndGroups = (productSetting.rackPlating?.tankAndGroups || []).map((tank: any, idx: number) => ({
-        model: tank.model,
-        modelId: tank.modelId,
-        modelKey: tank.modelKey,
-        modelName: tank.modelName,
-        currentJig: values[`rack_tank_${idx}_currentJig`] || 0,
-        currentTotal: values[`rack_tank_${idx}_currentTotal`] || 0,
-        T1: values[`rack_tank_${idx}_T1`] || 0,
-        T2: values[`rack_tank_${idx}_T2`] || 0,
-      }));
-      // Build barrelPlating.tankAndGroups
-      const barrelTankAndGroups = (productSetting.barrelPlating?.tankAndGroups || []).map((tank: any, idx: number) => ({
-        model: tank.model,
-        modelId: tank.modelId,
-        modelKey: tank.modelKey,
-        modelName: tank.modelName,
-        currentTotal: values[`barrel_tank_${idx}_currentTotal`] || 0,
-        T1: values[`barrel_tank_${idx}_T1`] || 0,
-        T2: values[`barrel_tank_${idx}_T2`] || 0,
-      }));
-      const payload = {
+      const payload: any = {
         settings: {
           line: 1,
-          mode: runMode, // Include the current runMode in the payload
-          rackPlating: {
-            jigCarrier: values.rack_jigCarrier || 0,
-            pcsJig: values.rack_pcsJig || 0,
-            timer: values.rack_timer || 0,
-            tankAndGroups: rackTankAndGroups,
-          },
-          barrelPlating: {
-            kgBarrel: values.barrel_kgBarrel || 0,
-            timer: values.barrel_timer || 0,
-            tankAndGroups: barrelTankAndGroups,
-          },
+          mode: runMode,
         },
       };
+
+      // Build rackPlating.tankAndGroups
+      if (productSetting.rackPlating?.tankAndGroups) {
+        const rackTankAndGroups = productSetting.rackPlating.tankAndGroups.map((tank: any, idx: number) => ({
+          model: tank.model,
+          modelId: tank.modelId,
+          modelKey: tank.modelKey,
+          modelName: tank.modelName,
+          currentJig: values[`rack_tank_${idx}_currentJig`] || 0,
+          currentTotal: values[`rack_tank_${idx}_currentTotal`] || 0,
+          T1: values[`rack_tank_${idx}_T1`] || 0,
+          T2: values[`rack_tank_${idx}_T2`] || 0,
+        }));
+        payload.settings.rackPlating = {
+          jigCarrier: values.rack_jigCarrier || 0,
+          pcsJig: values.rack_pcsJig || 0,
+          timer: values.rack_timer || 0,
+          tankAndGroups: rackTankAndGroups,
+        };
+      }
+
+      // Build barrelPlating.tankAndGroups
+      if (productSetting.barrelPlating?.tankAndGroups) {
+        const barrelTankAndGroups = productSetting.barrelPlating.tankAndGroups.map((tank: any, idx: number) => ({
+          model: tank.model,
+          modelId: tank.modelId,
+          modelKey: tank.modelKey,
+          modelName: tank.modelName,
+          currentTotal: values[`barrel_tank_${idx}_currentTotal`] || 0,
+          T1: values[`barrel_tank_${idx}_T1`] || 0,
+          T2: values[`barrel_tank_${idx}_T2`] || 0,
+        }));
+        payload.settings.barrelPlating = {
+          kgBarrel: values.barrel_kgBarrel || 0,
+          timer: values.barrel_timer || 0,
+          tankAndGroups: barrelTankAndGroups,
+        };
+      }
+
+      // Build defaultPlating.tankAndGroups
+      if (productSetting.defaultPlating?.tankAndGroups) {
+        const defaultTankAndGroups = productSetting.defaultPlating.tankAndGroups.map((tank: any, idx: number) => ({
+          model: tank.model,
+          modelId: tank.modelId,
+          modelKey: tank.modelKey,
+          modelName: tank.modelName,
+          currentTotal: values[`default_tank_${idx}_currentTotal`] || 0,
+          T1: values[`default_tank_${idx}_T1`] || 0,
+        }));
+        payload.settings.defaultPlating = {
+          tankAndGroups: defaultTankAndGroups,
+        };
+      }
+
       const res = await updateProductSetting(selectedProduct._id, payload);
       if (res.success) {
         message.success(t('apply_successfully'));
@@ -353,24 +388,26 @@ const ElectroplatingSettingsPage: React.FC = () => {
                 </div>
               </div>
             </Col>
-            {/* Chế độ chạy */}
-            <Col xs={24} md={8}>
-              <div className="bg-white rounded-xl border p-6 h-full flex flex-col items-center">
-                <div className="text-xl font-bold mb-4">{t('run_mode')}</div>
-                <Radio.Group
-                  value={runMode}
-                  onChange={e => setRunMode(e.target.value)}
-                  className="flex flex-col gap-1 w-full"
-                >
-                  <Radio.Button value="rack" className={`w-full h-14 flex items-center font-bold justify-start px-6 border-2 ${runMode === 'rack' ? 'bg-[#181B39] text-white border-[#181B39]' : 'bg-white text-black border-gray-300'}`}> 
-                    {runMode === 'rack' && <span className="mr-2 text-green-500 text-xl">✔</span>} {t('run_suspended')}
-                  </Radio.Button>
-                  <Radio.Button value="barrel" className={`w-full h-14 flex items-center font-bold justify-start px-6 border-2 ${runMode === 'barrel' ? 'bg-[#181B39] text-white border-[#181B39]' : 'bg-white text-black border-gray-300'}`}> 
-                    {runMode === 'barrel' && <span className="mr-2 text-green-500 text-xl">✔</span>} {t('run_rotating')}
-                  </Radio.Button>
-                </Radio.Group>
-              </div>
-            </Col>
+            {/* Chế độ chạy - Hide when mode is default */}
+            {runMode !== 'default' && (
+              <Col xs={24} md={8}>
+                <div className="bg-white rounded-xl border p-6 h-full flex flex-col items-center">
+                  <div className="text-xl font-bold mb-4">{t('run_mode')}</div>
+                  <Radio.Group
+                    value={runMode}
+                    onChange={e => setRunMode(e.target.value)}
+                    className="flex flex-col gap-1 w-full"
+                  >
+                    <Radio.Button value="rack" className={`w-full h-14 flex items-center font-bold justify-start px-6 border-2 ${runMode === 'rack' ? 'bg-[#181B39] text-white border-[#181B39]' : 'bg-white text-black border-gray-300'}`}> 
+                      {runMode === 'rack' && <span className="mr-2 text-green-500 text-xl">✔</span>} {t('run_suspended')}
+                    </Radio.Button>
+                    <Radio.Button value="barrel" className={`w-full h-14 flex items-center font-bold justify-start px-6 border-2 ${runMode === 'barrel' ? 'bg-[#181B39] text-white border-[#181B39]' : 'bg-white text-black border-gray-300'}`}> 
+                      {runMode === 'barrel' && <span className="mr-2 text-green-500 text-xl">✔</span>} {t('run_rotating')}
+                    </Radio.Button>
+                  </Radio.Group>
+                </div>
+              </Col>
+            )}
           </Row>
           <Form
             form={form}
@@ -513,6 +550,42 @@ const ElectroplatingSettingsPage: React.FC = () => {
                 </Form.Item>
                 }
                 
+                <div className="flex-1 flex justify-end">
+                  <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">{t('apply')}</Button>
+                </div>
+              </div>
+            </div>
+            <div
+              className={runMode === 'default' ? '' : 'hidden'}
+              style={runMode === 'default' ? {} : { display: 'none' }}
+            >
+              <div className="bg-white rounded-xl border p-4 mb-4">
+                <div className="flex flex-row justify-between items-center mb-4">
+                  <span className="text-xl font-bold">{t('load_parameters')}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {productSetting?.defaultPlating?.tankAndGroups?.map((tank: any, idx: number) => (
+                    <div key={idx} className={`rounded-xl p-4 ${getTankColor(idx)}`}> 
+                      <div className="font-bold mb-4 text-center">{tank.modelName}</div>
+                      <div className="flex flex-row gap-4 items-center justify-center">
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">{t('total_current')}</span>
+                          <Form.Item name={`default_tank_${idx}_currentTotal`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center" onFocus={() => handleFocusClearZero(`default_tank_${idx}_currentTotal`)} />
+                          </Form.Item>
+                        </div>
+                        <div className="flex flex-col items-center flex-1">
+                          <span className="font-bold">{t('t1')}</span>
+                          <Form.Item name={`default_tank_${idx}_T1`} className="mb-0">
+                            <Input type="number" min={0} className="w-28 h-10 text-center" onFocus={() => handleFocusClearZero(`default_tank_${idx}_T1`)} />
+                          </Form.Item>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-row items-center gap-8 bg-white rounded-xl border p-6 mb-6">
                 <div className="flex-1 flex justify-end">
                   <Button type="primary" htmlType="submit" className="h-10 w-48 bg-black text-white border-black">{t('apply')}</Button>
                 </div>

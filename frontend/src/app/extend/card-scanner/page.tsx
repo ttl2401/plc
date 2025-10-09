@@ -18,6 +18,7 @@ const Index = () => {
   const [runMode, setRunMode] = useState<string | null>(null);
   const [rackPlating, setRackPlating] = useState<any>(null);
   const [barrelPlating, setBarrelPlating] = useState<any>(null);
+  const [defaultPlating, setDefaultPlating] = useState<any>(null);
 
 
 
@@ -26,6 +27,7 @@ const Index = () => {
     setRunMode(null);
     setRackPlating(null);
     setBarrelPlating(null);
+    setDefaultPlating(null);
     if (!value || value.length < 2) {
       setProduct(null);
       return;
@@ -42,15 +44,23 @@ const Index = () => {
       setRunMode(null);
       // fetchProductSetting
       const settingRes = await fetchProductSetting(res.data._id, 1);
-      if (settingRes.data && settingRes.data.mode) {
-        setRunMode(settingRes.data.mode);
+      if (settingRes.data) {
+        if (settingRes.data.mode) {
+          setRunMode(settingRes.data.mode);
+        } else {
+          setRunMode('default');
+        }
+        
         if (settingRes.data.mode === 'rack') {
           setRackPlating(settingRes.data.rackPlating);
           setBarrelPlating(null);
+          setDefaultPlating(null);
         } else if (settingRes.data.mode === 'barrel') {
           setBarrelPlating(settingRes.data.barrelPlating);
           setRackPlating(null);
+          setDefaultPlating(null);
         } else {
+          setDefaultPlating(settingRes.data.defaultPlating);
           setRackPlating(null);
           setBarrelPlating(null);
         }
@@ -60,6 +70,7 @@ const Index = () => {
       setRunMode(null);
       setRackPlating(null);
       setBarrelPlating(null);
+      setDefaultPlating(null);
     } finally {
       setLoading(false);
     }
@@ -240,10 +251,12 @@ const Index = () => {
                       <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Kích thước (dm2)</div>
                       <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{product.sizeDm2}</div>
                     </div>
-                    <div>
-                      <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Chế độ chạy</div>
-                      <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{runMode === 'rack' ? 'Chạy treo' : runMode === 'barrel' ? 'Chạy quay' : ''}</div>
-                    </div>
+                    {runMode !== 'default' && (
+                      <div>
+                        <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Chế độ chạy</div>
+                        <div style={{ fontWeight: 700, fontSize: 18, background: "#f5f5f5", padding: "4px 16px", borderRadius: 8 }}>{runMode === 'rack' ? 'Chạy treo' : runMode === 'barrel' ? 'Chạy quay' : ''}</div>
+                      </div>
+                    )}
                   </div>
                 </Card>
                 <Space direction="vertical" style={{ width: "100%" }} size={16}>
@@ -280,6 +293,7 @@ const Index = () => {
                       setRunMode(null);
                       setRackPlating(null);
                       setBarrelPlating(null);
+                      setDefaultPlating(null);
                       setSearch("");
                     }}
                   >
@@ -458,6 +472,50 @@ const Index = () => {
                       ))}
                     </Space>
                   </>
+                )}
+                {runMode === 'default' && defaultPlating && (
+                  <Space direction="vertical" style={{ width: "100%" }} size={0}>
+                    {(defaultPlating.tankAndGroups || []).map((tank: any, idx: number) => (
+                      <Card
+                        key={idx}
+                        variant="borderless"
+                        className={colors[idx % colors.length]}
+                        style={{
+                          marginBottom: 20,
+                          borderRadius: 16,
+                          boxShadow: "0 2px 12px #00000008"
+                        }}
+                        styles={{ body: { padding: 24 } }}
+                      >
+                        <div style={{ fontWeight: 700, fontSize: 20, marginBottom: 16 }}>{tank.modelName || `Bể ${idx + 1}`}</div>
+                        <div style={{ display: "flex", gap: 16 }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>Dòng điện tổng</div>
+                            <div style={{
+                              fontWeight: 700,
+                              fontSize: 20,
+                              background: "#fff",
+                              borderRadius: 8,
+                              padding: "8px 0",
+                              textAlign: "center",
+                              color: "#ff2d2d"
+                            }}>{tank.currentTotal ?? '-'}</div>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4 }}>T1</div>
+                            <div style={{
+                              fontWeight: 700,
+                              fontSize: 20,
+                              background: "#fff",
+                              borderRadius: 8,
+                              padding: "8px 0",
+                              textAlign: "center"
+                            }}>{tank.T1 ?? '-'}</div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </Space>
                 )}
               </Col>
             </Row>

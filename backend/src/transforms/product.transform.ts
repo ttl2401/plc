@@ -1,7 +1,7 @@
 import { IProduct } from '@/models/product.model';
 import { API_URL } from '@/config';
 import { PaginateResult } from '@/controllers/base.controller';
-import { ProductSettingDefaultTanks } from '@/config/constant';
+import { ProductSettingDefaultTanks, productPlatingModes } from '@/config/constant';
 import { Tank } from '@/models/tank.model';
 import { TankGroup } from '@/models/tank-group.model';
 import { mappingTankNumberInLine } from '@/config/constant';
@@ -39,25 +39,24 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
     if (model === 'Tanks') {
       const tank = await Tank.findOne({ key });
       if (!tank) return null;
-      if (mode === 'rack') {
+      
+      if (mode === 'default') {
         return {
           model: 'Tanks',
           modelId: tank._id,
           modelKey: tank.key,
           modelName: tank.name,
-      //    plcVariableName : mappedPLCVariableName[tank.key],
-          currentJig: 0,
           currentTotal: 0,
-          T1: 0,
-          T2: 0
+          T1: 0
         };
-      } else if (mode === 'barrel') {
+      } else {
+        // For rack, barrel, and other modes
         return {
           model: 'Tanks',
           modelId: tank._id,
           modelKey: tank.key,
           modelName: tank.name,
-       //   plcVariableName : mappedPLCVariableName[tank.key],
+          currentJig: mode === 'rack' ? 0 : undefined,
           currentTotal: 0,
           T1: 0,
           T2: 0
@@ -66,25 +65,24 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
     } else if (model === 'TankGroups') {
       const group = await TankGroup.findOne({ key });
       if (!group) return null;
-      if (mode === 'rack') {
+      
+      if (mode === 'default') {
         return {
           model: 'TankGroups',
           modelId: group._id,
           modelKey: group.key,
           modelName: group.name,
-        //  plcVariableName : mappedPLCVariableName[group.key],
-          currentJig: 0,
           currentTotal: 0,
-          T1: 0,
-          T2: 0
+          T1: 0
         };
-      } else if (mode === 'barrel') {
+      } else {
+        // For rack, barrel, and other modes
         return {
           model: 'TankGroups',
           modelId: group._id,
           modelKey: group.key,
           modelName: group.name,
-        //  plcVariableName : mappedPLCVariableName[group.key],
+          currentJig: mode === 'rack' ? 0 : undefined,
           currentTotal: 0,
           T1: 0,
           T2: 0
@@ -94,58 +92,87 @@ export const getSettingDetail = async (data: IProduct, line: number) => {
     return null;
   };
 
-  // If settings for the line does not exist, build it completely
-  if (!settingForLine) {
-    const rackTankAndGroups = (await Promise.all(
-      ProductSettingDefaultTanks.map(item => resolveModel(item.model, item.key, 'rack'))
-    )).filter(Boolean) as any[];
-    
-    const barrelTankAndGroups = (await Promise.all(
-      ProductSettingDefaultTanks.map(item => resolveModel(item.model, item.key, 'barrel'))
+  // Helper to generate plating mode properties dynamically
+  const generatePlatingMode = async (modeKey: string) => {
+    const tankAndGroups = (await Promise.all(
+      ProductSettingDefaultTanks.map(item => resolveModel(item.model, item.key, modeKey))
     )).filter(Boolean) as any[];
 
+    if (modeKey === 'default') {
+      return {
+        tankAndGroups: tankAndGroups
+      };
+    } else {
+      // For rack, barrel, and other modes
+      const baseConfig = {
+        timer: 0,
+        tankAndGroups: tankAndGroups,
+        plcVariableTimer: mappedPLCVariableName['timer']
+      };
+
+      // Add mode-specific properties
+      if (modeKey === 'rack') {
+        return {
+          ...baseConfig,
+          jigCarrier: 0,
+          pcsJig: 0
+        };
+      } else if (modeKey === 'barrel') {
+        return {
+          ...baseConfig,
+          kgBarrel: 0
+        };
+      } else {
+        // For any other modes, add generic properties
+        return {
+          ...baseConfig,
+          // Add mode-specific properties here if needed
+        };
+      }
+    }
+  };
+
+  // If settings for the line does not exist, build it completely
+  if (!settingForLine) {
     settingForLine = {
       line: line,
-      mode: 'rack', 
-      rackPlating: {
-        jigCarrier: 0,
-        pcsJig: 0,
-        timer: 0,
-        tankAndGroups: rackTankAndGroups
-      },
-      barrelPlating: {
-        kgBarrel: 0,
-        timer: 0,
-        tankAndGroups: barrelTankAndGroups
-      }
+      mode: productPlatingModes[0]?.key || 'default'
     };
+
+    // Generate only plating modes that exist in productPlatingModes
+    for (const mode of productPlatingModes) {
+      const modeKey = mode.key;
+      const platingPropertyName = `${modeKey}Plating`;
+      settingForLine[platingPropertyName] = await generatePlatingMode(modeKey);
+    }
   } else {
-    if (!settingForLine.rackPlating){
-        // If settingForLine exists, check mode and set defaults for the other plating type
-      const rackTankAndGroups = (await Promise.all(
-        ProductSettingDefaultTanks.map(item => resolveModel(item.model, item.key, 'rack'))
-      )).filter(Boolean) as any[];
-      settingForLine.rackPlating = {
-        jigCarrier: 0,
-        pcsJig: 0,
-        timer: 0,
-        tankAndGroups: rackTankAndGroups
-      }
-    } else if (!settingForLine.barrelPlating){
-      const barrelTankAndGroups = (await Promise.all(
-        ProductSettingDefaultTanks.map(item => resolveModel(item.model, item.key, 'barrel'))
-      )).filter(Boolean) as any[];
-      settingForLine.barrelPlating = {
-        kgBarrel: 0,
-        timer: 0,
-        tankAndGroups: barrelTankAndGroups
+    // Check if current mode exists in productPlatingModes, if not change to first available mode
+    const currentModeExists = productPlatingModes.some(mode => mode.key === settingForLine.mode);
+    if (!currentModeExists && productPlatingModes.length > 0) {
+      settingForLine.mode = productPlatingModes[0].key;
+    }
+
+    // Remove any plating modes that are not in productPlatingModes
+    const existingPlatingModes = Object.keys(settingForLine).filter(key => key.endsWith('Plating'));
+    for (const existingMode of existingPlatingModes) {
+      const modeKey = existingMode.replace('Plating', '');
+      const modeExists = productPlatingModes.some(mode => mode.key === modeKey);
+      if (!modeExists) {
+        delete settingForLine[existingMode];
       }
     }
 
+    // Check and generate missing plating modes that are in productPlatingModes
+    for (const mode of productPlatingModes) {
+      const modeKey = mode.key;
+      const platingPropertyName = `${modeKey}Plating`;
+      
+      if (!settingForLine[platingPropertyName]) {
+        settingForLine[platingPropertyName] = await generatePlatingMode(modeKey);
+      }
+    }
   }
   
-  settingForLine.barrelPlating.plcVariableTimer = mappedPLCVariableName['timer'];
-  settingForLine.rackPlating.plcVariableTimer = mappedPLCVariableName['timer'];
   // Return the base product details along with the specific setting for the line
   return settingForLine;
 };
