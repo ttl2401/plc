@@ -26,12 +26,12 @@ async function migrate(): Promise<void> {
     if (files.length) {
       for (let i = 0; i < files.length; i++) {
         const fileName = files[i].split('/').at(-1);
-        if (migratedFileArray.includes(fileName as string) && !fileName?.startsWith('repeat')) {
+        if (migratedFileArray.includes(fileName as string) && !fileName?.includes('repeat')) {
           continue;
         }
         const migration = await import(files[i]);
         const result = await migration.migrate();
-        if (result && !fileName?.startsWith('repeat')) await Migrations.create({ file: fileName });
+        if (result && !fileName?.includes('repeat')) await Migrations.create({ file: fileName });
       }
     } else {
       console.log('No module imported');
