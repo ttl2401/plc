@@ -26,7 +26,7 @@ async function migrate(): Promise<void> {
     if (files.length) {
       for (let i = 0; i < files.length; i++) {
         const fileName = files[i].split('/').at(-1);
-        if (migratedFileArray.includes(fileName as string)) {
+        if (migratedFileArray.includes(fileName as string) && !fileName?.startsWith('repeat')) {
           continue;
         }
         const migration = await import(files[i]);
