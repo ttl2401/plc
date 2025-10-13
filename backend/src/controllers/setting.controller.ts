@@ -111,8 +111,11 @@ export const updateSettingTemperature = async (
       value: e.temp
     }))
     const updatePLCVariable = await plcVariableService.updateMultipleVariables(plcVariables);
-    
-    const updatedPLC = await plcService.writeMultipleVariablesToPLC(updatePLCVariable);
+    const updatePLCVariableForTemperature = updatePLCVariable.map((e: { name: string; value: number }) => ({
+      name: e.name,
+      value: e.value * 10
+    }))
+    const updatedPLC = await plcService.writeMultipleVariablesToPLC(updatePLCVariableForTemperature);
     
     return res.status(200).json(returnMessage(updatedTanks, 'Temperature settings updated successfully'));
   } catch (error) {
