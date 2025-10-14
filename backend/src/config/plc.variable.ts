@@ -831,3 +831,177 @@ export const cardScannerCPUWriterControl = [
 
 ]
 
+/**
+ * Bo sung hoa chat
+ * parameters-setting/chemistry
+ */
+export const boSungHoaChatControl = [
+  {
+    "name": "May_tinh_ Bosunghoachat_Dong_Nickel_23",
+    "dbNumber": 267,
+    "dataType": "LReal",
+    "offset": 0.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Dong_Nickel_24",
+    "dbNumber": 267,
+    "dataType": "LReal",
+    "offset": 8.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Dong_Nickel_25",
+    "dbNumber": 267,
+    "dataType": "LReal",
+    "offset": 16.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0.0,
+    "value": 0.0,
+    "disable": true
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Dong_bosung_Nickel_23",
+    "dbNumber": 267,
+    "dataType": "LReal",
+    "offset": 24.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Dong_bosung_Nickel_24",
+    "dbNumber": 267,
+    "dataType": "LReal",
+    "offset": 32.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0.0,
+    "value": 0.0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Dong_bosung_Nickel_25",
+    "dbNumber": 267,
+    "dataType": "LReal",
+    "offset": 40.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0.0,
+    "value": 0.0,
+    "disable": true
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Auto_1_23",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 48.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Auto_2_23",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 52.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Auto_1_24",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 56.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Auto_2_24",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 60.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Auto_1_25",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 64.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0,
+    "disable": true
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Auto_2_25",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 68.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0,
+    "disable": true
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Nickel_23",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 72.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Nickel_24",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 76.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_Nickel_25",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 80.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0,
+    "disable": true
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_9",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 84.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_13",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 88.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+  {
+    "name": "May_tinh_ Bosunghoachat_Thoi_gian_bom_14",
+    "dbNumber": 267,
+    "dataType": "DInt",
+    "offset": 92.0,
+    "type": "May_tinh_Bosunghoachat",
+    "startValue": 0,
+    "value": 0
+  },
+
+]

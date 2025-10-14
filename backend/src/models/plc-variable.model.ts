@@ -26,7 +26,7 @@ const plcVariableSchema = new Schema<IPlcVariable>(
     dataType : {
         type: String,
         required: true,
-        enum: ['Real', 'Int', 'Bool'],
+        enum: ['Real', 'Int', 'Bool', 'DInt', 'LReal'],
     },
     offset : {
         type: Number,

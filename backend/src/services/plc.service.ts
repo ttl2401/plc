@@ -267,7 +267,7 @@ export class PLCService {
           const cur = (read1 as Buffer).readUInt8(0);
           return this.getBitFromByte(cur, (bit ?? 0));
         }
-  
+        case 'int':
         case 'integer': {
           const read2 = this.client.DBRead(variable.dbNumber, variable.offset, 2);
           if (!read2) {
@@ -385,6 +385,7 @@ export class PLCService {
     switch (dataType.toLowerCase()) {
       case 'bool':
         return 1;
+      case 'int':
       case 'integer':
         return 2;
       case 'real':

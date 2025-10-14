@@ -5,7 +5,8 @@ import { plcControlButtonConfig,
   carrierVariableInformation,
   plcChecklistButtonConfig,
   settingTimerControl,
-  cardScannerCPUWriterControl
+  cardScannerCPUWriterControl,
+  boSungHoaChatControl
 } from '@/config/plc.variable';
 import { PlcVariable } from '@/models/plc-variable.model';
 
@@ -152,6 +153,22 @@ const migrate = async (): Promise<Boolean> => {
     }
   } 
 
+  /**
+   * Bo sung hoa chat
+   * parameters-setting/chemistry
+   */
+  for (const variable of boSungHoaChatControl){
+    try {
+      let exist = await PlcVariable.findOne({name: variable.name});  
+      if(!exist){
+        await PlcVariable.create(variable);
+      }
+    }
+    catch(e){
+      console.error(e);
+      return false;
+    }
+  } 
 
 
   return true;
