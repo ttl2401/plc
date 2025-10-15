@@ -8,7 +8,7 @@ import AlertBanner from '@/components/extend-information/AlertBanner';
 import StatusIndicator from '@/components/extend-information/StatusIndicator';
 import { Thermometer, Zap } from 'lucide-react';
 import { fetchPLCTemperatureVariables, fetchPLCElectricityVariables, PLCVariable } from '@/services/parameterMonitorService';
-import { useLanguage } from './layout';
+import { useLanguage } from './LanguageContext';
 
 const Index = () => {
   const { t } = useLanguage();
