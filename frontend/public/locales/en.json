@@ -177,6 +177,7 @@
   "pump_time": "Pump Time",
   "electric_pump": "Electric Pump",
   "non_electric_pump": "Non-Electric Pump",
+  "electric_temperature_info_title": "Electric Temperature Information Board",
   "electroplating_setting_title": "ELECTROPLATING PARAMETER SETTINGS",
   "product_not_found": "No matching product found",
   "failed_to_load_product_info": "Failed to load product info",

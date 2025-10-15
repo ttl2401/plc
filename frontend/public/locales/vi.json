@@ -177,6 +177,7 @@
   "pump_time": "Thời gian bơm",
   "electric_pump": "Bơm điện",
   "non_electric_pump": "Bơm không điện",
+  "electric_temperature_info_title": "Bảng thông tin nhiệt điện",
   "electroplating_setting_title": "CÀI ĐẶT THÔNG SỐ XI MẠ",
   "product_not_found": "Không tìm thấy sản phẩm phù hợp",
   "failed_to_load_product_info": "Không thể tải thông tin sản phẩm",

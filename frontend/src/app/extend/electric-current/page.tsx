@@ -8,8 +8,10 @@ import AlertBanner from '@/components/extend-information/AlertBanner';
 import StatusIndicator from '@/components/extend-information/StatusIndicator';
 import { Thermometer, Zap } from 'lucide-react';
 import { fetchPLCTemperatureVariables, fetchPLCElectricityVariables, PLCVariable } from '@/services/parameterMonitorService';
+import { useLanguage } from '@/components/layout/DashboardLayout';
 
 const Index = () => {
+  const { t } = useLanguage();
   const [selectedLine, setSelectedLine] = useState('01');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
@@ -201,16 +203,17 @@ const Index = () => {
         <div className="mb-6 flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Thông Số LINE {selectedLine}
+              {t('electric_temperature_info_title')}
             </h1>
             <div className="text-sm text-gray-600">
                 {mounted ? `Cập nhật: ${currentTime.toLocaleTimeString('vi-VN')}` : "Cập nhật: --:--:--"}
             </div>
           </div>
           
-          <div className="flex-shrink-0 ml-6">
+          {/* TEMPORARILY HIDDEN - Alert Banner (Dòng điện quá thấp, Nhiệt độ quá thấp) - can be restored later */}
+          {/* <div className="flex-shrink-0 ml-6">
             <AlertBanner alerts={alerts} />
-          </div>
+          </div> */}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -257,8 +260,8 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Status Indicators - Below the yellow box */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* TEMPORARILY HIDDEN - Status Indicators (Vệ sinh máy lọc, Vệ sinh máy bơm) - can be restored later */}
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <StatusIndicator 
                 type="machine_maintenance" 
                 time="23:59:30" 
@@ -267,7 +270,7 @@ const Index = () => {
                 type="pump_maintenance" 
                 time="23:59:30" 
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

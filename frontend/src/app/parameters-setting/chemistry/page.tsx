@@ -18,6 +18,7 @@ const ChemistrySettingsPage: React.FC = () => {
   const [tanks, setTanks] = useState<TankChemistry[]>([]);
   const [form] = Form.useForm();
   const [disabled, setDisabled] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [progressValues, setProgressValues] = useState<{ [tankId: number]: number }>({});
   const progressTimers = useRef<{ [tankId: number]: NodeJS.Timeout | null | undefined}>({});
 
@@ -138,12 +139,15 @@ const ChemistrySettingsPage: React.FC = () => {
       });
     });
     
+    setSubmitting(true);
     try {
       await updateChemistrySettings({ list: updatedList });
       message.success(t('update_success'));
       animateProgress(tanks);
     } catch (e) {
       message.error(t('update_failed'));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -178,7 +182,7 @@ const ChemistrySettingsPage: React.FC = () => {
                     noStyle 
                     rules={[{ required: true, type: 'number', min: 0 }]}
                   > 
-                    <InputNumber min={0} className="w-32 h-8 text-center" disabled={disabled} />
+                    <InputNumber min={0} className="w-32 h-8 text-center" disabled={disabled || submitting} />
                   </Form.Item>
                 </div>
               )}
@@ -226,7 +230,7 @@ const ChemistrySettingsPage: React.FC = () => {
                     noStyle 
                     rules={[{ required: true, type: 'number', min: 0 }]}
                   > 
-                    <InputNumber min={0} className="w-24 h-8 text-center" />
+                    <InputNumber min={0} className="w-24 h-8 text-center" disabled={submitting} />
                   </Form.Item>
                 </div>
               );
@@ -265,7 +269,15 @@ const ChemistrySettingsPage: React.FC = () => {
           ))}
         </div>
         <div className="flex w-full justify-end mt-8">
-          <Button type="primary" htmlType="submit" className="h-8 w-48 font-bold bg-black text-white border-black" disabled={disabled}>{t('apply')}</Button>
+          <Button 
+            type="primary" 
+            htmlType="submit" 
+            className="h-8 w-48 font-bold bg-black text-white border-black" 
+            disabled={disabled || submitting}
+            loading={submitting}
+          >
+            {t('apply')}
+          </Button>
         </div>
       </Form>
       <style jsx global>{`
