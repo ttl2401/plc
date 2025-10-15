@@ -231,7 +231,38 @@ export const fetchProductSettingChanges = async (productId: string): Promise<Fet
 
 
 // API for fetching setting chemisty of tank
-export const fetchChemistrySettings = async (): Promise<any> => {
+export interface ChemistryItem {
+  _id: string;
+  name: string;
+  dbNumber: number;
+  dataType: string;
+  offset: number;
+  startValue: number;
+  type: string;
+  value: number;
+  disable: boolean;
+  note: string;
+}
+
+export interface TankChemistry {
+  tankId: number;
+  tank: {
+    key: string;
+    groupKey: string;
+    name: string;
+    slot?: number;
+  };
+  disable: boolean;
+  chemistryList: ChemistryItem[];
+}
+
+export interface FetchChemistrySettingsResponse {
+  success: boolean;
+  message: string;
+  data: TankChemistry[];
+}
+
+export const fetchChemistrySettings = async (): Promise<FetchChemistrySettingsResponse> => {
   const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/chemistry`,
     {
@@ -244,16 +275,12 @@ export const fetchChemistrySettings = async (): Promise<any> => {
 }; 
 
 // API for updating chemistry settings
-export interface ChemistrySetting {
-  _id: string;
+export interface ChemistryUpdateItem {
   name: string;
-  chemistry: {
-    AHToAdded: number;
-    pumps: { pumpKey: string; pumpType: string; pumpName: string; time: number }[];
-  };
+  value: number;
 }
 
-export const updateChemistrySettings = async (payload: { list: ChemistrySetting[] }): Promise<any> => {
+export const updateChemistrySettings = async (payload: { list: ChemistryUpdateItem[] }): Promise<any> => {
   const response = await authenticatedFetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/settings/chemistry`,
     {

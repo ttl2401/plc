@@ -175,6 +175,8 @@
   "ah_to_add": "A/H To Add",
   "ah_to_consume": "A/H To Consume",
   "pump_time": "Pump Time",
+  "electric_pump": "Electric Pump",
+  "non_electric_pump": "Non-Electric Pump",
   "electroplating_setting_title": "ELECTROPLATING PARAMETER SETTINGS",
   "product_not_found": "No matching product found",
   "failed_to_load_product_info": "Failed to load product info",

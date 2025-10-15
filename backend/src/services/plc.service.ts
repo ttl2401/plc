@@ -191,10 +191,22 @@ export class PLCService {
           dataSize = 2;
           break;
           
+        case 'dint':
+          buffer = Buffer.alloc(4);
+          buffer.writeInt32BE(parseInt(value), 0);
+          dataSize = 4;
+          break;
+          
         case 'real':
           buffer = Buffer.alloc(4);
           buffer.writeFloatBE(parseFloat(value), 0);
           dataSize = 4;
+          break;
+          
+        case 'lreal':
+          buffer = Buffer.alloc(8);
+          buffer.writeDoubleBE(parseFloat(value), 0);
+          dataSize = 8;
           break;
           
         default:
@@ -276,6 +288,15 @@ export class PLCService {
           }
           return (read2 as Buffer).readInt16BE(0);
         }
+        
+        case 'dint': {
+          const read4 = this.client.DBRead(variable.dbNumber, variable.offset, 4);
+          if (!read4) {
+            const e = this.client.LastError?.();
+            throw new AppError(`Failed to read ${name} from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
+          }
+          return (read4 as Buffer).readInt32BE(0);
+        }
   
         case 'real': {
           const read4 = this.client.DBRead(variable.dbNumber, variable.offset, 4);
@@ -284,6 +305,15 @@ export class PLCService {
             throw new AppError(`Failed to read ${name} from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
           }
           return (read4 as Buffer).readFloatBE(0);
+        }
+        
+        case 'lreal': {
+          const read8 = this.client.DBRead(variable.dbNumber, variable.offset, 8);
+          if (!read8) {
+            const e = this.client.LastError?.();
+            throw new AppError(`Failed to read ${name} from PLC: ${this.client.ErrorText?.(e) ?? e}`, 500);
+          }
+          return (read8 as Buffer).readDoubleBE(0);
         }
   
         default:
@@ -388,8 +418,12 @@ export class PLCService {
       case 'int':
       case 'integer':
         return 2;
+      case 'dint':
+        return 4;
       case 'real':
         return 4;
+      case 'lreal':
+        return 8;
       default:
         return 1;
     }
@@ -466,10 +500,15 @@ export class PLCService {
           const cur = buffer.readUInt8(byteIndex);
           return this.getBitFromByte(cur, (bit ?? 0));
         }
+        case 'int':
         case 'integer':
           return buffer.readInt16BE(relativeOffset);
+        case 'dint':
+          return buffer.readInt32BE(relativeOffset);
         case 'real':
           return buffer.readFloatBE(relativeOffset);
+        case 'lreal':
+          return buffer.readDoubleBE(relativeOffset);
         default:
           return null;
       }

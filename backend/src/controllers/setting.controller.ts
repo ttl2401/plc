@@ -12,8 +12,12 @@ const robotService = new RobotService();
 const plcService = new PLCService();
 const plcVariableService = new PlcVariableService();
 
-import { mappingTankToVariablesSettingTimer } from '@/transforms/plc-variable.transform'
-import { getListSettingTemperature, getListSettingChemistry } from '@/transforms/tank.transform'
+import { mappingTankToVariablesSettingTimer, mappingTankToVariablesSettingChemistry } from '@/transforms/plc-variable.transform'
+import { 
+  getListSettingTemperature, 
+  getListSettingChemistry
+
+ } from '@/transforms/tank.transform'
 import { getListSettingRobot } from '@/transforms/robot.transform'
 
 export const getSettingTimer = async (
@@ -151,7 +155,7 @@ export const updateSettingRobot = async (
   }
 };
 
-export const getSettingChemistry = async (
+export const getSettingChemistryOld = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -166,7 +170,22 @@ export const getSettingChemistry = async (
   }
 };
 
-export const updateSettingChemistry = async (
+export const getSettingChemistry = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Get all tanks with chemistry setting
+    const tanks = await plcService.readVariablesFromPLC({type: 'May_tinh_Bosunghoachat'});
+    const data = mappingTankToVariablesSettingChemistry(tanks);
+    return res.status(200).json(returnMessage(data, 'Tanks with chemistry setting retrieved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateSettingChemistryOld = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -186,5 +205,35 @@ export const updateSettingChemistry = async (
     return res.status(200).json(returnMessage(result, 'Chemistry settings updated successfully'));
   } catch (error) {
     next(error);
+  }
+};
+
+
+export const updateSettingChemistry = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { list: variables } = req.body;
+ 
+    // Update variables in MongoDB
+    const updatedVariables = await plcVariableService.updateMultipleVariables(variables, 'May_tinh_Bosunghoachat');
+    
+    // Write variables to PLC
+    const plcResults = await plcService.writeMultipleVariablesToPLC(variables);
+    
+    // Check if all PLC writes were successful
+    const allSuccessful = plcResults.every(result => result === true);
+    
+    if (allSuccessful) {
+      res.json(returnMessage(updatedVariables, `Updated ${updatedVariables.length} variables successfully in both database and PLC`));
+    } else {
+      // Some PLC writes failed, but database updates succeeded
+      const failedCount = plcResults.filter(result => result === false).length;
+      res.json(returnMessage(updatedVariables, `Updated ${updatedVariables.length} variables in database, but ${failedCount} PLC writes failed`));
+    }
+  } catch (err) {
+    next(err);
   }
 };

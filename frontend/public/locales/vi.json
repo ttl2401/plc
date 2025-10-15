@@ -175,6 +175,8 @@
   "ah_to_add": "A/H Cần Bổ Sung",
   "ah_to_consume": "A/H Cần Tiêu Thụ",
   "pump_time": "Thời gian bơm",
+  "electric_pump": "Bơm điện",
+  "non_electric_pump": "Bơm không điện",
   "electroplating_setting_title": "CÀI ĐẶT THÔNG SỐ XI MẠ",
   "product_not_found": "Không tìm thấy sản phẩm phù hợp",
   "failed_to_load_product_info": "Không thể tải thông tin sản phẩm",

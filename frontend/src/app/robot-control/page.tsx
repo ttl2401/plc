@@ -500,7 +500,8 @@ const RobotControlPage = () => {
                 </Card>
               </Col>
 
-              <Col xs={24} md={12} style={{ paddingBottom: 16 }}>
+              {/* TEMPORARILY HIDDEN - Electro button (can be restored later) */}
+              {/* <Col xs={24} md={12} style={{ paddingBottom: 16 }}>
                 <Card className="bg-gray-50" styles={{ body: { padding: 16, textAlign: 'center' } }} variant="outlined" style={{ border: '2px solid #d9d9d9', borderRadius: '8px' }}>
                   <GaugeButton
                     checked={false}
@@ -510,7 +511,7 @@ const RobotControlPage = () => {
                     rightLabel={t('robot_control_electro_1')}
                   />
                 </Card>
-              </Col>
+              </Col> */}
 
               <Col xs={24} md={12} style={{ paddingBottom: 16 }}>
                 <Card className="bg-gray-50" styles={{ body: { padding: 16, textAlign: 'center' } }} variant="outlined" style={{ border: '2px solid #d9d9d9', borderRadius: '8px' }}>
@@ -527,7 +528,8 @@ const RobotControlPage = () => {
                 </Card>
               </Col>
 
-              <Col xs={24} md={12} style={{ paddingBottom: 16 }}>
+              {/* TEMPORARILY HIDDEN - Nạp hàng (Load Goods) button (can be restored later) */}
+              {/* <Col xs={24} md={12} style={{ paddingBottom: 16 }}>
                 <Card className="bg-gray-50" styles={{ body: { padding: 16, textAlign: 'center' } }} variant="outlined" style={{ border: '2px solid #d9d9d9', borderRadius: '8px' }}>
                   <GaugeButton
                     checked={true}
@@ -537,7 +539,7 @@ const RobotControlPage = () => {
                     rightLabel={t('robot_control_load_no')}
                   />
                 </Card>
-              </Col>
+              </Col> */}
             </Row>
           </Card>
         </Col>
