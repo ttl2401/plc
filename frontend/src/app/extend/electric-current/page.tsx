@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Sidebar from '@/components/extend-information/Sidebar';
+// import Sidebar from '@/components/extend-information/Sidebar'; // TEMPORARILY HIDDEN - can be restored later
 import ProcessCard from '@/components/extend-information/ProcessCard';
 import AlertBanner from '@/components/extend-information/AlertBanner';
 import StatusIndicator from '@/components/extend-information/StatusIndicator';
@@ -197,7 +197,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar selectedLine={selectedLine} onLineSelect={setSelectedLine} />
+      {/* TEMPORARILY HIDDEN - Sidebar (can be restored later) */}
+      {/* <Sidebar selectedLine={selectedLine} onLineSelect={setSelectedLine} /> */}
       
       <div className="flex-1 p-6">
         <div className="mb-6 flex justify-between items-start">
