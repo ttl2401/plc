@@ -146,9 +146,6 @@ export const cronjob = async function(){
             const variablesTemperature = await plcService.readVariablesFromPLC({type: 'May_tinh_Nhiet_Muc'}, typeTemperature);
             const variablesElectricity = await plcService.readVariablesFromPLC({type: 'May_tinh_Chinh_luu_R'}, typeElectricity);
             
-            console.log("variablesTemperature", variablesTemperature);
-            console.log("variablesElectricity", variablesElectricity);
-
             await storePlcVariablesToInflux(
                 listTemperatureWithTankId, variablesTemperature, 
                 listElectricityWithTankId, variablesElectricity,
