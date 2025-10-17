@@ -115,7 +115,10 @@ export class PLCService {
             }
           } else {
             // Keep original values if DB read failed
+            console.warn('--------------------------------');
+            console.warn(result);
             console.warn(`Failed to read DB ${dbNumber}, keeping stored values for ${dbInfo.variables.length} variables`);
+            console.warn('--------------------------------');
           }
         }
 
