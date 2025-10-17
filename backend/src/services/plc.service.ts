@@ -102,7 +102,7 @@ export class PLCService {
                   variable, 
                   result.value.startOffset
                 );
-                
+                console.log("value of variable ", variable.name, " is ", value);
                 if (value !== null) {
                   variable.value = value;
                 }
