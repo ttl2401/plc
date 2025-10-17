@@ -138,11 +138,15 @@ export const cronjob = async function(){
             console.log("running cronjob Sync Parameter Temperature and Electricity Cronjob");
 
             if (!plcService.isConnected()){
+              console.log("PLC not connected. Sync failed");
                 return;
             }
             
             const variablesTemperature = await plcService.readVariablesFromPLC({type: 'May_tinh_Nhiet_Muc'}, typeTemperature);
             const variablesElectricity = await plcService.readVariablesFromPLC({type: 'May_tinh_Chinh_luu_R'}, typeElectricity);
+            
+            console.log("variablesTemperature", variablesTemperature);
+            console.log("variablesElectricity", variablesElectricity);
             
             await storePlcVariablesToInflux(
                 listTemperatureWithTankId, variablesTemperature, 
