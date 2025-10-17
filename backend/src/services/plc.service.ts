@@ -80,14 +80,14 @@ export class PLCService {
 
         // Group variables by DB number and read efficiently
         const dbGroups = this.groupVariablesByDB(variables);
-        
+        console.log('dbGroups', dbGroups);
         // Read data from each DB group with timeout
         const dbReadResults = await Promise.allSettled(
           Object.entries(dbGroups).map(([dbNumber, dbInfo]) => 
             this.readDBRange(parseInt(dbNumber), dbInfo)
           )
         );
-        console.log('variables', variables);
+        
         console.warn('dbReadResults', dbReadResults);
         // Process results and decode individual variable values
         for (const [index, result] of dbReadResults.entries()) {
@@ -443,6 +443,7 @@ export class PLCService {
    * @returns Promise with buffer and start offset or null if failed
    */
   private async readDBRange(dbNumber: number, dbInfo: { minOffset: number, totalSize: number }): Promise<{ buffer: Buffer, startOffset: number } | null> {
+    console.log('readDBRange', dbNumber, dbInfo);
     return new Promise((resolve) => {
       // Set 500ms timeout
       const timeout = setTimeout(() => {
