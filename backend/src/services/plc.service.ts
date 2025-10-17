@@ -80,7 +80,7 @@ export class PLCService {
 
         // Group variables by DB number and read efficiently
         const dbGroups = this.groupVariablesByDB(variables);
-        console.log('dbGroups', dbGroups);
+        console.log('dbGroups', {minOffset: dbGroups.minOffset, maxOffset: dbGroups.maxOffset, totalSize: dbGroups.totalSize});
         // Read data from each DB group with timeout
         const dbReadResults = await Promise.allSettled(
           Object.entries(dbGroups).map(([dbNumber, dbInfo]) => 
@@ -385,24 +385,35 @@ export class PLCService {
     for (const variable of variables) {
       const dbNumber = variable.dbNumber.toString();
       
+      // For Bool types, we need to handle decimal offsets (e.g., 1.4 means byte 1, bit 4)
+      // Extract the actual byte offset and calculate the end offset properly
+      let byteOffset: number;
+      let endOffset: number;
+      
+      if (variable.dataType.toLowerCase() === 'bool') {
+        const { byte } = this.parseBitAddress(variable.offset);
+        byteOffset = byte;
+        endOffset = byte + 1; // Bool occupies 1 byte (we need to read the whole byte)
+      } else {
+        byteOffset = variable.offset;
+        const variableSize = this.getVariableSize(variable.dataType);
+        endOffset = variable.offset + variableSize;
+      }
+      
       if (!dbGroups[dbNumber]) {
         dbGroups[dbNumber] = {
           variables: [],
-          minOffset: variable.offset,
-          maxOffset: variable.offset,
+          minOffset: byteOffset,
+          maxOffset: endOffset,
           totalSize: 0
         };
       }
 
       dbGroups[dbNumber].variables.push(variable);
       
-      // Update offset range
-      dbGroups[dbNumber].minOffset = Math.min(dbGroups[dbNumber].minOffset, variable.offset);
-      
-      // Calculate variable size based on data type
-      const variableSize = this.getVariableSize(variable.dataType);
-      const variableEndOffset = variable.offset + variableSize;
-      dbGroups[dbNumber].maxOffset = Math.max(dbGroups[dbNumber].maxOffset, variableEndOffset);
+      // Update offset range using the calculated byte offsets
+      dbGroups[dbNumber].minOffset = Math.min(dbGroups[dbNumber].minOffset, byteOffset);
+      dbGroups[dbNumber].maxOffset = Math.max(dbGroups[dbNumber].maxOffset, endOffset);
     }
 
     // Calculate total size for each DB group
