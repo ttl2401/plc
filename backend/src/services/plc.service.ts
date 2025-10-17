@@ -88,7 +88,7 @@ export class PLCService {
           )
         );
         
-        console.warn('dbReadResults', dbReadResults);
+        
         // Process results and decode individual variable values
         for (const [index, result] of dbReadResults.entries()) {
           const dbNumber = Object.keys(dbGroups)[index];
@@ -103,9 +103,7 @@ export class PLCService {
                   variable, 
                   result.value.startOffset
                 );
-                if(variable.dbNumber == 65){
-                  console.log(`variable ${variable.name} at offset ${variable.offset} of db ${variable.dbNumber} is ${value}`);
-                }
+                
                 
                 if (value !== null) {
                   variable.value = value;
@@ -117,7 +115,6 @@ export class PLCService {
           } else {
             // Keep original values if DB read failed
             console.warn('--------------------------------');
-            console.warn(result);
             console.warn(`Failed to read DB ${dbNumber}, keeping stored values for ${dbInfo.variables.length} variables`);
             console.warn('--------------------------------');
           }
