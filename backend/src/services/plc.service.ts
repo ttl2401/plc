@@ -87,7 +87,8 @@ export class PLCService {
             this.readDBRange(parseInt(dbNumber), dbInfo)
           )
         );
-
+        console.log('variables', variables);
+        console.warn('dbReadResults', dbReadResults);
         // Process results and decode individual variable values
         for (const [index, result] of dbReadResults.entries()) {
           const dbNumber = Object.keys(dbGroups)[index];
