@@ -103,7 +103,7 @@ export class PLCService {
                   result.value.startOffset
                 );
                 if(variable.dbNumber == 109 || variable.dbNumber == 155){
-                  console.log("value of variable ", variable.name, " is ", value);
+                  console.log(`variable ${variable.name} at offset ${variable.offset} of db ${variable.dbNumber} is ${value}`);
                 }
                 
                 if (value !== null) {
