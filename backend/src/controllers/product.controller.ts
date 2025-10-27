@@ -9,7 +9,8 @@ import { getList, getDetail, getSettingDetail } from '@/transforms/product.trans
 import { validationResult } from 'express-validator';
 
 import exceljs from 'exceljs';
-
+import { PLCService } from '@/services/plc.service';
+const plcService = new PLCService();
 const productService = new ProductService();
 const userActivityService = new UserActivityService();
 const plcVariableConfigService = new PlcVariableConfigService();
@@ -317,8 +318,15 @@ export const applyProductToPlating = async (
     if(!product){
       return res.status(404).json(returnError('Product not found'));
     }
-    await plcVariableConfigService.updateValueByKey('current_plating_product', {code, settings : currentSettings});
-
+    // await plcVariableConfigService.updateValueByKey('current_plating_product', {code, settings : currentSettings});
+     
+    const variables = Object.entries(currentSettings).map(([name, value]) => ({
+      name,
+      value
+    }));
+   
+    const plcResults = await plcService.writeMultipleVariablesToPLC(variables);
+   
     return res.status(200).json(returnMessage(true, 'Product applied. Waiting for plating!'));
   } catch (error) {
     next(error);

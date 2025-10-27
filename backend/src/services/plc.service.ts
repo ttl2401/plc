@@ -350,6 +350,7 @@ export class PLCService {
 
       return results;
     } catch (error) {
+      console.warn((error as Error).message);
       throw new AppError('Failed to write multiple variables to PLC', 500);
     }
   }
