@@ -319,7 +319,7 @@ export const applyProductToPlating = async (
       return res.status(404).json(returnError('Product not found'));
     }
     // await plcVariableConfigService.updateValueByKey('current_plating_product', {code, settings : currentSettings});
-     
+
     const variables = Object.entries(currentSettings).map(([name, value]) => ({
       name,
       value
@@ -327,7 +327,7 @@ export const applyProductToPlating = async (
    
     const plcResults = await plcService.writeMultipleVariablesToPLC(variables);
    
-    return res.status(200).json(returnMessage(true, 'Product applied. Waiting for plating!'));
+    return res.status(200).json(returnMessage({results: plcResults}, 'Product applied. Waiting for plating!'));
   } catch (error) {
     next(error);
   }
