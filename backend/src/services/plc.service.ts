@@ -11,52 +11,127 @@ try {
   console.warn('node-snap7 module not found. PLC communication will be simulated.');
   snap7 = null;
 }
-
+type ProbePoint = { dbNumber: number; byteOffset: number; size: number };
 export class PLCService {
   private client: any;
+
+ 
   private watchdogTimer?: ReturnType<typeof setInterval>;
+  private probePoints: ProbePoint[] = [];
+  private probeIndex = 0;
+  private probeBatchSize = 1;
+  private consecutiveProbeFails = 0;
+  private maxConsecutiveProbeFails = 3;
+  private isQueueBusy = false;
 
-  /**
-   * Đọc cực nhẹ để giữ/kiểm tra kết nối. Nếu fail → Disconnect để lần sau tự connect lại.
-   * @param db DB dùng làm “ping” (nên là DB luôn tồn tại, ví dụ 1)
-   * @param byteOffset byte offset nhỏ, ví dụ 0
-   * @param intervalMs chu kỳ ping (ms), mặc định 7000ms
-   */
-  public startWatchdog(db = 1, byteOffset = 0, intervalMs = 7000) {
-    if (this.watchdogTimer) return; // đã bật
-    this.watchdogTimer = setInterval(() => {
-      (async () => {
-        try {
-          if (!this.client) return; // đang ở chế độ SIMULATION
-          // nếu chưa kết nối, thử connect
-          const ok = this.isConnected() || await this.connectWithTimeout();
-          if (!ok) return;
 
-          // đọc 1 byte cực nhỏ để giữ phiên sống (DBRead đồng bộ trong snap7 binding)
-          const buf = this.client.DBRead(db, byteOffset, 1);
+  private lastDisconnectAt?: number;       // thời điểm vừa bị Disconnect()
+  private reconnectWarned = false;         // đã log lỗi 10s chưa (tránh spam)
+  private reconnectMaxWaitMs = 10_000;     // thời gian chờ tối đa 10s
+
+
+  public setWatchdogTargets(
+    points: ProbePoint[],
+    options?: { batchSize?: number; maxConsecutiveFails?: number }
+  ) {
+    this.probePoints = points.slice();
+    if (options?.batchSize) this.probeBatchSize = Math.max(1, options.batchSize);
+    if (options?.maxConsecutiveFails) this.maxConsecutiveProbeFails = Math.max(1, options.maxConsecutiveFails);
+    this.probeIndex = 0;
+    this.consecutiveProbeFails = 0;
+  }
+  
+  public startWatchdogMulti(intervalMs = 7000) {
+    if (this.watchdogTimer) return;
+    this.watchdogTimer = setInterval(async () => {
+      // Không có điểm probe hoặc đang bận → bỏ qua
+      if (!this.probePoints.length || this.isQueueBusy) return;
+  
+      try {
+        if (!this.client) return; // simulation mode
+        const ok = this.isConnected() || await this.ensureConnectedOrErr();
+        if (!ok) return;
+  
+        let allOk = true;
+        for (let i = 0; i < this.probeBatchSize; i++) {
+          const p = this.probePoints[this.probeIndex % this.probePoints.length];
+          this.probeIndex++;
+          const size = Math.min(Math.max(p.size, 1), 4);
+          const buf = this.client.DBRead(p.dbNumber, p.byteOffset, size);
           if (!buf) {
-            const code = this.client.LastError?.();
-            const text = this.client.ErrorText?.(code) ?? code;
-            console.warn(`[WATCHDOG] DBRead failed: ${text}`);
-            try { this.client.Disconnect?.(); } catch {}
+            allOk = false;
+            const e = this.client.LastError?.();
+            const text = this.client.ErrorText?.(e) ?? e;
+            console.warn(`[WATCHDOG] DBRead fail db=${p.dbNumber} off=${p.byteOffset} size=${size}: ${text}`);
+            break;
           }
-        } catch (e: any) {
-          console.warn('[WATCHDOG] error:', e?.message ?? String(e));
-          try { this.client.Disconnect?.(); } catch {}
         }
-      })();
+  
+        if (!allOk) {
+          this.consecutiveProbeFails++;
+          if (this.consecutiveProbeFails >= this.maxConsecutiveProbeFails) {
+            console.warn(`[WATCHDOG] too many consecutive fails → Disconnect`);
+            this.markDisconnected();
+            this.consecutiveProbeFails = 0;
+          }
+        } else {
+          this.consecutiveProbeFails = 0;
+        }
+      } catch (e: any) {
+        console.warn('[WATCHDOG] error:', e?.message ?? String(e));
+        this.markDisconnected();    
+        this.consecutiveProbeFails = 0;
+      }
     }, intervalMs);
   }
-
+  
   public stopWatchdog() {
     if (this.watchdogTimer) {
       clearInterval(this.watchdogTimer);
       this.watchdogTimer = undefined;
     }
   }
+  
+  public setQueueBusy(busy: boolean) {
+    this.isQueueBusy = busy;
+  }
+
+  private markDisconnected() {
+    try { this.client?.Disconnect?.(); } catch {}
+    this.lastDisconnectAt = Date.now();
+    this.reconnectWarned = false; // reset để lần sau vượt 10s mới cảnh báo
+  }
+  
+  private async ensureConnectedOrErr(): Promise<boolean> {
+    if (this.isConnected()) return true;
+
+    const ok = await this.connectWithTimeout(); // bạn đã có hàm này
+    if (ok) {
+      // Reconnect thành công → xóa dấu mốc disconnect và cờ cảnh báo
+      this.lastDisconnectAt = undefined;
+      this.reconnectWarned = false;
+      return true;
+    }
+
+    // Reconnect KHÔNG thành công → kiểm tra đã quá 10s kể từ lần disconnect gần nhất chưa
+    if (this.lastDisconnectAt && !this.reconnectWarned) {
+      const waited = Date.now() - this.lastDisconnectAt;
+      if (waited >= this.reconnectMaxWaitMs) {
+        // LOG cảnh báo 1 lần cho mỗi đợt disconnect vượt ngưỡng
+        console.error(
+          `[PLC][RECONNECT-FAIL] >${this.reconnectMaxWaitMs}ms since disconnect ` +
+          `(waited=${waited}ms). Host=${PLC_CONFIG.HOST}`
+        );
+        this.reconnectWarned = true;
+      }
+    }
+
+    return false;
+  }
+
 
   private tcpProbe102(host: string, timeoutMs = 500): Promise<boolean> {
-    const net = require('net');
+    
     return new Promise((resolve) => {
       const s = new net.Socket();
       const done = (ok: boolean) => { try { s.destroy(); } catch {} ; resolve(ok); };
@@ -111,23 +186,31 @@ export class PLCService {
       try {
         // Connect to PLC if not already connected
         if (!this.isConnected()) {
-          const connectionResult = await this.connectWithTimeout();
+          const connectionResult = await this.ensureConnectedOrErr();
           if (!connectionResult) {
-            console.warn('Failed to connect to PLC, returning stored values');
+            console.error('PLC not connected (reconnect failed), returning stored values');
             return variables;
           }
         }
 
         // Group variables by DB number and read efficiently
         const dbGroups = this.groupVariablesByDB(variables);
-        console.log('dbGroups', {minOffset: dbGroups.minOffset, maxOffset: dbGroups.maxOffset, totalSize: dbGroups.totalSize});
         // Read data from each DB group with timeout
+        
+        /**
         const dbReadResults = await Promise.allSettled(
           Object.entries(dbGroups).map(([dbNumber, dbInfo]) => 
             this.readDBRange(parseInt(dbNumber), dbInfo)
           )
         );
-        
+        */
+        this.setQueueBusy(true);  // <-- để watchdog skip nhịp này
+        const dbReadResults = await Promise.allSettled(
+          Object.entries(dbGroups).map(([dbNumber, dbInfo]) =>
+            this.readDBRangeAsync(parseInt(dbNumber, 10), dbInfo /*, optional timeoutMs */)
+          )
+        );
+        this.setQueueBusy(false);
         
         // Process results and decode individual variable values
         for (const [index, result] of dbReadResults.entries()) {
@@ -188,18 +271,15 @@ export class PLCService {
 
       // Check if we have a PLC client and can connect
       if (!this.client) {
-        console.log(`[SIMULATION] Would write ${value} to PLC variable '${name}'`);
         return true;
       }
 
-      const canConnectToPLC = this.isConnected() || await this.connectWithTimeout();
+      const canConnectToPLC = this.isConnected() || (await this.ensureConnectedOrErr());
       
       if (!canConnectToPLC) {
-        throw new AppError('Failed to connect to PLC', 500);
+        throw new AppError('PLC not connected (reconnect failed)', 503);
       }
 
-      console.log(`Writing ${value} to PLC variable '${name}' (DB${variable.dbNumber}, offset:${variable.offset})`);
-      
       // Prepare data buffer based on data type
       let buffer: Buffer;
       let dataSize: number;
@@ -270,7 +350,7 @@ export class PLCService {
         throw new AppError(`PLC write failed: ${this.client.ErrorText(errorCode)}`, 500);
       }
 
-      console.log(`Successfully wrote ${value} to PLC variable '${name}'`);
+      // console.log(`Successfully wrote ${value} to PLC variable '${name}'`);
       return true;
 
     } catch (error) {
@@ -291,7 +371,6 @@ export class PLCService {
       const variable = await PlcVariable.findOne({ name });
       if (!variable) {
         if(ignoreThrowError){
-          console.log(`PLC variable '${name}' not found in database, return 0`)
           return 0;
         }else{
           throw new AppError(`PLC variable '${name}' not found in database`, 404);
@@ -305,9 +384,9 @@ export class PLCService {
       }
   
       if (!this.isConnected()) {
-        const connectionResult = await this.connectWithTimeout();
+        const connectionResult = await this.ensureConnectedOrErr();
         if (!connectionResult) {
-          throw new AppError('Failed to connect to PLC', 500);
+          throw new AppError('PLC not connected (reconnect failed)', 503);
         }
       }
   
@@ -492,7 +571,6 @@ export class PLCService {
    * @returns Promise with buffer and start offset or null if failed
    */
   private async readDBRange(dbNumber: number, dbInfo: { minOffset: number, totalSize: number }): Promise<{ buffer: Buffer, startOffset: number } | null> {
-    console.log('readDBRange', dbNumber, dbInfo);
     return new Promise((resolve) => {
       // Set 500ms timeout
       const timeout = setTimeout(() => {
@@ -526,6 +604,80 @@ export class PLCService {
     });
   }
 
+  /**
+   * Read a DB range using the async callback API (ReadArea) with a real timeout.
+   * This avoids blocking the event loop and lets us enforce a hard time limit.
+   */
+  private readDBRangeAsync(
+    dbNumber: number,
+    dbInfo: { minOffset: number; totalSize: number },
+    timeoutMs = 800
+  ): Promise<{ buffer: Buffer; startOffset: number } | null> {
+    // Nếu không có client hoặc totalSize không hợp lệ → trả null sớm
+    if (!this.client || !Number.isFinite(dbInfo.totalSize) || dbInfo.totalSize <= 0) {
+      return Promise.resolve(null);
+    }
+
+    // snap7 cần buffer được cấp sẵn
+    const buf = Buffer.alloc(dbInfo.totalSize);
+
+    return new Promise((resolve) => {
+      let settled = false;
+
+      // Timer cứng để cắt nhịp
+      const timer = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        console.warn(
+          `[DBRead timeout] DB=${dbNumber} start=${dbInfo.minOffset} size=${dbInfo.totalSize} > ${timeoutMs}ms`
+        );
+        // Timeout → có thể đánh dấu disconnect để lần sau gate sẽ reconnect
+        this.markDisconnected();
+        resolve(null);
+      }, timeoutMs);
+
+      try {
+        // Dùng ReadArea async: (area, db, start, amount, wordLen, buffer, cb)
+        // Ở đây ta đọc theo byte (S7WLByte) để lấy đúng totalSize byte liên tục
+        this.client.ReadArea(
+          snap7.S7AreaDB,
+          dbNumber,
+          dbInfo.minOffset,
+          dbInfo.totalSize,
+          snap7.S7WLByte,
+          buf,
+          (err: number /* or boolean depending binding */) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+
+            if (err) {
+              const text = this.client.ErrorText?.(err) ?? String(err);
+              console.warn(
+                `[DBRead error] DB=${dbNumber} start=${dbInfo.minOffset} size=${dbInfo.totalSize}: ${text}`
+              );
+              // Lỗi đọc → đánh dấu disconnect để gate sẽ reconnect ở lần sau
+              this.markDisconnected();
+              resolve(null);
+              return;
+            }
+
+            // Thành công
+            resolve({ buffer: buf, startOffset: dbInfo.minOffset });
+          }
+        );
+      } catch (e) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        console.warn(
+          `[DBRead exception] DB=${dbNumber} start=${dbInfo.minOffset} size=${dbInfo.totalSize}: ${String(e)}`
+        );
+        this.markDisconnected();
+        resolve(null);
+      }
+    });
+  }
   /**
    * Decode individual variable value from buffer
    * @param buffer - Buffer containing the data
@@ -609,7 +761,6 @@ export class PLCService {
       // 2) Nhánh 1: Dùng ConnectTo nếu tham số hợp lệ (dành cho S7-300/400, hoặc 1200/1500 vẫn OK)
       if (hostOK && rackOK && slotOK) {
         // ⚠️ Windows: bắt buộc 3 tham số, tất cả là số nguyên
-        console.log('[ConnectTo] host=%s rack=%d slot=%d types=', host, rack, slot, typeof host, typeof rack, typeof slot);
         const ret = this.client.ConnectTo(host, rack, slot);
         const ok = (ret === true) || (ret === 0);
         if (ok) return true;
@@ -617,7 +768,7 @@ export class PLCService {
         const code = this.client.LastError?.() ?? -1;
         const text = this.client.ErrorText?.(code) ?? `code=${code}`;
         console.warn(`ConnectTo failed: ${text}`);
-        try { this.client.Disconnect?.(); } catch {}
+        this.markDisconnected();
         // rơi xuống thử TSAP
       } else {
         console.warn('Skip ConnectTo because rack/slot are invalid; trying TSAP…');
@@ -633,17 +784,17 @@ export class PLCService {
         const code2 = this.client.LastError?.() ?? -1;
         const text2 = this.client.ErrorText?.(code2) ?? `code=${code2}`;
         console.warn(`TSAP Connect failed: ${text2}`);
-        try { this.client.Disconnect?.(); } catch {}
+        this.markDisconnected();
         return false;
       } catch (e2) {
         console.warn('TSAP Connect threw:', e2);
-        try { this.client.Disconnect?.(); } catch {}
+        this.markDisconnected();
         return false;
       }
     } catch (e) {
       // Nếu bạn vẫn thấy “Wrong arguments” ở đây, 100% tham số vào ConnectTo không đúng kiểu/số lượng
       console.warn('ConnectTo threw error:', e);
-      try { this.client.Disconnect?.(); } catch {}
+      this.markDisconnected();
       return false;
     }
   }
@@ -696,12 +847,13 @@ export class PLCService {
       return false;
     }
     if (this.isConnected()) return true;
-    const ok = await this.connectWithTimeout();
+    const ok = await this.ensureConnectedOrErr();
     if (ok) {
-      console.log(`PLC OK (${PLC_CONFIG.HOST}, Rack ${PLC_CONFIG.RACK}, Slot ${PLC_CONFIG.SLOT})`);
       return true;
     }
-    console.warn('PLC not reachable at startup');
+    console.error('PLC not reachable at startup');
     return false;
   }
+
+  
 }

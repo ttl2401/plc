@@ -8,12 +8,20 @@ import { cronjob as syncCarrierIndexCronjob } from './sync-carrier-index.cronjob
 import { cronjob as mappingCarrierWithProductCodeCronjob } from './mapping-carrier-with-product-code.cronjob';
 import { cronjob as syncPlcParameterMonitor } from './sync-plc-parameter-monitor.cronjob';
 
+import { initPlcWatchdogFromDB } from '@/services/watchdog.startup';
+import { plcService } from '@/services/singleton.service';
 
 async function cronjob(): Promise<void> {
   try {
     await connectMongoDB();
     await checkInfluxDB();
     
+    await initPlcWatchdogFromDB({
+      intervalMs: 7000,       // tuỳ biến
+      batchSize: 1,           // 1 điểm/nhịp cho nhẹ
+      maxConsecutiveFails: 3, // 3 nhịp lỗi liên tiếp => Disconnect
+    });
+
     const tasks: any[] = [];
 
     if(process.env.NODE_ENV === 'development'){
@@ -32,8 +40,11 @@ async function cronjob(): Promise<void> {
           for (const t of tasks) {
             try { t?.stop?.(); } catch {}
           }
+          plcService.stopWatchdog(); 
         } catch {}
         finally {
+          await closeInfluxDB();
+          await disconnectMongoDB();
           process.exit(0);
         }
        

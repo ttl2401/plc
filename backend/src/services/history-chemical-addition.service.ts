@@ -58,7 +58,6 @@ export class HistoryChemicalAdditionService {
         queryFilters.date.$lte = moment(to).endOf('day').format('YYYY-MM-DD');
       }
     }
-    console.log("query filter", query)
     return await HistoryChemicalAddition.paginate(queryFilters, options);
     
   }
