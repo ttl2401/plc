@@ -40,6 +40,6 @@ const pumpSchema = new Schema<IPump>(
 
 // Index for faster queries on name and key
 pumpSchema.index({ name: 1 });
-pumpSchema.index({ key: 1 }, { unique: true });
+pumpSchema.index({ key: 1 });
 
 export const Pump = mongoose.model<IPump>('Pumps', pumpSchema); 

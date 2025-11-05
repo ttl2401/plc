@@ -86,7 +86,7 @@ tankSchema.plugin(mongoosePaginate);
 // Indexes for faster queries
 tankSchema.index({ name: 1 });
 tankSchema.index({ groupKey: 1 });
-tankSchema.index({ key: 1 }, { unique: true });
+tankSchema.index({ key: 1 });
 
 // Compound index for groupKey and key
 tankSchema.index({ groupKey: 1, key: 1 });
