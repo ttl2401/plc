@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { PlcVariableService } from '../services/plc-variable.service';
-import { PLCService } from '../services/plc.service';
+import { plcService } from '@/services/singleton.service';
 import { returnMessage, returnError, returnPaginationMessage } from '@/controllers/base.controller';
 
 const plcVariableService = new PlcVariableService();
-const plcService = new PLCService();
 
 export const getPLCVariablesRobot = async (req: Request, res: Response, next: NextFunction) => {
   try {

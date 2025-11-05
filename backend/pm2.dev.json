@@ -7,7 +7,8 @@
         "watch": false,
         "env": {
           "NODE_ENV": "development"
-        }
+        },
+        "max_memory_restart": "500M"
       },
       {
         "name": "xima-cron",
@@ -16,7 +17,8 @@
         "watch": false,
         "env": {
           "NODE_ENV": "development"
-        }
+        },
+        "max_memory_restart": "500M"
       }
     ]
   }

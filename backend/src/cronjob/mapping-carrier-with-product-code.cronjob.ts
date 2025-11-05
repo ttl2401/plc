@@ -7,11 +7,10 @@ import { PlcVariableConfig } from '@/models/plc-variable-config.model'
 
 import { MappingCarrierCode } from '@/models/mapping-carrier-pick-product-code.model';
 
+import { onceAtATime } from '@/utils/once-at-a-time';
 
-export const cronjob = function(){
-
-    const task = cron.schedule('* * * * * *', async function () {
-        console.log("running cronjob Mapping Carrier ID with product code");
+async function doMappingCarrierWithProductCode() {
+    console.log("running cronjob Mapping Carrier ID with product code");
 
         const currentIndex = await PlcVariableConfig.findOne({key: 'carrier_index' });
         if(currentIndex?.value) {
@@ -39,7 +38,25 @@ export const cronjob = function(){
             }
             
         }
+}
+
+const job = onceAtATime(doMappingCarrierWithProductCode, {
+    onSkip: () => {
+        console.warn('[mapping-carrier-with-product-code] skip: previous tick still running');
+    },
+});
+
+export const cronjob = function(){
+
+    const task = cron.schedule('* * * * * *', async function () {
         
+        try {
+            await job();
+        }
+        catch (e){
+            console.error(`Error mapping carrier with product code with e `, e)
+        }
+
     })
     return task; 
 

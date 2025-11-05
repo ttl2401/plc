@@ -14,31 +14,29 @@ async function cronjob(): Promise<void> {
     await connectMongoDB();
     await checkInfluxDB();
     
-    let task1:any;  
+    const tasks: any[] = [];
+
     if(process.env.NODE_ENV === 'development'){
-      task1 = randomDataCronjob();
+      tasks.push(randomDataCronjob());
     }
-    
-    const task4 = mappingCarrierWithProductCodeCronjob();
-    const task2 = await robotDataCronjob();
-    // const task3 = syncCarrierIndexCronjob();
-    const task5 = await syncPlcParameterMonitor();
+
+    tasks.push(mappingCarrierWithProductCodeCronjob());
+    tasks.push(robotDataCronjob());
+    tasks.push(syncPlcParameterMonitor());
+    // tasks.push(syncCarrierIndexCronjob());
 
     console.log('✅ Cron scheduled and DBs connected');
     const shutdown = async (signal: string) => {
         console.log(`\n${signal} received. Shutting down...`);
         try { 
-          if(task1){
-            task1.stop();
+          for (const t of tasks) {
+            try { t?.stop?.(); } catch {}
           }
-          task2.stop();
-          // task3.stop();
-          task4.stop();
-          task5.stop();
         } catch {}
-        await closeInfluxDB();
-        await disconnectMongoDB();
-        process.exit(0);
+        finally {
+          process.exit(0);
+        }
+       
     };
 
     process.on('SIGINT', () => shutdown('SIGINT'));

@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { mappingRobotInLine, mappingTankNumberInLine } from '@/config/constant';
-import { PLCService } from '@/services/plc.service';
+
 import { PlcVariableConfig } from '@/models/plc-variable-config.model';
 import { RobotWorkingHistory } from '@/models/robot-working-history.model';
 import { MappingCarrierCode } from '@/models/mapping-carrier-pick-product-code.model';
@@ -8,19 +8,11 @@ import { MappingTankProductCarrier } from '@/models/mapping-current-tank-product
 
 import { elementTankMonitorWithTemperatureAndElectric } from '@/config/constant';
 
-const plcService = new PLCService();
+import { plcService } from '@/services/singleton.service';
 
-export const cronjob = async function(){
-    console.log("running cronjob Robot Data");
+import { onceAtATime } from '@/utils/once-at-a-time';
 
-    await PlcVariableConfig.findOneAndUpdate(
-        { key: "loading_position" },
-        { value: 1 }, // Currently loading position only at position 1
-        { new: true, upsert: true}
-    );
-
-    const task = cron.schedule('* * * * * *', async function () {
-       
+const doRobotData = async () => {
         const variablesCarrierWithPLCValues = await plcService.readVariablesFromPLC({type: 'May_tinh_PLC_Send_Carrier'});
         for (const variable of variablesCarrierWithPLCValues){
             variable.value = variable.value ? Math.round(variable.value * 100) / 100 : 0;
@@ -217,6 +209,33 @@ export const cronjob = async function(){
                 }
             }
         }
+}
+
+const job = onceAtATime( 
+    doRobotData, {
+    onSkip: () => {
+      console.warn('[read-robot-data] skip: previous tick still running');
+    },
+});
+
+export const cronjob = async function(){
+    console.log("running cronjob Robot Data");
+
+    await PlcVariableConfig.findOneAndUpdate(
+        { key: "loading_position" },
+        { value: 1 }, 
+        { new: true, upsert: true}
+    );
+
+    const task = cron.schedule('* * * * * *', async function () {
+       
+        try {
+            await job();
+        }
+        catch (e){
+            console.error(`Error read robot data with e `, e)
+        }
+
         
     })
     return task; 

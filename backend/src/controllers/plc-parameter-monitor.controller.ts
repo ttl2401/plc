@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { PLCService } from '../services/plc.service';
+
+import { plcService } from '@/services/singleton.service';
 import { PlcVariableService } from '../services/plc-variable.service';
 import { returnMessage } from '@/controllers/base.controller';
 
-const plcService = new PLCService();
 const plcVariableService = new PlcVariableService();
 
 export const getPLCTemperature = async (req: Request, res: Response, next: NextFunction) => {

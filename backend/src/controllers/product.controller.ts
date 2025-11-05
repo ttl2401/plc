@@ -9,8 +9,9 @@ import { getList, getDetail, getSettingDetail } from '@/transforms/product.trans
 import { validationResult } from 'express-validator';
 
 import exceljs from 'exceljs';
-import { PLCService } from '@/services/plc.service';
-const plcService = new PLCService();
+
+import { plcService } from '@/services/singleton.service';
+
 const productService = new ProductService();
 const userActivityService = new UserActivityService();
 const plcVariableConfigService = new PlcVariableConfigService();

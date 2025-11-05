@@ -14,6 +14,46 @@ try {
 
 export class PLCService {
   private client: any;
+  private watchdogTimer?: ReturnType<typeof setInterval>;
+
+  /**
+   * Đọc cực nhẹ để giữ/kiểm tra kết nối. Nếu fail → Disconnect để lần sau tự connect lại.
+   * @param db DB dùng làm “ping” (nên là DB luôn tồn tại, ví dụ 1)
+   * @param byteOffset byte offset nhỏ, ví dụ 0
+   * @param intervalMs chu kỳ ping (ms), mặc định 7000ms
+   */
+  public startWatchdog(db = 1, byteOffset = 0, intervalMs = 7000) {
+    if (this.watchdogTimer) return; // đã bật
+    this.watchdogTimer = setInterval(() => {
+      (async () => {
+        try {
+          if (!this.client) return; // đang ở chế độ SIMULATION
+          // nếu chưa kết nối, thử connect
+          const ok = this.isConnected() || await this.connectWithTimeout();
+          if (!ok) return;
+
+          // đọc 1 byte cực nhỏ để giữ phiên sống (DBRead đồng bộ trong snap7 binding)
+          const buf = this.client.DBRead(db, byteOffset, 1);
+          if (!buf) {
+            const code = this.client.LastError?.();
+            const text = this.client.ErrorText?.(code) ?? code;
+            console.warn(`[WATCHDOG] DBRead failed: ${text}`);
+            try { this.client.Disconnect?.(); } catch {}
+          }
+        } catch (e: any) {
+          console.warn('[WATCHDOG] error:', e?.message ?? String(e));
+          try { this.client.Disconnect?.(); } catch {}
+        }
+      })();
+    }, intervalMs);
+  }
+
+  public stopWatchdog() {
+    if (this.watchdogTimer) {
+      clearInterval(this.watchdogTimer);
+      this.watchdogTimer = undefined;
+    }
+  }
 
   private tcpProbe102(host: string, timeoutMs = 500): Promise<boolean> {
     const net = require('net');

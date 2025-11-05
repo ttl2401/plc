@@ -8,11 +8,13 @@ import { temperatureVariableControl, electricityVariableControl } from '@/config
 import { listTankMonitorWithTemperatureAndElectric } from '@/config/constant';
 import { PlcVariable } from '@/models/plc-variable.model';
 import { MappingTankProductCarrier, IMappingTankProductCarrier } from '@/models/mapping-current-tank-product-carrier.model';
-import { PLCService } from '@/services/plc.service';
+
 import { Point } from '@influxdata/influxdb-client'
 import { writeApi, queryApi } from '@/config/influxdb'
 
-const plcService = new PLCService();
+import { plcService } from '@/services/singleton.service';
+import { onceAtATime } from '@/utils/once-at-a-time';
+
 
 type ControlItem = {
     name: string;
@@ -126,54 +128,65 @@ function toTankMap(
 }
 
 
-export const cronjob = async function(){
-    const typeTemperature = await PlcVariable.find({ type: 'May_tinh_Nhiet_Muc' }).sort({ name: 1 });
-    const typeElectricity = await PlcVariable.find({ type: 'May_tinh_Chinh_luu_R' }).sort({ name: 1 });
+
+
+let typeTemperature:any, typeElectricity:any, listTemperatureWithTankId:ControlItem[], listElectricityWithTankId:ControlItem[];
+
+const doSyncPlcParameterMonitor = async () => {
+    console.log("running cronjob Sync Parameter Temperature and Electricity Cronjob");
+
+    const variablesTemperature = await plcService.readVariablesFromPLC({type: 'May_tinh_Nhiet_Muc'}, typeTemperature);
+    const variablesElectricity = await plcService.readVariablesFromPLC({type: 'May_tinh_Chinh_luu_R'}, typeElectricity);
     
-    const listTemperatureWithTankId: ControlItem[] = temperatureVariableControl.filter(e => e.tankId != null);
-    const listElectricityWithTankId: ControlItem[] = electricityVariableControl.filter(e => e.tankId != null);
+    await storePlcVariablesToInflux(
+        listTemperatureWithTankId, variablesTemperature, 
+        listElectricityWithTankId, variablesElectricity,
+        listTankMonitorWithTemperatureAndElectric
+    );
+
+
+    const opsTemp = variablesTemperature.map(({ name, type, value }) => ({
+        updateOne: {
+          filter: { name, ...(type ? { type } : {}) },
+          update: { $set: { value, updatedAt: new Date() } },
+          upsert: false,
+        },
+    }));
+    await PlcVariable.bulkWrite(opsTemp, { ordered: false });
+
+    const opsElec = variablesElectricity.map(({ name, type, value }) => ({
+        updateOne: {
+          filter: { name, ...(type ? { type } : {}) },
+          update: { $set: { value, updatedAt: new Date() } },
+          upsert: false,
+        },
+    }));
+    await PlcVariable.bulkWrite(opsElec, { ordered: false });
+}
+
+const job = onceAtATime(
+  doSyncPlcParameterMonitor, {
+    onSkip: () => {
+        console.warn('[sync-plc-parameter-monitor] skip: previous tick still running');
+    },
+});
+
+
+
+export const cronjob = async function(){
+    typeTemperature = await PlcVariable.find({ type: 'May_tinh_Nhiet_Muc' }).sort({ name: 1 });
+    typeElectricity = await PlcVariable.find({ type: 'May_tinh_Chinh_luu_R' }).sort({ name: 1 });
+    
+    listTemperatureWithTankId = temperatureVariableControl.filter(e => e.tankId != null);
+    listElectricityWithTankId = electricityVariableControl.filter(e => e.tankId != null);
 
     const task = cron.schedule('* * * * * *', async function () {
         try {
-            console.log("running cronjob Sync Parameter Temperature and Electricity Cronjob");
-
-            /*
-            if (!plcService.isConnected()){
-              console.log("PLC not connected. Sync failed");
-                return;
-            }
-            */
-            const variablesTemperature = await plcService.readVariablesFromPLC({type: 'May_tinh_Nhiet_Muc'}, typeTemperature);
-            const variablesElectricity = await plcService.readVariablesFromPLC({type: 'May_tinh_Chinh_luu_R'}, typeElectricity);
-            
-            await storePlcVariablesToInflux(
-                listTemperatureWithTankId, variablesTemperature, 
-                listElectricityWithTankId, variablesElectricity,
-                listTankMonitorWithTemperatureAndElectric
-            );
-
-
-            const opsTemp = variablesTemperature.map(({ name, type, value }) => ({
-                updateOne: {
-                  filter: { name, ...(type ? { type } : {}) },
-                  update: { $set: { value, updatedAt: new Date() } },
-                  upsert: false,
-                },
-            }));
-            await PlcVariable.bulkWrite(opsTemp, { ordered: false });
-
-            const opsElec = variablesElectricity.map(({ name, type, value }) => ({
-                updateOne: {
-                  filter: { name, ...(type ? { type } : {}) },
-                  update: { $set: { value, updatedAt: new Date() } },
-                  upsert: false,
-                },
-            }));
-            await PlcVariable.bulkWrite(opsElec, { ordered: false });
+            await job();
 
         }
         catch (e){
-            console.error(`Error sync carrier index with e `, e)
+            console.error(`Error sync plc parameter monitor with e `, e)
         }
 
         

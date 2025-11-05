@@ -4,12 +4,13 @@ import _ from 'lodash';
 import { TankGroupService } from '@/services/tank-group.service';
 import { TankService } from '@/services/tank.service';
 import { RobotService } from '@/services/robot.service';
-import { PLCService } from '@/services/plc.service';
+
+import { plcService } from '@/services/singleton.service';
 import { PlcVariableService } from '@/services/plc-variable.service';
 const tankGroupService = new TankGroupService();
 const tankService = new TankService();
 const robotService = new RobotService();
-const plcService = new PLCService();
+
 const plcVariableService = new PlcVariableService();
 
 import { mappingTankToVariablesSettingTimer, mappingTankToVariablesSettingChemistry } from '@/transforms/plc-variable.transform'

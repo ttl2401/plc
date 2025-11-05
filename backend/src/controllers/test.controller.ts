@@ -2,9 +2,9 @@ import { Point } from '@influxdata/influxdb-client'
 import { writeApi, queryApi } from '@/config/influxdb'
 import { returnMessage, returnError } from '@/controllers/base.controller'
 import { Request, Response, NextFunction } from 'express'
-import { PLCService } from '@/services/plc.service'
 
-const plcService = new PLCService();
+import { plcService } from '@/services/singleton.service';
+
 
 // Example data array
 const data = [
