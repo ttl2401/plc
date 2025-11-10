@@ -152,6 +152,8 @@ const doSyncPlcParameterMonitor = async () => {
           upsert: false,
         },
     }));
+
+    console.log("opsTemp value: ", opsTemp)
     await PlcVariable.bulkWrite(opsTemp, { ordered: false });
 
     const opsElec = variablesElectricity.map(({ name, type, value }) => ({

@@ -213,9 +213,9 @@ export class PLCService {
         this.setQueueBusy(false);
         
         // Process results and decode individual variable values
-
+        if(type == 'May_tinh_Nhiet_Muc'){
         console.log("dbReadResults.entries()", dbReadResults.entries())
-
+        }
         for (const [index, result] of dbReadResults.entries()) {
 
           if(type == 'May_tinh_Nhiet_Muc'){
@@ -236,7 +236,7 @@ export class PLCService {
                 );
                 
                 if(type == 'May_tinh_Nhiet_Muc'){
-                  console.log(`Offset ${result.value.startOffset} has value ${value}`)
+                  console.log(`Offset ${variable.offset} has value ${value}`)
                 }
                 if (value !== null) {
                   variable.value = value;
