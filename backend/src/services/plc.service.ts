@@ -214,12 +214,12 @@ export class PLCService {
         
         // Process results and decode individual variable values
 
-        
+        console.log("dbReadResults.entries()", dbReadResults.entries())
 
         for (const [index, result] of dbReadResults.entries()) {
 
           if(type == 'May_tinh_Nhiet_Muc'){
-            console.warn("[index, result]", [index, result])
+            console.log("[index, result]", [index, result])
           }
 
           const dbNumber = Object.keys(dbGroups)[index];
@@ -235,7 +235,9 @@ export class PLCService {
                   result.value.startOffset
                 );
                 
-                
+                if(type == 'May_tinh_Nhiet_Muc'){
+                  console.log(`Offset ${result.value.startOffset} has value ${value}`)
+                }
                 if (value !== null) {
                   variable.value = value;
                 }
