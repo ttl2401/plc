@@ -213,6 +213,11 @@ export class PLCService {
         this.setQueueBusy(false);
         
         // Process results and decode individual variable values
+
+        if(type == 'May_tinh_Nhiet_Muc'){
+          console.warn("dbReadResults.entries()", dbReadResults.entries())
+        }
+
         for (const [index, result] of dbReadResults.entries()) {
           const dbNumber = Object.keys(dbGroups)[index];
           const dbInfo = dbGroups[dbNumber];
