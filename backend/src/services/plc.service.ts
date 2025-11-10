@@ -207,7 +207,7 @@ export class PLCService {
         this.setQueueBusy(true);  // <-- để watchdog skip nhịp này
         const dbReadResults = await Promise.allSettled(
           Object.entries(dbGroups).map(([dbNumber, dbInfo]) =>
-            this.readDBRangeAsync(parseInt(dbNumber, 10), dbInfo /*, optional timeoutMs */)
+            this.readDBRange(parseInt(dbNumber, 10), dbInfo /*, optional timeoutMs */)
           )
         );
         this.setQueueBusy(false);
@@ -587,7 +587,7 @@ export class PLCService {
       // Set 500ms timeout
       const timeout = setTimeout(() => {
         resolve(null);
-      }, 500);
+      }, 800);
 
       try {
         // Read the entire range from PLC DB
