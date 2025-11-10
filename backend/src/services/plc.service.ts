@@ -626,7 +626,7 @@ export class PLCService {
     timeoutMs = 800
   ): Promise<{ buffer: Buffer; startOffset: number } | null> {
     if (!this.client) return Promise.resolve(null);
-  
+    console.log(`read DBNumber ${dbNumber} with minOffset ${dbInfo.minOffset}`);
     // 1) Ép kiểu an toàn: số nguyên không âm
     const dbNum   = Math.trunc(Number(dbNumber));
     const start   = Math.trunc(Number(dbInfo?.minOffset));
