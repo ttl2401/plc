@@ -48,7 +48,7 @@ const doRobotData = async () => {
                 let productCode;
                 // Store in History
                 const query: any = {
-                    robotKey : mappingRobotInLine[1],
+                    robotKey : mappingRobotInLine[1]?.key,
                     carrierPick :  Carrier_Ma_1, // Id of item in line
                     tankId : Ho_Ma_1,
                     action : type
@@ -117,7 +117,7 @@ const doRobotData = async () => {
                 let productCode;
                 // Store in History
                 const query: any = {
-                    robotKey : mappingRobotInLine[2],
+                    robotKey : mappingRobotInLine[2]?.key,
                     carrierPick :  Carrier_Ma_2, // Id of item in line
                     tankId : Ho_Ma_2,
                     action : type
@@ -172,7 +172,7 @@ const doRobotData = async () => {
                 let productCode;
                 // Store in History
                 const query: any = {
-                    robotKey : mappingRobotInLine[3],
+                    robotKey : mappingRobotInLine[3]?.key,
                     carrierPick :  Carrier_Ma_3, // Id of item in line
                     tankId : Ho_Ma_3,
                     action : type
