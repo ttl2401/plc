@@ -613,66 +613,90 @@ export class PLCService {
     dbInfo: { minOffset: number; totalSize: number },
     timeoutMs = 800
   ): Promise<{ buffer: Buffer; startOffset: number } | null> {
-    // Nếu không có client hoặc totalSize không hợp lệ → trả null sớm
-    if (!this.client || !Number.isFinite(dbInfo.totalSize) || dbInfo.totalSize <= 0) {
+    if (!this.client) return Promise.resolve(null);
+  
+    // 1) Ép kiểu an toàn: số nguyên không âm
+    const dbNum   = Math.trunc(Number(dbNumber));
+    const start   = Math.trunc(Number(dbInfo?.minOffset));
+    const amount  = Math.trunc(Number(dbInfo?.totalSize));
+    if (!Number.isFinite(dbNum) || dbNum < 0 ||
+        !Number.isFinite(start) || start < 0 ||
+        !Number.isFinite(amount) || amount <= 0) {
+      console.warn('[ReadRange] Bad params',
+        { dbNumber, minOffset: dbInfo?.minOffset, totalSize: dbInfo?.totalSize,
+          dbNum, start, amount, types: {
+            dbNumber: typeof dbNumber,
+            minOffset: typeof dbInfo?.minOffset,
+            totalSize: typeof dbInfo?.totalSize
+          }
+        });
       return Promise.resolve(null);
     }
-
-    // snap7 cần buffer được cấp sẵn
-    const buf = Buffer.alloc(dbInfo.totalSize);
-
+  
+    // 2) Fallback cho hằng số nếu binding không có
+    const AREA_DB = (snap7 && typeof snap7.S7AreaDB  !== 'undefined') ? snap7.S7AreaDB  : 0x84; // DB
+    const WL_BYTE = (snap7 && typeof snap7.S7WLByte !== 'undefined') ? snap7.S7WLByte : 0x02;  // Byte
+  
+    // 3) Chuẩn bị buffer đúng kích cỡ
+    const buf = Buffer.allocUnsafe(amount);
+  
     return new Promise((resolve) => {
       let settled = false;
-
-      // Timer cứng để cắt nhịp
       const timer = setTimeout(() => {
         if (settled) return;
         settled = true;
-        console.warn(
-          `[DBRead timeout] DB=${dbNumber} start=${dbInfo.minOffset} size=${dbInfo.totalSize} > ${timeoutMs}ms`
-        );
-        // Timeout → có thể đánh dấu disconnect để lần sau gate sẽ reconnect
+        console.warn(`[DBRead timeout] DB=${dbNum} start=${start} size=${amount} > ${timeoutMs}ms`);
         this.markDisconnected();
         resolve(null);
       }, timeoutMs);
-
+  
       try {
-        // Dùng ReadArea async: (area, db, start, amount, wordLen, buffer, cb)
-        // Ở đây ta đọc theo byte (S7WLByte) để lấy đúng totalSize byte liên tục
-        this.client.ReadArea(
-          snap7.S7AreaDB,
-          dbNumber,
-          dbInfo.minOffset,
-          dbInfo.totalSize,
-          snap7.S7WLByte,
-          buf,
-          (err: number /* or boolean depending binding */) => {
-            if (settled) return;
-            settled = true;
-            clearTimeout(timer);
-
-            if (err) {
-              const text = this.client.ErrorText?.(err) ?? String(err);
-              console.warn(
-                `[DBRead error] DB=${dbNumber} start=${dbInfo.minOffset} size=${dbInfo.totalSize}: ${text}`
-              );
-              // Lỗi đọc → đánh dấu disconnect để gate sẽ reconnect ở lần sau
-              this.markDisconnected();
-              resolve(null);
-              return;
-            }
-
-            // Thành công
-            resolve({ buffer: buf, startOffset: dbInfo.minOffset });
+        if (typeof this.client.ReadArea !== 'function') {
+          clearTimeout(timer);
+          console.warn('[ReadRange] client.ReadArea is not a function');
+          resolve(null);
+          return;
+        }
+  
+        // 4) Gọi ReadArea với tham số đã “sạch”
+        this.client.ReadArea(AREA_DB, dbNum, start, amount, WL_BYTE, buf, (err: any) => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+  
+          if (err) {
+            const code = Number(err);
+            const text = this.client?.ErrorText?.(code) ?? String(err);
+            console.warn(`[DBRead error] DB=${dbNum} start=${start} size=${amount}: ${text}`);
+            this.markDisconnected();
+            resolve(null);
+            return;
           }
-        );
-      } catch (e) {
+          // 5) Extra guard: đảm bảo buffer có đủ bytes
+          if (!buf || buf.length < amount) {
+            console.warn(`[DBRead short buffer] expect=${amount} got=${buf?.length ?? 'n/a'}`);
+            resolve(null);
+            return;
+          }
+          resolve({ buffer: buf, startOffset: start });
+        });
+      } catch (e: any) {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
-        console.warn(
-          `[DBRead exception] DB=${dbNumber} start=${dbInfo.minOffset} size=${dbInfo.totalSize}: ${String(e)}`
-        );
+  
+        // In đầy đủ ngữ cảnh để bắt đúng nguyên nhân
+        console.warn('[DBRead exception] Wrong arguments?', {
+          message: e?.message ?? String(e),
+          dbNum, start, amount,
+          types: {
+            AREA_DB: typeof AREA_DB,
+            WL_BYTE: typeof WL_BYTE,
+            dbNum: typeof dbNum,
+            start: typeof start,
+            amount: typeof amount
+          }
+        });
         this.markDisconnected();
         resolve(null);
       }
