@@ -626,7 +626,7 @@ export class PLCService {
     timeoutMs = 800
   ): Promise<{ buffer: Buffer; startOffset: number } | null> {
     if (!this.client) return Promise.resolve(null);
-    console.log(`read DBNumber ${dbNumber} with minOffset ${dbInfo.minOffset}`);
+    
     // 1) Ép kiểu an toàn: số nguyên không âm
     const dbNum   = Math.trunc(Number(dbNumber));
     const start   = Math.trunc(Number(dbInfo?.minOffset));
@@ -644,7 +644,7 @@ export class PLCService {
         });
       return Promise.resolve(null);
     }
-  
+    console.log(`read DBNumber ${dbNum} with start offet = ${start}`);
     // 2) Fallback cho hằng số nếu binding không có
     const AREA_DB = (snap7 && typeof snap7.S7AreaDB  !== 'undefined') ? snap7.S7AreaDB  : 0x84; // DB
     const WL_BYTE = (snap7 && typeof snap7.S7WLByte !== 'undefined') ? snap7.S7WLByte : 0x02;  // Byte
