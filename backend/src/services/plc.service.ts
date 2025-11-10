@@ -207,7 +207,7 @@ export class PLCService {
         this.setQueueBusy(true);  // <-- để watchdog skip nhịp này
         const dbReadResults = await Promise.allSettled(
           Object.entries(dbGroups).map(([dbNumber, dbInfo]) =>
-            this.readDBRange(parseInt(dbNumber, 10), dbInfo /*, optional timeoutMs */)
+            this.readDBRangeAsync(parseInt(dbNumber, 10), dbInfo /*, optional timeoutMs */)
           )
         );
         this.setQueueBusy(false);
@@ -620,100 +620,100 @@ export class PLCService {
    * Read a DB range using the async callback API (ReadArea) with a real timeout.
    * This avoids blocking the event loop and lets us enforce a hard time limit.
    */
+  // Trong class PLCService — thay thế toàn bộ hàm readDBRangeAsync bằng bản dưới:
   private readDBRangeAsync(
     dbNumber: number,
     dbInfo: { minOffset: number; totalSize: number },
     timeoutMs = 800
   ): Promise<{ buffer: Buffer; startOffset: number } | null> {
     if (!this.client) return Promise.resolve(null);
-    
-    // 1) Ép kiểu an toàn: số nguyên không âm
-    const dbNum   = Math.trunc(Number(dbNumber));
-    const start   = Math.trunc(Number(dbInfo?.minOffset));
-    const amount  = Math.trunc(Number(dbInfo?.totalSize));
+
+    // 1) Ép kiểu an toàn
+    const dbNum  = Math.trunc(Number(dbNumber));
+    const start  = Math.trunc(Number(dbInfo?.minOffset));
+    const amount = Math.trunc(Number(dbInfo?.totalSize));
     if (!Number.isFinite(dbNum) || dbNum < 0 ||
         !Number.isFinite(start) || start < 0 ||
         !Number.isFinite(amount) || amount <= 0) {
-      console.warn('[ReadRange] Bad params',
-        { dbNumber, minOffset: dbInfo?.minOffset, totalSize: dbInfo?.totalSize,
-          dbNum, start, amount, types: {
-            dbNumber: typeof dbNumber,
-            minOffset: typeof dbInfo?.minOffset,
-            totalSize: typeof dbInfo?.totalSize
-          }
-        });
+      console.warn('[ReadRange] Bad params', {
+        dbNumber, minOffset: dbInfo?.minOffset, totalSize: dbInfo?.totalSize,
+        parsed: { dbNum, start, amount }
+      });
       return Promise.resolve(null);
     }
-    console.log(`read DBNumber ${dbNum} with start offet = ${start}`);
-    // 2) Fallback cho hằng số nếu binding không có
-    const AREA_DB = (snap7 && typeof snap7.S7AreaDB  !== 'undefined') ? snap7.S7AreaDB  : 0x84; // DB
-    const WL_BYTE = (snap7 && typeof snap7.S7WLByte !== 'undefined') ? snap7.S7WLByte : 0x02;  // Byte
-  
-    // 3) Chuẩn bị buffer đúng kích cỡ
-    const buf = Buffer.allocUnsafe(amount);
-  
+
+    // 2) Constants fallback cho ReadArea
+    const AREA_DB = (typeof snap7?.S7AreaDB  !== 'undefined') ? snap7.S7AreaDB  : 0x84;
+    const WL_BYTE = (typeof snap7?.S7WLByte !== 'undefined') ? snap7.S7WLByte : 0x02;
+
     return new Promise((resolve) => {
       let settled = false;
-      const timer = setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        console.warn(`[DBRead timeout] DB=${dbNum} start=${start} size=${amount} > ${timeoutMs}ms`);
-        this.markDisconnected();
-        resolve(null);
-      }, timeoutMs);
-  
-      try {
-        if (typeof this.client.ReadArea !== 'function') {
-          clearTimeout(timer);
-          console.warn('[ReadRange] client.ReadArea is not a function');
-          resolve(null);
-          return;
-        }
-  
-        // 4) Gọi ReadArea với tham số đã “sạch”
-        this.client.ReadArea(AREA_DB, dbNum, start, amount, WL_BYTE, buf, (err: any) => {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timer);
-  
-          if (err) {
-            const code = Number(err);
-            const text = this.client?.ErrorText?.(code) ?? String(err);
-            console.warn(`[DBRead error] DB=${dbNum} start=${start} size=${amount}: ${text}`);
-            this.markDisconnected();
-            resolve(null);
-            return;
-          }
-          // 5) Extra guard: đảm bảo buffer có đủ bytes
-          if (!buf || buf.length < amount) {
-            console.warn(`[DBRead short buffer] expect=${amount} got=${buf?.length ?? 'n/a'}`);
-            resolve(null);
-            return;
-          }
-          resolve({ buffer: buf, startOffset: start });
-        });
-      } catch (e: any) {
+      const done = (out: { buffer: Buffer; startOffset: number } | null) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
-  
-        // In đầy đủ ngữ cảnh để bắt đúng nguyên nhân
-        console.warn('[DBRead exception] Wrong arguments?', {
-          message: e?.message ?? String(e),
-          dbNum, start, amount,
-          types: {
-            AREA_DB: typeof AREA_DB,
-            WL_BYTE: typeof WL_BYTE,
-            dbNum: typeof dbNum,
-            start: typeof start,
-            amount: typeof amount
-          }
-        });
+        resolve(out);
+      };
+
+      const timer = setTimeout(() => {
+        console.warn(`[DBRead timeout] DB=${dbNum} start=${start} size=${amount} > ${timeoutMs}ms`);
         this.markDisconnected();
-        resolve(null);
+        done(null);
+      }, timeoutMs);
+
+      try {
+        // 3) Nhánh 1: Dùng DBRead async nếu có (khuyến nghị)
+        if (typeof this.client.DBRead === 'function' && this.client.DBRead.length >= 4) {
+          this.client.DBRead(dbNum, start, amount, (err: any, res?: Buffer) => {
+            if (err) {
+              const code = Number(err);
+              const text = this.client?.ErrorText?.(code) ?? String(err);
+              console.warn(`[DBRead error] DB=${dbNum} start=${start} size=${amount}: ${text}`);
+              this.markDisconnected();
+              return done(null);
+            }
+            if (!res || res.length < amount) {
+              console.warn(`[DBRead short buffer] expect=${amount} got=${res?.length ?? 'n/a'}`);
+              return done(null);
+            }
+            return done({ buffer: res, startOffset: start });
+          });
+          return; // đã chọn nhánh DBRead
+        }
+
+        // 4) Nhánh 2: Fallback ReadArea async (không truyền buffer đầu vào!)
+        if (typeof this.client.ReadArea === 'function') {
+          this.client.ReadArea(AREA_DB, dbNum, start, amount, WL_BYTE, (err: any, res?: Buffer) => {
+            if (err) {
+              const code = Number(err);
+              const text = this.client?.ErrorText?.(code) ?? String(err);
+              console.warn(`[ReadArea error] DB=${dbNum} start=${start} size=${amount}: ${text}`);
+              this.markDisconnected();
+              return done(null);
+            }
+            if (!res || res.length < amount) {
+              console.warn(`[ReadArea short buffer] expect=${amount} got=${res?.length ?? 'n/a'}`);
+              return done(null);
+            }
+            return done({ buffer: res, startOffset: start });
+          });
+          return;
+        }
+
+        // 5) Không có API async -> báo lỗi
+        console.warn('[ReadRange] No async DBRead/ReadArea available on client');
+        return done(null);
+      } catch (e: any) {
+        console.warn(
+          '[DBRead exception] Wrong arguments?', 
+          { msg: e?.message ?? String(e), dbNum, start, amount }
+        );
+        this.markDisconnected();
+        return done(null);
       }
     });
   }
+
   /**
    * Decode individual variable value from buffer
    * @param buffer - Buffer containing the data
