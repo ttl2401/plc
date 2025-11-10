@@ -171,8 +171,8 @@ export class PLCService {
    * @returns Promise<IPlcVariable[]> - Array of all PLC variables with current values from PLC
    */
   async readVariablesFromPLC(queries: any, listVariables?: any | null): Promise<IPlcVariable[]> {
+    const { type } = queries;
     try {
-      const { type } = queries;
       
       // First, fetch all variables from MongoDB
       const variables = listVariables ? listVariables : (await PlcVariable.find({ type }).sort({ name: 1 }).lean());
@@ -232,14 +232,18 @@ export class PLCService {
                   variable.value = value;
                 }
               } catch (decodeError) {
+                if(type == 'May_tinh_Nhiet_Muc')
                 console.warn(`Failed to decode variable ${variable.name}:`, decodeError);
               }
             }
           } else {
             // Keep original values if DB read failed
-            console.warn('--------------------------------');
+            if(type == 'May_tinh_Nhiet_Muc'){
+              console.warn('--------------------------------');
             console.warn(`Failed to read DB ${dbNumber}, keeping stored values for ${dbInfo.variables.length} variables`);
             console.warn('--------------------------------');
+            }   
+            
           }
         }
 
