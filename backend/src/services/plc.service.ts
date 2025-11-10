@@ -213,14 +213,8 @@ export class PLCService {
         this.setQueueBusy(false);
         
         // Process results and decode individual variable values
-        if(type == 'May_tinh_Nhiet_Muc'){
-        console.log("dbReadResults.entries()", dbReadResults.entries())
-        }
+       
         for (const [index, result] of dbReadResults.entries()) {
-
-          if(type == 'May_tinh_Nhiet_Muc'){
-            console.log("[index, result]", [index, result])
-          }
 
           const dbNumber = Object.keys(dbGroups)[index];
           const dbInfo = dbGroups[dbNumber];
@@ -242,17 +236,17 @@ export class PLCService {
                   variable.value = value;
                 }
               } catch (decodeError) {
-                if(type == 'May_tinh_Nhiet_Muc')
+      
                 console.warn(`Failed to decode variable ${variable.name}:`, decodeError);
               }
             }
           } else {
             // Keep original values if DB read failed
-            if(type == 'May_tinh_Nhiet_Muc'){
+          
               console.warn('--------------------------------');
-            console.warn(`Failed to read DB ${dbNumber}, keeping stored values for ${dbInfo.variables.length} variables`);
-            console.warn('--------------------------------');
-            }   
+              console.warn(`Failed to read DB ${dbNumber}, keeping stored values for ${dbInfo.variables.length} variables`);
+              console.warn('--------------------------------');
+             
             
           }
         }
