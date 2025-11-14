@@ -213,6 +213,7 @@ const doRobotData = async () => {
 
 const job = onceAtATime( 
     doRobotData, {
+    timeoutMs: 5000,
     onSkip: () => {
       console.warn('[read-robot-data] skip: previous tick still running');
     },
