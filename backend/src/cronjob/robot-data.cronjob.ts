@@ -228,7 +228,7 @@ export const cronjob = async function(){
         { new: true, upsert: true}
     );
 
-    const task = cron.schedule('* * * * * *', async function () {
+    const task = cron.schedule('*/2 * * * * *', async function () {
        
         try {
             await job();
