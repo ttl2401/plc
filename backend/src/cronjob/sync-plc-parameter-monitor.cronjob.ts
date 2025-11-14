@@ -133,8 +133,7 @@ function toTankMap(
 let typeTemperature:any, typeElectricity:any, listTemperatureWithTankId:ControlItem[], listElectricityWithTankId:ControlItem[];
 
 const doSyncPlcParameterMonitor = async () => {
-    console.log("running cronjob Sync Parameter Temperature and Electricity Cronjob");
-
+    
     const variablesTemperature = await plcService.readVariablesFromPLC({type: 'May_tinh_Nhiet_Muc'}, typeTemperature);
     const variablesElectricity = await plcService.readVariablesFromPLC({type: 'May_tinh_Chinh_luu_R'}, typeElectricity);
     
@@ -180,6 +179,8 @@ export const cronjob = async function(){
     
     listTemperatureWithTankId = temperatureVariableControl.filter(e => e.tankId != null);
     listElectricityWithTankId = electricityVariableControl.filter(e => e.tankId != null);
+
+    console.log("running cronjob Sync Parameter Temperature and Electricity Cronjob");
 
     const task = cron.schedule('1-59/2 * * * * *', async function () {
         try {
