@@ -15,7 +15,8 @@ type ProbePoint = { dbNumber: number; byteOffset: number; size: number };
 export class PLCService {
   private client: any;
 
- 
+  private reconnectFailCount = 0;               // số lần liên tiếp reconnect fail
+  private readonly recreateClientThreshold = 50; 
   private watchdogTimer?: ReturnType<typeof setInterval>;
   private probePoints: ProbePoint[] = [];
   private probeIndex = 0;
@@ -104,15 +105,19 @@ export class PLCService {
   
   private async ensureConnectedOrErr(): Promise<boolean> {
     if (this.isConnected()) return true;
-
+    console.log('[PLC] Not connected, trying reconnect…');
     const ok = await this.connectWithTimeout(); // bạn đã có hàm này
     if (ok) {
       // Reconnect thành công → xóa dấu mốc disconnect và cờ cảnh báo
+      console.log('[PLC] Reconnected successfully');
       this.lastDisconnectAt = undefined;
       this.reconnectWarned = false;
+      this.reconnectFailCount = 0; // reset 
       return true;
     }
-
+    // Reconnect thất bại
+    this.reconnectFailCount++;
+    this.recreateClientIfNeeded();
     // Reconnect KHÔNG thành công → kiểm tra đã quá 10s kể từ lần disconnect gần nhất chưa
     if (this.lastDisconnectAt && !this.reconnectWarned) {
       const waited = Date.now() - this.lastDisconnectAt;
@@ -888,4 +893,30 @@ export class PLCService {
   }
 
   
+  private recreateClientIfNeeded() {
+    if (this.reconnectFailCount < this.recreateClientThreshold) return;
+  
+    console.warn(
+      `[PLC] Recreating S7Client after ${this.reconnectFailCount} failed reconnect attempts`
+    );
+  
+    try {
+      this.client?.Disconnect?.();
+    } catch {}
+  
+    if (snap7) {
+      try {
+        this.client = new snap7.S7Client();
+      } catch (e) {
+        console.error('[PLC] Failed to recreate S7Client:', e);
+        this.client = null;
+      }
+    } else {
+      this.client = null;
+    }
+  
+    this.reconnectFailCount = 0; // reset lại đếm
+    this.lastDisconnectAt = Date.now();
+    this.reconnectWarned = false;
+  }
 }
