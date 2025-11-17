@@ -259,6 +259,9 @@ const mappingTankWithProductAndCarrier = async (tankId: number, productCode: str
         });
         if(!checkExitTankWithProductAndCarrier){
             const tankKey = elementTankMonitorWithTemperatureAndElectric[tankId]?.key;
+            if(!tankKey){
+                console.warn(`No Mapping Tank Key for Tank Id ${tankId}`)
+            }
             await MappingTankProductCarrier.create({
                 tankId, productCode, tankKey, carrierPick
             });

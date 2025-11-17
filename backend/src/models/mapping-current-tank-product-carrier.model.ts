@@ -18,7 +18,7 @@ const MappingTankProductCarrierSchema = new Schema<IMappingTankProductCarrier>({
   },
   tankKey: {
     type: String,
-    required: true,
+    required: false,
   },
   productCode: {
     type: String,
