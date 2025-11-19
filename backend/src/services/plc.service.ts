@@ -30,6 +30,7 @@ export class PLCService {
   private reconnectWarned = false;         // đã log lỗi 10s chưa (tránh spam)
   private reconnectMaxWaitMs = 10_000;     // thời gian chờ tối đa 10s
 
+  private countForLog = 0;
 
   public setWatchdogTargets(
     points: ProbePoint[],
@@ -226,6 +227,7 @@ export class PLCService {
           
           if (result.status === 'fulfilled' && result.value) {
             // Successfully read DB range, decode individual variables
+            this.countForLog++;
             for (const variable of dbInfo.variables) {
               try {
                 const value = this.decodeVariableFromBuffer(
@@ -234,11 +236,12 @@ export class PLCService {
                   result.value.startOffset
                 );
                 
-                 
+                
                 if(type == 'May_tinh_PLC_Send_Carrier' 
                   || 
                   type == 'May_tinh_Nhiet_Muc'
                 ){
+                  if (this.countForLog > 30)
                      console.log(`type ${type} : Variable ${variable.name} with offset ${variable.offset} has value ${value}`)
                 }
 
@@ -249,6 +252,9 @@ export class PLCService {
       
                 console.warn(`Failed to decode variable ${variable.name}:`, decodeError);
               }
+            }
+            if(this.countForLog > 31){ // reset
+              this.countForLog = 0;
             }
           } else {
             // Keep original values if DB read failed
