@@ -234,12 +234,12 @@ export class PLCService {
                   result.value.startOffset
                 );
                 
-                // if(type == 'May_tinh_Nhiet_Muc'){
-                //   console.log(`Offset ${variable.offset} has value ${value}`)
-                // }
-
-                if(type == 'May_tinh_PLC_Send_Carrier'){
-                     console.log(`Variable ${variable.name} with offset ${variable.offset} has value ${value}`)
+                 
+                if(type == 'May_tinh_PLC_Send_Carrier' 
+                  || 
+                  type == 'May_tinh_Nhiet_Muc'
+                ){
+                     console.log(`type ${type} : Variable ${variable.name} with offset ${variable.offset} has value ${value}`)
                 }
 
                 if (value !== null) {
