@@ -17,7 +17,7 @@ const doRobotData = async () => {
         for (const variable of variablesCarrierWithPLCValues){
             variable.value = variable.value ? Math.round(variable.value * 100) / 100 : 0;
         }
-        const objVariables = plcService.toVariablesObject(variablesCarrierWithPLCValues);
+        const { objVariables, arrayValues} = plcService.toVariablesObject(variablesCarrierWithPLCValues);
         const Ho_Ma_vao_1: number = objVariables.Ho_Ma_vao_1 || 0;
         const Ho_Ma_vao_2: number = objVariables.Ho_Ma_vao2 || 0;
         const Ho_Ma_vao_3: number = objVariables.Ho_Ma_vao_3 || 0;
@@ -30,7 +30,8 @@ const doRobotData = async () => {
         /**
          * ROBOT 1
          */
-        console.log(`--Ho_Ma_1---- ${Ho_Ma_1}`)
+        console.log(`--objVariables----`, objVariables )
+        console.log(`--arrayValues----`, arrayValues )
         if( Ho_Ma_1 > 0) {          
             const Carrier_Ma_1 = objVariables.Carrier_Ma_1 ? parseInt(objVariables.Carrier_Ma_1) : 0;
             // Mapping Carrier Index

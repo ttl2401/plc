@@ -884,8 +884,10 @@ export class PLCService {
     for (const variable of variables) {
       result[variable.name] = variable.value;
     }
-    
-    return result;
+    const arrayValues = variables.map(e => {
+      return {name: e.name, offset: e.offset, value: e.value, dbNumber: e.dbNumber}
+    })
+    return {objVariables : result , arrayValues};
   }
 
   /**
