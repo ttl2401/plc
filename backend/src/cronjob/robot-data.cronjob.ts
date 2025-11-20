@@ -35,8 +35,7 @@ const doRobotData = async () => {
             // Mapping Carrier Index
             await mappingCarrierIndex(Carrier_Ma_1);
 
-            console.log(`----\n Carrier_Ma_1 has value ${Carrier_Ma_1}\n-----`)
-
+           
             if (Carrier_Ma_1 > 0){
                 const Carrier_Ma_vao_1 = objVariables.Carrier_Ma_vao_1 ? parseInt(objVariables.Carrier_Ma_vao_1) : 0;
                 const Carrier_Ma_ra_1 = objVariables.Carrier_Ma_ra_1 ? parseInt(objVariables.Carrier_Ma_ra_1) : 0;
@@ -55,8 +54,7 @@ const doRobotData = async () => {
                 }
                 const checkHistory = await RobotWorkingHistory.findOne(query);
 
-                console.log(`checkHistory` , checkHistory);
-
+             
                 // reset necessary info to 0
                 await plcService.writeVariableToPLC('Carrier_Ma_1', 0, 1);
 
@@ -68,7 +66,7 @@ const doRobotData = async () => {
                         productCode = checkProductCode.productCode;
                     }
                     await RobotWorkingHistory.create(query);
-                    console.log(`Not Exist: checkProductCode` , checkProductCode);
+                    
                     // reset necessary info to 0
                     if (checkProductCode){
                         // Apply product settings to PLC
@@ -78,10 +76,10 @@ const doRobotData = async () => {
 
 
                 }else {
-                    console.log(`checkHistory.productCode` , checkHistory.productCode);
+                   
                     if (!checkHistory.productCode){
                         const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
-                        console.log(`Exist : checkProductCode` , checkProductCode);
+                       
                         if(checkProductCode) {
                             checkHistory.productCode = checkProductCode.productCode;
                             productCode = checkProductCode.productCode;
@@ -107,8 +105,7 @@ const doRobotData = async () => {
          */
         if (Ho_Ma_2 > 0 ){
             const Carrier_Ma_2 = objVariables.Carrier_Ma_2 ? parseInt(objVariables.Carrier_Ma_2) : 0;
-            console.log(`----\n Carrier_Ma_2 has value ${Carrier_Ma_2}\n-----`)
-
+            
             if (Carrier_Ma_2 > 0){
                 const Carrier_Ma_vao_2 = objVariables.Carrier_Ma_vao_2 ? parseInt(objVariables.Carrier_Ma_vao_2) : 0;
                 const Carrier_Ma_ra_2 = objVariables.Carrier_Ma_ra_2 ? parseInt(objVariables.Carrier_Ma_ra_2) : 0;
@@ -165,8 +162,7 @@ const doRobotData = async () => {
          */
         if (Ho_Ma_3 > 0 ){
             const Carrier_Ma_3 = objVariables.Carrier_Ma_3 ? parseInt(objVariables.Carrier_Ma_3) : 0;
-            console.log(`----\n Carrier_Ma_3 has value ${Carrier_Ma_3}\n-----`)
-
+            
             if (Carrier_Ma_3 > 0){
                 const Carrier_Ma_vao_3 = objVariables.Carrier_Ma_vao_3 ? parseInt(objVariables.Carrier_Ma_vao_3) : 0;
                 const Carrier_Ma_ra_3 = objVariables.Carrier_Ma_ra_3 ? parseInt(objVariables.Carrier_Ma_ra_3) : 0;
