@@ -30,8 +30,8 @@ const doRobotData = async () => {
         /**
          * ROBOT 1
          */
-        console.log(`--objVariables----`, objVariables )
-        console.log(`--arrayValues----`, arrayValues )
+       // console.log(`--objVariables----`, objVariables )
+       // console.log(`--arrayValues----`, arrayValues )
         if( Ho_Ma_1 > 0) {          
             const Carrier_Ma_1 = objVariables.Carrier_Ma_1 ? parseInt(objVariables.Carrier_Ma_1) : 0;
             // Mapping Carrier Index
