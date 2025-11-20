@@ -56,6 +56,10 @@ const doRobotData = async () => {
                 const checkHistory = await RobotWorkingHistory.findOne(query);
 
                 console.log(`checkHistory` , checkHistory);
+
+                // reset necessary info to 0
+                await plcService.writeVariableToPLC('Carrier_Ma_1', 0, 1);
+
                 if(!checkHistory){
                     query.tankKey = mappingTankNumberInLine[query.tankId]?.key;
                     const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
@@ -69,9 +73,6 @@ const doRobotData = async () => {
                     if (checkProductCode){
                         // Apply product settings to PLC
                         const isWritten = await writeProductSettingsToPLC();
-
-                        // reset necessary info to 0
-                        await plcService.writeVariableToPLC('Carrier_Ma_1', 0, 1);
                     }
                     
 
@@ -87,10 +88,7 @@ const doRobotData = async () => {
                             await checkHistory.save();
 
                             // Apply product settings to PLC
-                        const isWritten = await writeProductSettingsToPLC();
-
-                            // reset necessary info to 0
-                            await plcService.writeVariableToPLC('Carrier_Ma_1', 0, 1);
+                            const isWritten = await writeProductSettingsToPLC();
                         }
                     }
                 }
@@ -127,7 +125,12 @@ const doRobotData = async () => {
                     tankId : Ho_Ma_2,
                     action : type
                 }
+
+                // reset necessary info to 0
+                await plcService.writeVariableToPLC('Carrier_Ma_2', 0, 1)
+
                 const checkHistory = await RobotWorkingHistory.findOne(query);
+                
                 if(!checkHistory){
                     query.tankKey = mappingTankNumberInLine[query.tankId]?.key;
                     const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
@@ -137,10 +140,7 @@ const doRobotData = async () => {
                     }
                     await RobotWorkingHistory.create(query);
 
-                    // reset necessary info to 0
-                    if (checkProductCode){
-                        await plcService.writeVariableToPLC('Carrier_Ma_2', 0, 1)
-                    }
+             
 
                 }else {
                     if (!checkHistory.productCode){
@@ -149,7 +149,7 @@ const doRobotData = async () => {
                             checkHistory.productCode = checkProductCode.productCode;
                             productCode = checkProductCode.productCode;
                             await checkHistory.save();
-                            await plcService.writeVariableToPLC('Carrier_Ma_2', 0, 1);
+            
                         }
                     }
                 }
@@ -183,6 +183,10 @@ const doRobotData = async () => {
                     tankId : Ho_Ma_3,
                     action : type
                 }
+
+                // reset necessary info to 0
+                await plcService.writeVariableToPLC('Carrier_Ma_3', 0, 1)
+
                 const checkHistory = await RobotWorkingHistory.findOne(query);
                 if(!checkHistory){
                     query.tankKey = mappingTankNumberInLine[query.tankId]?.key;
@@ -193,10 +197,6 @@ const doRobotData = async () => {
                     }
                     await RobotWorkingHistory.create(query);
 
-                    // reset necessary info to 0
-                    if (checkProductCode){
-                        await plcService.writeVariableToPLC('Carrier_Ma_3', 0, 1);
-                    }
 
 
                 }else {
@@ -206,7 +206,6 @@ const doRobotData = async () => {
                             checkHistory.productCode = checkProductCode.productCode;
                             productCode = checkProductCode.productCode;
                             await checkHistory.save();
-                            await plcService.writeVariableToPLC('Carrier_Ma_3', 0, 1);
                         }
                     }
                 }
