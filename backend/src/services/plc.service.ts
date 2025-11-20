@@ -285,7 +285,7 @@ export class PLCService {
    * @param value - Value to write
    * @returns Promise<boolean> - Success status
    */
-  async writeVariableToPLC(name: string, value: any): Promise<boolean> {
+  async writeVariableToPLC(name: string, value: any, writeLog = 0): Promise<boolean> {
     try {
       // Find the variable in the database to get its configuration
       const variable = await PlcVariable.findOne({ name });
@@ -361,6 +361,9 @@ export class PLCService {
           throw new AppError(`Unsupported data type: ${variable.dataType}`, 400);
       }
 
+      if(writeLog){
+        console.log(`---------\n Writing variable ${variable.name} with offset ${variable.offset} by value: ${value} \n----------`)
+      }
       // Write to PLC DB
       const writeResult = this.client.DBWrite(
         variable.dbNumber,
