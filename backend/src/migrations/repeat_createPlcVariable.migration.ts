@@ -93,6 +93,8 @@ const migrate = async (): Promise<Boolean> => {
         let exist = await PlcVariable.findOne({name: variable.oldName});  
         if(exist){
           await PlcVariable.updateOne({name: variable.oldName}, variable);
+        }else {
+          await PlcVariable.create(variable);
         }
       }else {
         let exist = await PlcVariable.findOne({name: variable.name});  
