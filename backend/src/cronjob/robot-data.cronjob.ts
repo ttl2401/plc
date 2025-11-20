@@ -30,12 +30,13 @@ const doRobotData = async () => {
         /**
          * ROBOT 1
          */
+        console.log(`--Ho_Ma_1---- ${Ho_Ma_1}`)
         if( Ho_Ma_1 > 0) {          
             const Carrier_Ma_1 = objVariables.Carrier_Ma_1 ? parseInt(objVariables.Carrier_Ma_1) : 0;
             // Mapping Carrier Index
             await mappingCarrierIndex(Carrier_Ma_1);
 
-            
+            console.log(`--Carrier_Ma_1---- ${Carrier_Ma_1}`)
             if (Carrier_Ma_1 > 0){
                 const Carrier_Ma_vao_1 = objVariables.Carrier_Ma_vao_1 ? parseInt(objVariables.Carrier_Ma_vao_1) : 0;
                 const Carrier_Ma_ra_1 = objVariables.Carrier_Ma_ra_1 ? parseInt(objVariables.Carrier_Ma_ra_1) : 0;
@@ -105,7 +106,7 @@ const doRobotData = async () => {
          */
         if (Ho_Ma_2 > 0 ){
             const Carrier_Ma_2 = objVariables.Carrier_Ma_2 ? parseInt(objVariables.Carrier_Ma_2) : 0;
-            
+            console.log(`--Carrier_Ma_2---- ${Carrier_Ma_2}`)
             if (Carrier_Ma_2 > 0){
                 const Carrier_Ma_vao_2 = objVariables.Carrier_Ma_vao_2 ? parseInt(objVariables.Carrier_Ma_vao_2) : 0;
                 const Carrier_Ma_ra_2 = objVariables.Carrier_Ma_ra_2 ? parseInt(objVariables.Carrier_Ma_ra_2) : 0;
@@ -162,7 +163,7 @@ const doRobotData = async () => {
          */
         if (Ho_Ma_3 > 0 ){
             const Carrier_Ma_3 = objVariables.Carrier_Ma_3 ? parseInt(objVariables.Carrier_Ma_3) : 0;
-            
+            console.log(`--Carrier_Ma_3---- ${Carrier_Ma_3}`)
             if (Carrier_Ma_3 > 0){
                 const Carrier_Ma_vao_3 = objVariables.Carrier_Ma_vao_3 ? parseInt(objVariables.Carrier_Ma_vao_3) : 0;
                 const Carrier_Ma_ra_3 = objVariables.Carrier_Ma_ra_3 ? parseInt(objVariables.Carrier_Ma_ra_3) : 0;
