@@ -54,6 +54,8 @@ const doRobotData = async () => {
                     action : type
                 }
                 const checkHistory = await RobotWorkingHistory.findOne(query);
+
+                console.log(`checkHistory` , checkHistory);
                 if(!checkHistory){
                     query.tankKey = mappingTankNumberInLine[query.tankId]?.key;
                     const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
@@ -62,7 +64,7 @@ const doRobotData = async () => {
                         productCode = checkProductCode.productCode;
                     }
                     await RobotWorkingHistory.create(query);
-
+                    console.log(`Not Exist: checkProductCode` , checkProductCode);
                     // reset necessary info to 0
                     if (checkProductCode){
                         // Apply product settings to PLC
@@ -75,8 +77,10 @@ const doRobotData = async () => {
 
 
                 }else {
+                    console.log(`checkHistory.productCode` , checkHistory.productCode);
                     if (!checkHistory.productCode){
                         const checkProductCode = await MappingCarrierCode.findOne({carrierPickId : query.carrierPick })
+                        console.log(`Exist : checkProductCode` , checkProductCode);
                         if(checkProductCode) {
                             checkHistory.productCode = checkProductCode.productCode;
                             productCode = checkProductCode.productCode;
