@@ -211,7 +211,12 @@ from(bucket: "${bucket}")
   
     // 2) Pagination ở Node
     const totalDocs = allPairs.length;
-    allPairs.sort((a, b) => b.carrier.localeCompare(a.carrier)); // Sort by carrier DESC
+    // Sort by carrier DESC (numeric comparison)
+    allPairs.sort((a, b) => {
+      const carrierA = Number(a.carrier) || 0;
+      const carrierB = Number(b.carrier) || 0;
+      return carrierB - carrierA; // DESC order
+    });
     const start = (page - 1) * limit;
     const slice = allPairs.slice(start, start + limit);
   
