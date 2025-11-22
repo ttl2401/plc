@@ -19,7 +19,7 @@ const doRobotData = async () => {
         }
         const { objVariables, arrayValues} = plcService.toVariablesObject(variablesCarrierWithPLCValues);
         const Ho_Ma_vao_1: number = objVariables.Ho_Ma_vao_1 || 0;
-        const Ho_Ma_vao_2: number = objVariables.Ho_Ma_vao2 || 0;
+        const Ho_Ma_vao_2: number = objVariables.Ho_Ma_vao_2 || 0;
         const Ho_Ma_vao_3: number = objVariables.Ho_Ma_vao_3 || 0;
         const Ho_Ma_ra_1: number = objVariables.Ho_Ma_ra_1 || 0;
         const Ho_Ma_ra_2: number = objVariables.Ho_Ma_ra_2 || 0;
@@ -31,13 +31,13 @@ const doRobotData = async () => {
          * ROBOT 1
          */
        // console.log(`--objVariables----`, objVariables )
-       // console.log(`--arrayValues----`, arrayValues )
+        // console.log(`--arrayValues----`, arrayValues )
+        
         if( Ho_Ma_1 > 0) {          
             const Carrier_Ma_1 = objVariables.Carrier_Ma_1 ? parseInt(objVariables.Carrier_Ma_1) : 0;
             // Mapping Carrier Index
             await mappingCarrierIndex(Carrier_Ma_1);
 
-            console.log(`--Carrier_Ma_1---- ${Carrier_Ma_1}`)
             if (Carrier_Ma_1 > 0){
                 const Carrier_Ma_vao_1 = objVariables.Carrier_Ma_vao_1 ? parseInt(objVariables.Carrier_Ma_vao_1) : 0;
                 const Carrier_Ma_ra_1 = objVariables.Carrier_Ma_ra_1 ? parseInt(objVariables.Carrier_Ma_ra_1) : 0;
@@ -58,7 +58,7 @@ const doRobotData = async () => {
 
              
                 // reset necessary info to 0
-                await plcService.writeVariableToPLC('Carrier_Ma_1', 0, 1);
+                await plcService.writeVariableToPLC('Carrier_Ma_1', 0);
 
                 if(!checkHistory){
                     query.tankKey = mappingTankNumberInLine[query.tankId]?.key;
@@ -107,7 +107,7 @@ const doRobotData = async () => {
          */
         if (Ho_Ma_2 > 0 ){
             const Carrier_Ma_2 = objVariables.Carrier_Ma_2 ? parseInt(objVariables.Carrier_Ma_2) : 0;
-            console.log(`--Carrier_Ma_2---- ${Carrier_Ma_2}`)
+            // console.log(`--Carrier_Ma_2---- ${Carrier_Ma_2}`)
             if (Carrier_Ma_2 > 0){
                 const Carrier_Ma_vao_2 = objVariables.Carrier_Ma_vao_2 ? parseInt(objVariables.Carrier_Ma_vao_2) : 0;
                 const Carrier_Ma_ra_2 = objVariables.Carrier_Ma_ra_2 ? parseInt(objVariables.Carrier_Ma_ra_2) : 0;
@@ -126,7 +126,7 @@ const doRobotData = async () => {
                 }
 
                 // reset necessary info to 0
-                await plcService.writeVariableToPLC('Carrier_Ma_2', 0, 1)
+                await plcService.writeVariableToPLC('Carrier_Ma_2', 0)
 
                 const checkHistory = await RobotWorkingHistory.findOne(query);
                 
@@ -164,7 +164,7 @@ const doRobotData = async () => {
          */
         if (Ho_Ma_3 > 0 ){
             const Carrier_Ma_3 = objVariables.Carrier_Ma_3 ? parseInt(objVariables.Carrier_Ma_3) : 0;
-            console.log(`--Carrier_Ma_3---- ${Carrier_Ma_3}`)
+       
             if (Carrier_Ma_3 > 0){
                 const Carrier_Ma_vao_3 = objVariables.Carrier_Ma_vao_3 ? parseInt(objVariables.Carrier_Ma_vao_3) : 0;
                 const Carrier_Ma_ra_3 = objVariables.Carrier_Ma_ra_3 ? parseInt(objVariables.Carrier_Ma_ra_3) : 0;
@@ -183,7 +183,7 @@ const doRobotData = async () => {
                 }
 
                 // reset necessary info to 0
-                await plcService.writeVariableToPLC('Carrier_Ma_3', 0, 1)
+                await plcService.writeVariableToPLC('Carrier_Ma_3', 0)
 
                 const checkHistory = await RobotWorkingHistory.findOne(query);
                 if(!checkHistory){
