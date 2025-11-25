@@ -251,5 +251,6 @@
   "plc_checklist_label.Checklist_quat_hut_thap_xlk": "Quạt hút tháp Xử lý khí",
   "plc_checklist_label.Checklist_bom_nuoc_thap_xlk": "Bơm nước tháp xử lý khí",
   "plc_checklist_label.Checklist_may_thoi_khi": "Máy thổi khí",
-  "plc_checklist_label.Checklist_bom_tach_dau": "Bơm Tách dầu"
+  "plc_checklist_label.Checklist_bom_tach_dau": "Bơm Tách dầu",
+  "carrier": "Carrier"
 } 

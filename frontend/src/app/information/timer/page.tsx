@@ -229,6 +229,12 @@ const InformationTimerPage: React.FC = () => {
       render: (code: string) => <span style={{ color: '#27ae60', fontWeight: 600 }}>{code}</span>,
     },
     {
+      title: t("carrier"),
+      dataIndex: "carrierPick",
+      key: "carrier",
+      render: (_: any, record: any) => record?.carrier ?? record?.carrierPick ?? '-',
+    },
+    {
       title: t("start_date"),
       key: "ngay_bat_dau",
       render: (_: any, record: any) => {

@@ -137,20 +137,26 @@ const InformationTemperaturePage: React.FC = () => {
   // Build columns dynamically for tanks
   const columns: ColumnsType<InformationTemperature> = [
     {
-      title: "#",
+      title: t("table_index"),
       dataIndex: "index",
       key: "index",
       width: 50,
       render: (_: any, __: any, idx: number) => (pagination.page - 1) * pagination.limit + idx + 1,
     },
     {
-      title: "Mã sản phẩm",
+      title: t("product_code"),
       dataIndex: "code",
       key: "code",
       render: (code: string) => <span style={{ color: '#27ae60', fontWeight: 600 }}>{code}</span>,
     },
     {
-      title: "Ngày bắt đầu",
+      title: t("carrier"),
+      dataIndex: "carrier",
+      key: "carrier",
+      render: (_: any, record: InformationTemperature) => record.carrier ?? '-',
+    },
+    {
+      title: t("start_date"),
       key: "ngay_bat_dau",
       render: (_: any, record: InformationTemperature) => {
         const firstTank = record.tanks[0];
@@ -159,7 +165,7 @@ const InformationTemperaturePage: React.FC = () => {
       },
     },
     {
-      title: "Giờ vào",
+      title: t("time_in"),
       key: "gio_vao",
       render: (_: any, record: InformationTemperature) => {
         const firstTank = record.tanks[0];
@@ -168,7 +174,7 @@ const InformationTemperaturePage: React.FC = () => {
       },
     },
     {
-      title: "Giờ ra",
+      title: t("time_out"),
       key: "gio_ra",
       render: (_: any, record: InformationTemperature) => {
         const lastTank = record.tanks[record.tanks.length - 1];
@@ -210,7 +216,7 @@ const InformationTemperaturePage: React.FC = () => {
       const hasSlotData = data.some(record => shouldShowSlotColumn(record, tank));
       if (hasSlotData) {
         children.push({
-          title: 'Slot',
+          title: t("slot"),
           key: `${tank}_slot`,
           align: "center" as const,
           render: (_: any, record: InformationTemperature) => {

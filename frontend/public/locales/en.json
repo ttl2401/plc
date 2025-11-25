@@ -252,5 +252,6 @@
   "plc_checklist_label.Checklist_quat_hut_thap_xlk": "Fan Air treatment tower",
   "plc_checklist_label.Checklist_bom_nuoc_thap_xlk": "Pump Air treatment tower",
   "plc_checklist_label.Checklist_may_thoi_khi": "air blower",
-  "plc_checklist_label.Checklist_bom_tach_dau": "oil separator pump"
+  "plc_checklist_label.Checklist_bom_tach_dau": "oil separator pump",
+  "carrier": "Carrier"
 }
